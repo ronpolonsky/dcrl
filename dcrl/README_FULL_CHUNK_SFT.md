@@ -10,6 +10,8 @@ Every replan stores the starting observation, full selected chunk in environment
 units, executed-prefix length and episode outcome in compressed HDF5. Failed
 episodes are retained. SFT defaults to successful episodes; `--include-failures`
 opts into all collected chunks. Zero successful chunks is an error.
+Interrupted collection resumes from the partial HDF5 and restores the teacher's
+post-episode sampling RNG, so later targets keep the same continuous stream.
 
 The student keeps its pretrained LIBERO normalization assets. Raw chunks pass
 through the student's input transforms and normalization exactly once. Prompts

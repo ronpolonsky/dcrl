@@ -100,6 +100,15 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
             f.attrs['metadata'] = json.dumps(metadata, sort_keys=True)
             f.attrs['teacher_norm_stats'] = norm_bytes.decode()
             f.attrs['instruction'] = instruction
+            # A partial collection can be resumed after a preemption. Restore
+            # the teacher's post-episode RNG so the remaining episodes use the
+            # same continuous sampling stream as an uninterrupted collection.
+            complete = [name for name in f if f[name].attrs.get('complete', False)]
+            if complete:
+                last_name = max(complete, key=lambda name: int(name.rsplit('_', 1)[1]))
+                saved_rng = f[last_name].attrs.get('teacher_rng_after')
+                if saved_rng is not None:
+                    teacher = teacher.replace(rng=jax.numpy.asarray(saved_rng, dtype=jax.numpy.uint32))
             for episode in tqdm(range(episodes), desc='Collect frozen teacher'):
                 name = f'episode_{episode:06d}'
                 if name in f and f[name].attrs.get('complete', False):
@@ -152,6 +161,7 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
                 group.create_dataset('state', data=np.stack([r[0]['state'] for r in rows]))
                 group.create_dataset('actions', data=np.stack([r[1] for r in rows]))
                 group.create_dataset('executed_prefix', data=[r[2] for r in rows])
+                group.attrs['teacher_rng_after'] = np.asarray(jax.device_get(teacher.rng), dtype=np.uint32)
                 group.attrs['complete'] = True
                 f.flush()
             f.attrs['complete'] = True
