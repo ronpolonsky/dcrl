@@ -88,11 +88,18 @@ def train(args):
     from openpi.shared import download, normalize
     from openpi.training import config as configs, optimizer, sharding, weight_loaders
     from dcrl.expo.agents.vla.pi05 import Pi05Agent
-    from dcrl.full_chunk_data import ChunkDataset
+    from dcrl.full_chunk_data import ChunkDataset, partition_collection
     from dcrl.libero_env import LiberoTaskEnv, LIBERO_SUITE_MAX_STEPS
 
-    dataset_path = args.output_dir / 'teacher_chunks.hdf5'
-    dataset = ChunkDataset(dataset_path, success_only=not args.include_failures)
+    mixed_dataset_path = args.output_dir / 'teacher_chunks.hdf5'
+    success_dataset_path = args.output_dir / 'data/success/teacher_chunks.hdf5'
+    failure_dataset_path = args.output_dir / 'data/failures/teacher_chunks.hdf5'
+    if not success_dataset_path.exists():
+        partition_collection(mixed_dataset_path, success_dataset_path, failure_dataset_path)
+    dataset_paths = [success_dataset_path]
+    if args.include_failures:
+        dataset_paths.append(failure_dataset_path)
+    dataset = ChunkDataset(dataset_paths, success_only=not args.include_failures)
     teacher = dataset.metadata['config']
     if (dataset.metadata['teacher_dir'] != str(args.teacher_dir.resolve())
             or dataset.metadata['checkpoint_step'] != args.teacher_step):

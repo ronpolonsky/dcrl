@@ -9,6 +9,37 @@ import numpy as np
 from tqdm import tqdm
 
 
+def partition_collection(source: Path, success_path: Path, failure_path: Path):
+    """Split a complete mixed collection into success and failure HDF5 files."""
+    source = Path(source)
+    if not source.exists():
+        raise FileNotFoundError(source)
+    source.parent.mkdir(parents=True, exist_ok=True)
+    with h5py.File(source, 'r') as src:
+        if not src.attrs.get('complete', False):
+            raise ValueError(f'Collection is incomplete: {source}')
+        metadata = src.attrs.get('metadata')
+        for destination, wanted_success in ((success_path, True), (failure_path, False)):
+            destination = Path(destination)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            temp = destination.with_suffix('.partial.hdf5')
+            if destination.exists():
+                with h5py.File(destination, 'r') as existing:
+                    if (not existing.attrs.get('complete', False)
+                            or existing.attrs.get('metadata') != metadata):
+                        raise ValueError(f'Existing partition does not match collection: {destination}')
+                continue
+            with h5py.File(temp, 'w') as dst:
+                for key, value in src.attrs.items():
+                    dst.attrs[key] = value
+                dst.attrs['partition'] = 'success' if wanted_success else 'failure'
+                for name, group in src.items():
+                    if bool(group.attrs.get('success', False)) == wanted_success:
+                        src.copy(name, dst, name=name)
+                dst.attrs['complete'] = True
+            temp.replace(destination)
+
+
 def _episode_worker(connection, suite, task_id, seed, image_size, initial_state_index, max_steps):
     """Own one MuJoCo/EGL context in an isolated process for a complete episode."""
     env = None
@@ -62,6 +93,8 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
         with h5py.File(output, 'r') as f:
             if json.loads(f.attrs['metadata']) != metadata or not f.attrs.get('complete', False):
                 raise ValueError('Existing collection does not match this request')
+        partition_collection(output, output.parent / 'data/success/teacher_chunks.hdf5',
+                            output.parent / 'data/failures/teacher_chunks.hdf5')
         return
     output.parent.mkdir(parents=True, exist_ok=True)
     # Publish only complete collections; interrupted temporary files are not training inputs.
@@ -166,6 +199,8 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
                 f.flush()
             f.attrs['complete'] = True
         temp.replace(output)
+        partition_collection(output, output.parent / 'data/success/teacher_chunks.hdf5',
+                            output.parent / 'data/failures/teacher_chunks.hdf5')
     finally:
         if bootstrap_env is not None:
             bootstrap_env.close()
@@ -174,24 +209,32 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
 class ChunkDataset:
     """Disk-backed selected chunks, never reconstructed from executed transitions."""
     def __init__(self, path, success_only=True):
-        self.file = h5py.File(path, 'r')
-        if not self.file.attrs.get('complete', False):
-            self.file.close()
+        paths = [path] if isinstance(path, (str, Path)) else list(path)
+        self.files = [h5py.File(p, 'r') for p in paths]
+        if any(not file.attrs.get('complete', False) for file in self.files):
+            self.close()
             raise ValueError('Collection is incomplete')
-        self.metadata = json.loads(self.file.attrs['metadata'])
-        self.instruction = self.file.attrs['instruction']
-        self.indices = [(name, i) for name, group in self.file.items()
+        self.metadata = json.loads(self.files[0].attrs['metadata'])
+        self.instruction = self.files[0].attrs['instruction']
+        for file in self.files[1:]:
+            if (json.loads(file.attrs['metadata']) != self.metadata
+                    or file.attrs['instruction'] != self.instruction):
+                self.close()
+                raise ValueError('Collection partitions do not match')
+        self.indices = [(file_index, name, i)
+                        for file_index, file in enumerate(self.files)
+                        for name, group in file.items()
                         if not success_only or group.attrs['success']
                         for i in range(len(group['actions']))]
         if not self.indices:
-            self.file.close()
+            self.close()
             raise ValueError('No eligible teacher chunks; collect more episodes or explicitly allow failures')
 
     def sample(self, rng, count):
         result = []
         for index in rng.integers(len(self.indices), size=count):
-            name, row = self.indices[index]
-            group = self.file[name]
+            file_index, name, row = self.indices[index]
+            group = self.files[file_index][name]
             result.append({'observation/image': group['base_0_rgb'][row],
                            'observation/wrist_image': group['left_wrist_0_rgb'][row],
                            'observation/state': group['state'][row],
@@ -199,4 +242,5 @@ class ChunkDataset:
         return result
 
     def close(self):
-        self.file.close()
+        for file in getattr(self, 'files', []):
+            file.close()
