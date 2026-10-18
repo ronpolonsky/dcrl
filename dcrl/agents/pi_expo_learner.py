@@ -790,10 +790,16 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
 
         return self.replace(edit_actor=edit_actor, rng=rng), actor_info
     
-    def update_actor(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
+    def bc_update(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
+        """Update only the base Pi0.5 actor with a supervised action chunk.
+
+        This deliberately leaves the critic, edit actor, temperature, and all
+        their optimizer states unchanged. The target actor is refreshed only so
+        a learner resumed after BC remains internally consistent for later RL.
+        """
         actor_batch = self.actor.prepare_batch_for_actor(batch)
-        
-        # Ensure actor_batch has correct sharding
+
+        # Ensure actor_batch has correct sharding.
         def ensure_sharding(x):
             if isinstance(x, jnp.ndarray):
                 return jax.device_put(x, self.data_sharding)
@@ -802,7 +808,7 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
 
         rng = self.rng
         key, rng = jax.random.split(rng, 2)
-        
+
         with _sharding.set_mesh(self.actor.mesh):
             new_train_state, info = self.actor.train_step(key, self.actor_train_state, actor_batch)
 
@@ -811,9 +817,16 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
             new_train_state_params, self.target_actor_params, self.actor_tau
         )
 
-        new_agent = self.replace(actor_train_state=new_train_state, target_actor_params=target_score_params, rng=rng)
-        
+        new_agent = self.replace(
+            actor_train_state=new_train_state,
+            target_actor_params=target_score_params,
+            rng=rng,
+        )
         return new_agent, info
+
+    def update_actor(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
+        """RL actor update entry point; BC and RL share the actor optimizer path."""
+        return self.bc_update(batch)
 
 
     def update_temperature(self, entropy: float) -> Tuple[AgentLearner, Dict[str, float]]:

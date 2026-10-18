@@ -2,6 +2,7 @@
 
 import dataclasses
 import functools
+import os
 from functools import partial
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -137,12 +138,18 @@ def pi05_init_train_state(
         mesh, jax.sharding.PartitionSpec()
     )
 
-    train_state = jax.jit(
-        init,
-        donate_argnums=(1,),  # donate the partial params buffer
-        in_shardings=replicated_sharding,
-        out_shardings=state_sharding,
-    )(init_rng, partial_params)
+    if os.environ.get("OPENPI_SKIP_INIT_JIT") == "1":
+        # Inference-only collectors do not need XLA to compile the optimizer
+        # state initialization. Build the restored state eagerly and place it
+        # on the requested devices; SFT/RL training keeps the normal JIT path.
+        train_state = jax.device_put(init(init_rng, partial_params), state_sharding)
+    else:
+        train_state = jax.jit(
+            init,
+            donate_argnums=(1,),  # donate the partial params buffer
+            in_shardings=replicated_sharding,
+            out_shardings=state_sharding,
+        )(init_rng, partial_params)
 
     if is_target:
         model_params = pi05_get_params(train_state)
@@ -694,4 +701,3 @@ class Pi05Agent(Model):
             transformed_inputs, train_state, key, prefix_padded, num_samples, noise=noise,
         )
         return self._unpad_actions(x_clean), None
-
