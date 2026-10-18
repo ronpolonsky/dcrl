@@ -92,8 +92,8 @@ def train(args):
     from dcrl.libero_env import LiberoTaskEnv, LIBERO_SUITE_MAX_STEPS
 
     mixed_dataset_path = args.output_dir / 'teacher_chunks.hdf5'
-    success_dataset_path = args.output_dir / 'data/success/teacher_chunks.hdf5'
-    failure_dataset_path = args.output_dir / 'data/failures/teacher_chunks.hdf5'
+    success_dataset_path = args.output_dir / 'sft_data/success/teacher_chunks.hdf5'
+    failure_dataset_path = args.output_dir / 'sft_data/failures/teacher_chunks.hdf5'
     if not success_dataset_path.exists():
         partition_collection(mixed_dataset_path, success_dataset_path, failure_dataset_path)
     dataset_paths = [success_dataset_path]

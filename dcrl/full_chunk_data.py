@@ -93,8 +93,8 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
         with h5py.File(output, 'r') as f:
             if json.loads(f.attrs['metadata']) != metadata or not f.attrs.get('complete', False):
                 raise ValueError('Existing collection does not match this request')
-        partition_collection(output, output.parent / 'data/success/teacher_chunks.hdf5',
-                            output.parent / 'data/failures/teacher_chunks.hdf5')
+        partition_collection(output, output.parent / 'sft_data/success/teacher_chunks.hdf5',
+                            output.parent / 'sft_data/failures/teacher_chunks.hdf5')
         return
     output.parent.mkdir(parents=True, exist_ok=True)
     # Publish only complete collections; interrupted temporary files are not training inputs.
@@ -199,8 +199,8 @@ def collect(teacher_dir: Path, checkpoint_step: int, output: Path, episodes: int
                 f.flush()
             f.attrs['complete'] = True
         temp.replace(output)
-        partition_collection(output, output.parent / 'data/success/teacher_chunks.hdf5',
-                            output.parent / 'data/failures/teacher_chunks.hdf5')
+        partition_collection(output, output.parent / 'sft_data/success/teacher_chunks.hdf5',
+                            output.parent / 'sft_data/failures/teacher_chunks.hdf5')
     finally:
         if bootstrap_env is not None:
             bootstrap_env.close()

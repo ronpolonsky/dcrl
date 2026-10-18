@@ -13,7 +13,8 @@ opts into all collected chunks. Zero successful chunks is an error.
 Interrupted collection resumes from the partial HDF5 and restores the teacher's
 post-episode sampling RNG, so later targets keep the same continuous stream.
 After collection, the mixed source is partitioned into
-`data/success/teacher_chunks.hdf5` and `data/failures/teacher_chunks.hdf5`.
+`sft_data/success/teacher_chunks.hdf5` and
+`sft_data/failures/teacher_chunks.hdf5`.
 Training reads the success partition by default and reads both partitions when
 `--include-failures` is requested.
 
