@@ -12,7 +12,7 @@
 set -euo pipefail
 
 PROJECT=/nlp/scr/ronpo/projects/dcrl
-EXPO=/iris/u/ronpo/projects/expo-ft
+EXPO="$PROJECT/third_party/expo-ft"
 export PYTHONPATH="$PROJECT:$EXPO/expo_ft/agents/vla/openpi/src:$EXPO/expo_ft/agents/vla/openpi/packages/openpi-client/src:$PROJECT/.deps/LIBERO"
 export LIBERO_CONFIG_PATH="$PROJECT/.deps/libero_config"
 export MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa XLA_PYTHON_CLIENT_PREALLOCATE=false

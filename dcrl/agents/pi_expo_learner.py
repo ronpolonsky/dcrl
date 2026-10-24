@@ -155,6 +155,20 @@ def decay_mask_fn(params):
     flat_mask = {path: path[-1] != "bias" for path in flat_params}
     return flax.core.FrozenDict(flax.traverse_util.unflatten_dict(flat_mask))
 
+
+def _init_actor_optimizer_state(actor: Any, actor_train_state: Any):
+    """Initialize a second actor optimizer with the same trainable leaves.
+
+    OpenPI's Pi05 state initializes its optimizer on ``trainable_filter``
+    rather than the full NNX state, while SmallActor trains every leaf.  The
+    helper keeps both actor implementations checkpoint-compatible.
+    """
+    params = actor_train_state.params
+    train_config = getattr(actor, "train_config", None)
+    if train_config is not None:
+        params = params.filter(train_config.trainable_filter)
+    return actor_train_state.tx.init(params)
+
 @partial(jax.jit, static_argnames=('critic_fn', 'num_min_qs'))
 def compute_q(critic_fn, critic_params, observations, actions, states, num_min_qs=None):
     q_values = critic_fn({'params': critic_params}, observations, actions, p=states, sample_num=num_min_qs)
@@ -183,6 +197,15 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
     target_critic: TrainState
     actor: Any = struct.field(pytree_node=False)
     actor_train_state: training_utils.TrainState
+    # The actor parameters are shared, but BC/distillation and RL keep
+    # independent optimizer histories. ``actor_train_state`` contains the
+    # currently active optimizer state for compatibility with the actor
+    # adapter and inference code; these fields are the authoritative
+    # phase-specific states.
+    distill_actor_opt_state: Any
+    distill_actor_step: int
+    rl_actor_opt_state: Any
+    rl_actor_step: int
     target_actor_params: at.Params
     edit_actor: TrainState
     temp: TrainState
@@ -215,6 +238,11 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
     actor_success_only: bool = struct.field(pytree_node=False)
     _infer_cache: Optional[dict] = struct.field(pytree_node=False, default=None)
     critic_camera_keys: Tuple[str, ...] = struct.field(pytree_node=False, default=CRITIC_CAMERA_KEYS)
+    # Optional inference-only prefix used when evaluating a legacy editor whose
+    # trained critic width is larger than the actions executed by the evaluator.
+    # The prefix is padded internally to self.replan_steps; rollout execution
+    # remains controlled by the environment loop.
+    eval_candidate_steps: Optional[int] = struct.field(pytree_node=False, default=None)
 
     @classmethod
     def from_pi05(
@@ -478,10 +506,19 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
         )(temp)
 
 
+        # Keep the two actor optimizer histories separate from the beginning.
+        # Both use the actor adapter's optimizer transformation, but only the
+        # state selected by the phase-specific update method is advanced.
+        distill_actor_opt_state = actor_train_state.opt_state
+        rl_actor_opt_state = _init_actor_optimizer_state(actor, actor_train_state)
         agent = cls(
             rng=rng,
             actor=actor,
             actor_train_state=actor_train_state,
+            distill_actor_opt_state=distill_actor_opt_state,
+            distill_actor_step=actor_train_state.step,
+            rl_actor_opt_state=rl_actor_opt_state,
+            rl_actor_step=0,
             target_actor_params=target_actor_params,
             edit_actor=edit_actor,
             N=N,
@@ -520,6 +557,27 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
         if not resume:
             agent = agent.cache_infer_params()
         return agent
+
+    def activate_actor_optimizer(self, phase: str):
+        """Select the phase-specific actor optimizer for adapter compatibility.
+
+        Parameters remain shared. This only changes which optimizer state and
+        step are exposed through ``actor_train_state``; update methods also
+        select their state explicitly, so checkpoints can resume either phase.
+        """
+        if phase == "distill":
+            opt_state = self.distill_actor_opt_state
+            step = self.distill_actor_step
+        elif phase == "rl":
+            opt_state = self.rl_actor_opt_state
+            step = self.rl_actor_step
+        else:
+            raise ValueError(f"unknown actor optimizer phase: {phase}")
+        return self.replace(
+            actor_train_state=dataclasses.replace(
+                self.actor_train_state, opt_state=opt_state, step=step
+            )
+        )
 
     def _apply_edit_xyzg_mask(self, edit: jnp.ndarray) -> jnp.ndarray:
         """Zero out rotation dims (3,4,5) when edit_action_xyzg is True. Keeps xyz (0,1,2) and gripper (6)."""
@@ -604,7 +662,20 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
             return jnp.array(action), self.replace(rng=rng), sample_info
 
         transformed_full = transformed_actions  # (N, action_horizon, action_dim)
-        transformed_actions = transformed_full[:, :self.replan_steps, :].reshape(self.N, self.full_action_dim)
+        candidate_steps = self.eval_candidate_steps or self.replan_steps
+        if not 1 <= candidate_steps <= self.replan_steps:
+            raise ValueError(
+                f"eval_candidate_steps={candidate_steps} must be in [1, {self.replan_steps}]"
+            )
+        candidate_prefix = transformed_full[:, :candidate_steps, :]
+        if candidate_steps < self.replan_steps:
+            # Keep legacy editor/critic tensor widths while making candidate
+            # values depend only on the actions actually evaluated/executed.
+            pad = jnp.repeat(
+                candidate_prefix[:, -1:, :], self.replan_steps - candidate_steps, axis=1
+            )
+            candidate_prefix = jnp.concatenate([candidate_prefix, pad], axis=1)
+        transformed_actions = candidate_prefix.reshape(self.N, self.full_action_dim)
 
         critic_transformed_obs = transformed_inputs["critic_obs"]
         transformed_states = transformed_inputs["critic_states"]
@@ -653,6 +724,16 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
         rng, _ = jax.random.split(rng, 2)
         sample_info = {"sample_time": sample_time}
         return jnp.array(action), self.replace(rng=rng), sample_info
+
+    def eval_actor_only(self, observations):
+        """Sample an action chunk from the base actor only.
+
+        This is the evaluation path for initialization distillation: it does
+        not score candidates with the critic and never invokes the edit policy.
+        The returned chunk and learner update have the same shape/semantics as
+        :meth:`sample_actions`, so callers can execute the configured prefix.
+        """
+        return self.sample_actions(observations, only_base_actions=True)
 
     def sample_batch_actions(self, batch):
         # Preserve the batch axis even for a minibatch of one. Squeezing here
@@ -790,12 +871,12 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
 
         return self.replace(edit_actor=edit_actor, rng=rng), actor_info
     
-    def bc_update(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
-        """Update only the base Pi0.5 actor with a supervised action chunk.
+    def _actor_update(self, batch: DatasetDict, optimizer_phase: str) -> Tuple[AgentLearner, Dict[str, float]]:
+        """Apply the actor adapter's flow-matching update using one phase state.
 
-        This deliberately leaves the critic, edit actor, temperature, and all
-        their optimizer states unchanged. The target actor is refreshed only so
-        a learner resumed after BC remains internally consistent for later RL.
+        Distillation and RL share the actor parameters but never share Adam
+        moments or optimizer step counters.  Keeping the selected state in a
+        temporary TrainState preserves the unchanged actor adapter API.
         """
         actor_batch = self.actor.prepare_batch_for_actor(batch)
 
@@ -806,27 +887,57 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
             return x
         actor_batch = jax.tree_util.tree_map(ensure_sharding, actor_batch)
 
+        if optimizer_phase == "distill":
+            opt_state = self.distill_actor_opt_state
+            actor_step = self.distill_actor_step
+        elif optimizer_phase == "rl":
+            opt_state = self.rl_actor_opt_state
+            actor_step = self.rl_actor_step
+        else:
+            raise ValueError(f"unknown actor optimizer phase: {optimizer_phase}")
+
+        active_state = dataclasses.replace(
+            self.actor_train_state,
+            opt_state=opt_state,
+            step=actor_step,
+        )
+
         rng = self.rng
         key, rng = jax.random.split(rng, 2)
 
         with _sharding.set_mesh(self.actor.mesh):
-            new_train_state, info = self.actor.train_step(key, self.actor_train_state, actor_batch)
+            new_train_state, info = self.actor.train_step(key, active_state, actor_batch)
 
         new_train_state_params = self.actor.get_params(new_train_state)
         target_score_params = optax.incremental_update(
             new_train_state_params, self.target_actor_params, self.actor_tau
         )
 
-        new_agent = self.replace(
+        updates = dict(
             actor_train_state=new_train_state,
             target_actor_params=target_score_params,
             rng=rng,
         )
+        if optimizer_phase == "distill":
+            updates.update(
+                distill_actor_opt_state=new_train_state.opt_state,
+                distill_actor_step=new_train_state.step,
+            )
+        else:
+            updates.update(
+                rl_actor_opt_state=new_train_state.opt_state,
+                rl_actor_step=new_train_state.step,
+            )
+        new_agent = self.replace(**updates)
         return new_agent, info
 
+    def bc_update(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
+        """Update only the base actor with the distillation optimizer state."""
+        return self._actor_update(batch, "distill")
+
     def update_actor(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
-        """RL actor update entry point; BC and RL share the actor optimizer path."""
-        return self.bc_update(batch)
+        """RL actor update entry point using the persistent RL optimizer state."""
+        return self._actor_update(batch, "rl")
 
 
     def update_temperature(self, entropy: float) -> Tuple[AgentLearner, Dict[str, float]]:

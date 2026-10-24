@@ -38,6 +38,22 @@ if _ZSTD is None:
         _ZSTD = str(_fallback_zstd)
 
 
+class _ReplayUnpickler(pickle.Unpickler):
+    """Load replay snapshots written with either NumPy core module layout."""
+
+    def find_class(self, module, name):
+        # NumPy 2.x serializes some helpers under numpy._core, while the
+        # current training image exposes them under numpy.core.  Keep replay
+        # snapshots portable without changing their serialized contents.
+        if module == "numpy._core" or module.startswith("numpy._core."):
+            module = "numpy.core" + module[len("numpy._core"): ]
+        return super().find_class(module, name)
+
+
+def _load_pickle(file):
+    return _ReplayUnpickler(file).load()
+
+
 def _save_replay_state(task_dir: Path, step: int, state: dict) -> None:
     if _ZSTD is None:
         path = task_dir / f"replay_{step}.pkl"
@@ -79,7 +95,7 @@ def _load_replay_state(task_dir: Path, step: int) -> dict:
             stdout=subprocess.PIPE,
         )
         try:
-            state = pickle.load(process.stdout)
+            state = _load_pickle(process.stdout)
         finally:
             process.stdout.close()
         return_code = process.wait()
@@ -89,7 +105,7 @@ def _load_replay_state(task_dir: Path, step: int) -> dict:
 
     path = task_dir / f"replay_{step}.pkl"
     with path.open("rb") as file:
-        return pickle.load(file)
+        return _load_pickle(file)
 
 
 def parse_args(argv=None):
@@ -97,14 +113,27 @@ def parse_args(argv=None):
     parser.add_argument('--suite', default='libero_90')
     parser.add_argument('--task-id', type=int, default=DEFAULT_TASK_IDS[0],
                         help='One zero-based LIBERO task ID per run (default: 60)')
-    parser.add_argument('--num-steps', type=int, default=10000, help='Online environment actions')
-    parser.add_argument('--num-offline-steps', type=int, default=0,
+    parser.add_argument('--online-rl-steps', dest='online_rl_steps', type=int, default=10000, help='Online RL environment actions')
+    parser.add_argument('--offline-rl-steps', type=int, default=0,
                         help='EXPO learner updates from demos before collecting online actions')
+    parser.add_argument('--init-distill-steps', type=int, default=0,
+                        help='Pi0.5 base-chunk distillation updates before EXPO offline/RL')
+    parser.add_argument('--distill-data-root', type=str,
+                        default='/nlp/scr/ronpo/dcrlcheckpoints/pi_base_data/fixed125',
+                        help='Directory containing pi05_task_<id>_*.hdf5 collections')
+    parser.add_argument('--distill-data-path', type=str, default=None,
+                        help='Explicit completed Pi0.5 mixed HDF5 collection')
+    parser.add_argument('--distill-success-only', action='store_true',
+                        help='Diagnostic option: use only successful Pi0.5 chunks')
+    parser.add_argument('--pi-distill-eval-interval', type=int, default=None,
+                        help='Pi0.5-to-compact distillation eval cadence; defaults to offline-rl-eval-interval')
+    parser.add_argument('--pi-distill-chckpt-interval', type=int, default=None,
+                        help='Pi0.5-to-compact distillation checkpoint cadence; defaults to offline-rl-checkpoint-interval')
     parser.add_argument('--max-episode-steps', type=int, default=None,
                         help='Training action limit; default matches the official suite limit')
     parser.add_argument('--image-size', type=int, default=224)
-    parser.add_argument('--action-horizon', type=int, default=16)
-    parser.add_argument('--replan-steps', type=int, default=8)
+    parser.add_argument('--action-horizon', type=int, default=10)
+    parser.add_argument('--replan-steps', type=int, default=5)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--utd-ratio', type=int, default=20)
     parser.add_argument('--update-type', choices=('episode', 'step', 'batch'), default='episode')
@@ -115,12 +144,17 @@ def parse_args(argv=None):
     parser.add_argument('--num-demos', type=int, default=0, help='0 loads all task demonstrations')
     parser.add_argument('--demos-root')
     parser.add_argument('--replay-capacity', type=int, default=10000)
-    parser.add_argument('--offline-eval-interval', type=int, default=500,
+    parser.add_argument('--offline-rl-eval-interval', type=int, default=500,
                         help='Evaluate every N offline updates and at phase end; 0 disables')
-    parser.add_argument('--eval-every', type=int, default=1000)
-    parser.add_argument('--eval-episodes', type=int, default=50)
+    parser.add_argument('--offline-rl-checkpoint-interval', type=int, default=5000,
+                        help='Checkpoint every N offline updates; 0 disables')
+    parser.add_argument('--online-rl-eval-interval', type=int, default=1000)
+    # Use the same 20 fixed benchmark starts as the SFT/official Pi-facing
+    # evaluation defaults.  The evaluator still preserves their official
+    # ordering and reset semantics.
+    parser.add_argument('--eval-episodes', type=int, default=20)
     parser.add_argument('--eval-seed', type=int, default=7)
-    parser.add_argument('--checkpoint-every', type=int, default=5000)
+    parser.add_argument('--online-rl-checkpot-interval', type=int, default=5000)
     parser.add_argument('--wandb-entity', default='distill_rl')
     parser.add_argument('--wandb-project', default='dcrl')
     parser.add_argument('--wandb-name', default=None)
@@ -149,6 +183,40 @@ def _norm_stats(task_dir: Path, demo_path: Path, *, state_dim: int, overwrite: b
     return stats
 
 
+def _pi05_norm_stats(task_dir: Path, paths: list[Path], *, state_dim: int,
+                     overwrite: bool):
+    """Load the shared official Pi0.5 stats embedded in collector files.
+
+    Pi0.5 collections are produced with one shared LIBERO statistics file.  A
+    task-local demo estimate can have a zero quantile range (for example the
+    task-28 gripper dimension), which makes quantile normalization amplify
+    small Pi0.5 actions by 1e6.  Reusing the collector's stats keeps the
+    distillation targets and the compact learner in the same coordinate
+    system for all three phases.
+    """
+    from openpi.shared import normalize
+    import h5py
+
+    path = task_dir / 'norm_stats.json'
+    if path.exists() and not overwrite:
+        stats = normalize.load(task_dir)
+    else:
+        with h5py.File(paths[0], 'r') as file:
+            encoded = file.attrs.get('normalization_stats')
+        if encoded is None:
+            raise ValueError(f'Pi0.5 collection has no embedded normalization stats: {paths[0]}')
+        if isinstance(encoded, bytes):
+            encoded = encoded.decode()
+        stats = normalize.deserialize_json(str(encoded))
+        normalize.save(task_dir, stats)
+    for name, width in (('state', state_dim), ('actions', 7)):
+        if name not in stats or stats[name].q01 is None or stats[name].q99 is None:
+            raise ValueError(f'Missing Pi0.5 quantile stats for {name}: {path}')
+        if np.asarray(stats[name].q01).shape != (width,) or np.asarray(stats[name].q99).shape != (width,):
+            raise ValueError(f'Wrong {name} stats dimension in {path}')
+    return stats
+
+
 def _device_batch(batch, sharding):
     import jax
     return jax.tree_util.tree_map(lambda value: jax.device_put(np.asarray(value), sharding), batch)
@@ -157,6 +225,26 @@ def _device_batch(batch, sharding):
 def _metrics(info):
     return {name: float(np.asarray(value)) for name, value in info.items()
             if np.asarray(value).size == 1}
+
+
+def _resolve_distill_paths(args, task_id: int) -> list[Path]:
+    if args.distill_data_path:
+        return [Path(args.distill_data_path)]
+    root = Path(args.distill_data_root)
+    paths = sorted(
+        path for path in root.glob(f'pi05_task_{task_id}_*.hdf5')
+        if not path.name.endswith('.partial.hdf5')
+    )
+    if not paths:
+        raise FileNotFoundError(
+            f'No completed Pi0.5 collection for task {task_id} under {root}'
+        )
+    if len(paths) > 1:
+        raise ValueError(
+            f'Multiple Pi0.5 collections match task {task_id}: {paths}; '
+            'pass --distill-data-path explicitly'
+        )
+    return paths
 
 
 def _sample_batches(online, offline, *, batch_size, utd_ratio, offline_ratio,
@@ -209,15 +297,51 @@ def _evaluate(agent, env, *, episodes: int, max_steps: int, replan_steps: int, s
                    'eval/mean_steps': float(np.mean(lengths))}
 
 
+def _evaluate_actor(agent, env, *, episodes: int, max_steps: int, replan_steps: int, seed: int):
+    """Evaluate only the base actor using the official LIBERO rollout loop.
+
+    Initialization distillation trains the compact base actor with BC.  Its
+    eval must therefore not use the compact learner's critic/edit candidates;
+    otherwise the reported score would include components that were not
+    trained by the distillation update.  The reset, fixed initial-state order,
+    horizon, and action-prefix execution remain identical to ``_evaluate``.
+    """
+    import jax
+    eval_agent = agent.replace(rng=jax.random.PRNGKey(seed))
+    env.episode_index = 0
+    env.env.seed(env.seed)
+    successes = 0
+    lengths = []
+    for _ in range(episodes):
+        obs = env.reset()
+        plan = deque()
+        for step in range(max_steps):
+            if not plan:
+                chunk, eval_agent, _ = eval_agent.eval_actor_only(obs)
+                plan.extend(np.asarray(jax.device_get(chunk))[:replan_steps])
+            obs, _, success, _ = env.step(plan.popleft())
+            if success:
+                successes += 1
+                lengths.append(step + 1)
+                break
+        else:
+            lengths.append(max_steps)
+    return {'eval/actor_success_rate': successes / episodes,
+            'eval/actor_mean_steps': float(np.mean(lengths))}
+
+
 def _save(checkpoint_manager, agent, online, offline, *, task_dir: Path, step: int,
           offline_steps_done: int, online_steps_done: int,
-          completed_episodes: int, episode_id: int, episodes_since_update: int, rng):
+          completed_episodes: int, episode_id: int, episodes_since_update: int, rng,
+          distill_steps_done: int = 0, distill_rng=None):
     from dcrl.agents.pi_expo_learner import save_checkpoint
     state = dict(rows=online.rows, replay_rng=online.rng.bit_generator.state,
                  offline_rng=offline.rng.bit_generator.state,
                  combine_rng=rng.bit_generator.state,
+                 distill_rng=(None if distill_rng is None else distill_rng.bit_generator.state),
                  completed_episodes=completed_episodes, episode_id=episode_id,
                  episodes_since_update=episodes_since_update,
+                 distill_steps_done=distill_steps_done,
                  offline_steps_done=offline_steps_done, online_steps_done=online_steps_done)
     _save_replay_state(task_dir, step, state)
     # Publish the model checkpoint last: a visible checkpoint always has replay.
@@ -243,17 +367,44 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         'seed', 'image_size', 'action_horizon', 'replan_steps', 'batch_size',
         'utd_ratio', 'offline_ratio', 'num_demos', 'replay_capacity',
         'max_episode_steps', 'demos_root', 'update_type', 'num_updates', 'num_batch',
-        'warmup_episodes', 'num_offline_steps', 'offline_eval_interval',
-        'eval_every', 'eval_episodes', 'eval_seed', 'checkpoint_every', 'num_steps')}
+        'warmup_episodes', 'init_distill_steps', 'distill_data_root',
+        'distill_data_path', 'distill_success_only', 'pi_distill_eval_interval',
+        'pi_distill_chckpt_interval', 'offline_rl_steps', 'offline_rl_eval_interval',
+        'online_rl_eval_interval', 'eval_episodes', 'eval_seed', 'online_rl_checkpot_interval', 'offline_rl_checkpoint_interval', 'online_rl_steps')}
     fixed.update(suite=suite, task_id=task_id)
     if args.resume:
-        if not config_path.exists() or json.loads(config_path.read_text()) != fixed:
+        if not config_path.exists():
+            raise ValueError(f'Resume requested but configuration is missing: {config_path}')
+        existing_config = json.loads(config_path.read_text())
+        # A checkpoint can be used as a warm start for any later phase.
+        # The phase budgets may be changed (including set to zero), while all
+        # model, data, and optimization settings must remain compatible.
+        phase_keys = {'init_distill_steps', 'offline_rl_steps', 'online_rl_steps'}
+        phase_transition = (
+            {k: v for k, v in existing_config.items() if k not in phase_keys}
+                == {k: v for k, v in fixed.items() if k not in phase_keys}
+        )
+        if existing_config != fixed and not phase_transition:
             raise ValueError(f'Resume configuration differs from {config_path}')
     else:
         config_path.write_text(json.dumps(fixed, indent=2) + '\n')
     env = LiberoTaskEnv(suite, task_id, seed=args.seed + task_id,
                         image_size=args.image_size)
-    eval_enabled = args.eval_every or (args.num_offline_steps and args.offline_eval_interval)
+    pi_distill_eval_interval = (
+        args.pi_distill_eval_interval
+        if args.pi_distill_eval_interval is not None
+        else args.offline_rl_eval_interval
+    )
+    pi_distill_chckpt_interval = (
+        args.pi_distill_chckpt_interval
+        if args.pi_distill_chckpt_interval is not None
+        else args.offline_rl_checkpoint_interval
+    )
+    eval_enabled = (
+        args.online_rl_eval_interval
+        or (args.offline_rl_steps and args.offline_rl_eval_interval)
+        or (args.init_distill_steps and pi_distill_eval_interval)
+    )
     eval_env = (LiberoTaskEnv(suite, task_id, seed=args.eval_seed,
                               image_size=args.image_size, benchmark_eval=True)
                 if eval_enabled and args.eval_episodes else None)
@@ -263,8 +414,16 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             raise ValueError(f'Official evaluation has only {len(eval_env.init_states)} initial states')
         obs = env.reset()
         demo_path = env.demo_path(args.demos_root)
-        stats = _norm_stats(task_dir, demo_path, state_dim=len(obs['state']),
-                            overwrite=args.overwrite)
+        distill_paths = (
+            _resolve_distill_paths(args, task_id) if args.init_distill_steps else None
+        )
+        stats = (
+            _pi05_norm_stats(task_dir, distill_paths, state_dim=len(obs['state']),
+                             overwrite=args.overwrite)
+            if distill_paths is not None else
+            _norm_stats(task_dir, demo_path, state_dim=len(obs['state']),
+                        overwrite=args.overwrite)
+        )
         demos = load_demonstrations(
             demo_path, instruction=env.instruction, image_size=args.image_size,
             max_episodes=args.num_demos or None)
@@ -294,10 +453,23 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             offline.insert_episode(demo)
         del demos
 
+        distill_replay = None
+        if args.init_distill_steps:
+            from dcrl.pi05_distill_data import Pi05DistillReplay
+            distill_replay = Pi05DistillReplay(
+                distill_paths,
+                norm_stats=stats,
+                action_horizon=args.action_horizon,
+                padded_action_dim=agent.actor.model_config.action_dim,
+                seed=args.seed + 3000 + task_id,
+                success_only=args.distill_success_only,
+            )
+
         manager, resuming = initialize_checkpoint_dir(
             task_dir / 'checkpoints', keep_period=None,
             overwrite=args.overwrite, resume=args.resume)
         checkpoint_step = 0
+        distill_steps_done = 0
         offline_steps_done = 0
         online_steps_done = 0
         completed_episodes = 0
@@ -314,10 +486,13 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             online.rows = state['rows']
             online.rng.bit_generator.state = state['replay_rng']
             offline.rng.bit_generator.state = state['offline_rng']
+            if distill_replay is not None and state.get('distill_rng') is not None:
+                distill_replay.rng.bit_generator.state = state['distill_rng']
             episodes_since_update = state['episodes_since_update']
+            distill_steps_done = state.get('distill_steps_done', 0)
             offline_steps_done = state['offline_steps_done']
             online_steps_done = state['online_steps_done']
-            if checkpoint_step != offline_steps_done + online_steps_done:
+            if checkpoint_step != distill_steps_done + offline_steps_done + online_steps_done:
                 raise ValueError('Checkpoint phase counters do not match its step')
             combine_rng.bit_generator.state = state['combine_rng']
             completed_episodes = state['completed_episodes']
@@ -325,23 +500,126 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             if online_steps_done:
                 env.episode_index = completed_episodes
                 obs = env.reset()
-            logging.info('Task %d resumed: offline=%d online=%d',
-                         task_id, offline_steps_done, online_steps_done)
-        if online_steps_done >= args.num_steps:
-            raise ValueError('num-steps must exceed the resumed online step')
+            logging.info('Task %d resumed: distill=%d offline=%d online=%d',
+                         task_id, distill_steps_done, offline_steps_done, online_steps_done)
+        # A zero phase budget means "do not run this phase". If a resumed
+        # checkpoint already contains work in that phase, retain its counter
+        # as the global-step offset and skip additional updates. Positive
+        # budgets remain absolute per-phase targets for exact resumption.
+        init_target = (distill_steps_done if args.resume and args.init_distill_steps == 0
+                       else args.init_distill_steps)
+        offline_target = (offline_steps_done if args.resume and args.offline_rl_steps == 0
+                          else args.offline_rl_steps)
+        online_target = (online_steps_done if args.resume and args.online_rl_steps == 0
+                         else args.online_rl_steps)
+        if resuming and offline_steps_done and args.init_distill_steps not in (0, distill_steps_done):
+            raise ValueError(
+                'cannot change the distillation target after offline RL has started; '
+                'pass --init-distill-steps 0 to skip it'
+            )
+        if resuming and online_steps_done and args.offline_rl_steps not in (0, offline_steps_done):
+            raise ValueError(
+                'cannot change the offline RL target after online RL has started; '
+                'pass --offline-rl-steps 0 to skip it'
+            )
+        if distill_steps_done > init_target:
+            raise ValueError('checkpoint has more distillation steps than requested')
+        if offline_steps_done > offline_target:
+            raise ValueError('checkpoint has more offline steps than requested')
+        if online_steps_done > online_target:
+            raise ValueError('checkpoint has more online steps than requested')
+        logging.info('Phase targets: distill=%d offline=%d online=%d',
+                     init_target, offline_target, online_target)
+
+        # Select the optimizer state that belongs to the phase being resumed.
+        # A checkpoint always contains both actor optimizer states; the phase
+        # counter determines which one is active, including the case where
+        # init_distill_steps=0 intentionally skips remaining distillation.
+        agent = agent.activate_actor_optimizer(
+            'distill' if distill_steps_done < init_target else 'rl'
+        )
 
         plan = deque()
         episode_steps = 0
         last_saved_step = checkpoint_step
         log_mode = 'a' if resuming else 'w'
         with (task_dir / 'metrics.jsonl').open(log_mode) as log_file:
+            # Initialization distillation uses the same tqdm/eval/checkpoint
+            # structure as the EXPO offline phase, but calls bc_update so only
+            # the compact base actor learns from frozen Pi0.5 chunks.
+            if args.init_distill_steps and distill_replay is None:
+                raise RuntimeError('distillation replay was not initialized')
+            distill_progress = tqdm(
+                range(distill_steps_done, init_target),
+                desc=f'{suite} task {task_id} init-distill')
+            for distill_index in distill_progress:
+                distill_batch = distill_replay.sample(args.batch_size)
+                agent, info = agent.bc_update(
+                    _device_batch(distill_batch, data_sharding)
+                )
+                distill_steps_done = distill_index + 1
+                global_step = distill_steps_done
+                metrics = dict(
+                    phase='init_distill',
+                    step=distill_steps_done,
+                    global_step=global_step,
+                    **_metrics(info),
+                )
+                if (eval_env is not None and pi_distill_eval_interval
+                        and (distill_steps_done % pi_distill_eval_interval == 0
+                             or distill_steps_done == init_target)):
+                    metrics.update(_evaluate_actor(
+                        agent, eval_env, episodes=args.eval_episodes,
+                        max_steps=official_max_steps, replan_steps=args.replan_steps,
+                        seed=args.eval_seed))
+                log_file.write(json.dumps(metrics) + '\n')
+                log_file.flush()
+                if wandb_run is not None:
+                    wandb_run.log(metrics, step=global_step)
+                if (pi_distill_chckpt_interval
+                        and distill_steps_done % pi_distill_chckpt_interval == 0):
+                    _save(
+                        manager, agent, online, offline, task_dir=task_dir,
+                        step=global_step,
+                        distill_steps_done=distill_steps_done,
+                        offline_steps_done=offline_steps_done,
+                        online_steps_done=online_steps_done,
+                        completed_episodes=completed_episodes,
+                        episode_id=episode_id,
+                        episodes_since_update=episodes_since_update,
+                        rng=combine_rng,
+                        distill_rng=distill_replay.rng,
+                    )
+                    last_saved_step = global_step
+
+            if init_target and last_saved_step < distill_steps_done:
+                _save(
+                    manager, agent, online, offline, task_dir=task_dir,
+                    step=distill_steps_done,
+                    distill_steps_done=distill_steps_done,
+                    offline_steps_done=offline_steps_done,
+                    online_steps_done=online_steps_done,
+                    completed_episodes=completed_episodes,
+                    episode_id=episode_id,
+                    episodes_since_update=episodes_since_update,
+                    rng=combine_rng,
+                    distill_rng=distill_replay.rng,
+                )
+                last_saved_step = distill_steps_done
+
+            # Distillation and RL use different actor optimizer histories.
+            # Switch once, after the distillation loop, before either offline
+            # or online RL updates. Offline and online RL then share this RL
+            # optimizer state.
+            agent = agent.activate_actor_optimizer('rl')
+
             # Offline initialization uses the same EXPO update API, but all
             # critic and success-only actor examples come from demonstrations.
             demo_replay = offline
-            if args.num_offline_steps and not demo_replay.can_sample(success_only=True):
+            if offline_target and not demo_replay.can_sample(success_only=True):
                 raise ValueError('Offline initialization needs at least r+1 demo transitions')
             offline_progress = tqdm(
-                range(offline_steps_done, args.num_offline_steps),
+                range(offline_steps_done, offline_target),
                 desc=f'{suite} task {task_id} offline')
             for offline_index in offline_progress:
                 critic = demo_replay.sample(args.batch_size * args.utd_ratio)
@@ -350,11 +628,12 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                     agent, _device_batch(critic, data_sharding), args.utd_ratio,
                     _device_batch(actor, data_sharding))
                 offline_steps_done = offline_index + 1
+                global_step = distill_steps_done + offline_steps_done
                 metrics = dict(phase='offline', step=offline_steps_done,
-                               global_step=offline_steps_done, **_metrics(info))
-                if (eval_env is not None and args.offline_eval_interval
-                        and (offline_steps_done % args.offline_eval_interval == 0
-                             or offline_steps_done == args.num_offline_steps)):
+                               global_step=global_step, **_metrics(info))
+                if (eval_env is not None and args.offline_rl_eval_interval
+                        and (offline_steps_done % args.offline_rl_eval_interval == 0
+                             or offline_steps_done == offline_target)):
                     metrics.update(_evaluate(
                         agent, eval_env, episodes=args.eval_episodes,
                         max_steps=official_max_steps, replan_steps=args.replan_steps,
@@ -362,49 +641,53 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                 log_file.write(json.dumps(metrics) + '\n')
                 log_file.flush()
                 if wandb_run is not None:
-                    wandb_run.log(metrics, step=offline_steps_done)
-                if args.checkpoint_every and offline_steps_done % args.checkpoint_every == 0:
+                    wandb_run.log(metrics, step=global_step)
+                if args.offline_rl_checkpoint_interval and offline_steps_done % args.offline_rl_checkpoint_interval == 0:
                     _save(manager, agent, online, offline, task_dir=task_dir,
-                          step=offline_steps_done,
+                          step=global_step,
+                          distill_steps_done=distill_steps_done,
                           offline_steps_done=offline_steps_done,
                           online_steps_done=online_steps_done,
                           completed_episodes=completed_episodes, episode_id=episode_id,
                           episodes_since_update=episodes_since_update,
-                          rng=combine_rng)
-                    last_saved_step = offline_steps_done
+                          rng=combine_rng,
+                          distill_rng=(None if distill_replay is None else distill_replay.rng))
+                    last_saved_step = global_step
 
-            if args.num_offline_steps and last_saved_step < args.num_offline_steps:
+            if offline_target and last_saved_step < distill_steps_done + offline_target:
                 _save(manager, agent, online, offline, task_dir=task_dir,
-                      step=args.num_offline_steps,
-                      offline_steps_done=args.num_offline_steps,
+                      step=distill_steps_done + offline_target,
+                      distill_steps_done=distill_steps_done,
+                      offline_steps_done=offline_target,
                       online_steps_done=online_steps_done,
                       completed_episodes=completed_episodes, episode_id=episode_id,
                       episodes_since_update=episodes_since_update,
-                          rng=combine_rng)
-                last_saved_step = args.num_offline_steps
+                      rng=combine_rng,
+                      distill_rng=(None if distill_replay is None else distill_replay.rng))
+                last_saved_step = distill_steps_done + offline_target
 
             # Keep both schedules on the online-step counter. With episode
             # updates, run each due eval/checkpoint at the next completed
             # episode, after its learner update.
             next_eval_online = (
-                (online_steps_done // args.eval_every + 1) * args.eval_every
-                if args.eval_every else None)
+                (online_steps_done // args.online_rl_eval_interval + 1) * args.online_rl_eval_interval
+                if args.online_rl_eval_interval else None)
             next_checkpoint_online = (
-                (online_steps_done // args.checkpoint_every + 1) * args.checkpoint_every
-                if args.checkpoint_every else None)
+                (online_steps_done // args.online_rl_checkpot_interval + 1) * args.online_rl_checkpot_interval
+                if args.online_rl_checkpot_interval else None)
             progress = tqdm(
-                range(online_steps_done, args.num_steps),
+                range(online_steps_done, online_target),
                 desc=f'{suite} task {task_id} online')
             for index in progress:
                 step = index + 1
-                global_step = args.num_offline_steps + step
+                global_step = distill_steps_done + offline_target + step
                 if not plan:
                     chunk, agent, _ = agent.sample_actions(obs)
                     plan.extend(np.asarray(jax.device_get(chunk))[:args.replan_steps])
                 proposed = plan.popleft()
                 next_obs, reward, success, executed = env.step(proposed)
                 episode_steps += 1
-                done = success or episode_steps >= train_max_steps or step == args.num_steps
+                done = success or episode_steps >= train_max_steps or step == online_target
                 online.insert(Transition(obs=obs, action=executed, reward=reward,
                                          done=done, episode_id=episode_id))
                 if done and success:
@@ -448,7 +731,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                     plan.clear()
                     if args.update_type == 'batch' and can_update:
                         episodes_since_update = 0 if trigger else episodes_since_update + 1
-                    if step < args.num_steps:
+                    if step < online_target:
                         obs = env.reset()
                     progress.set_postfix(episodes=completed_episodes, success=int(success))
 
@@ -458,34 +741,38 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                         agent, eval_env, episodes=args.eval_episodes,
                         max_steps=official_max_steps, replan_steps=args.replan_steps,
                         seed=args.eval_seed))
-                    next_eval_online = (step // args.eval_every + 1) * args.eval_every
+                    next_eval_online = (step // args.online_rl_eval_interval + 1) * args.online_rl_eval_interval
 
                 if done and next_checkpoint_online is not None and step >= next_checkpoint_online:
                     _save(manager, agent, online, offline, task_dir=task_dir,
                           step=global_step,
+                          distill_steps_done=distill_steps_done,
                           offline_steps_done=offline_steps_done,
                           online_steps_done=online_steps_done,
                           completed_episodes=completed_episodes, episode_id=episode_id,
                           episodes_since_update=episodes_since_update,
-                          rng=combine_rng)
+                          rng=combine_rng,
+                          distill_rng=(None if distill_replay is None else distill_replay.rng))
                     last_saved_step = global_step
                     next_checkpoint_online = (
-                        (step // args.checkpoint_every + 1) * args.checkpoint_every)
+                        (step // args.online_rl_checkpot_interval + 1) * args.online_rl_checkpot_interval)
 
                 log_file.write(json.dumps(metrics) + '\n')
                 log_file.flush()
                 if wandb_run is not None:
                     wandb_run.log(metrics, step=global_step)
 
-            final_step = args.num_offline_steps + args.num_steps
-            if last_saved_step != final_step:
+            final_step = distill_steps_done + offline_target + online_target
+            if last_saved_step != final_step and final_step > 0:
                 _save(manager, agent, online, offline, task_dir=task_dir,
                       step=final_step,
+                      distill_steps_done=distill_steps_done,
                       offline_steps_done=offline_steps_done,
                       online_steps_done=online_steps_done,
                       completed_episodes=completed_episodes, episode_id=episode_id,
                       episodes_since_update=episodes_since_update,
-                          rng=combine_rng)
+                      rng=combine_rng,
+                      distill_rng=(None if distill_replay is None else distill_replay.rng))
     finally:
         if manager is not None:
             manager.wait_until_finished()
@@ -493,23 +780,32 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         env.close()
         if eval_env is not None:
             eval_env.close()
+        if distill_replay is not None:
+            distill_replay.close()
 
 
 def main(argv=None):
     args = parse_args(argv)
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-    if args.num_steps < 1 or args.batch_size < 1 or args.utd_ratio < 1 or args.num_updates < 1:
-        raise ValueError('num-steps, batch-size, utd-ratio, and num-updates must be positive')
+    if args.online_rl_steps < 0 or args.batch_size < 1 or args.utd_ratio < 1 or args.num_updates < 1:
+        raise ValueError('online-rl-steps must be nonnegative; batch-size, utd-ratio, and num-updates must be positive')
     if (args.max_episode_steps is not None and args.max_episode_steps < 1) or args.num_batch < 1 or args.replay_capacity < 2:
         raise ValueError('max-episode-steps, num-batch, and replay-capacity must be positive')
     if not 1 <= args.replan_steps <= args.action_horizon:
         raise ValueError('replan-steps must be in [1, action-horizon]')
     if not 0 <= args.offline_ratio <= 1:
         raise ValueError('offline-ratio must be in [0, 1]')
-    if args.num_offline_steps < 0 or args.offline_eval_interval < 0 or args.warmup_episodes < 0 or args.num_demos < 0 or args.eval_every < 0 or args.eval_episodes < 0 or args.checkpoint_every < 0:
-        raise ValueError('offline steps, warmup, demo count, eval settings, and checkpoint interval must be nonnegative')
+    if (args.init_distill_steps < 0 or args.offline_rl_steps < 0 or args.offline_rl_eval_interval < 0
+            or args.pi_distill_eval_interval is not None and args.pi_distill_eval_interval < 0
+            or args.pi_distill_chckpt_interval is not None and args.pi_distill_chckpt_interval < 0
+            or args.offline_rl_checkpoint_interval < 0
+            or args.warmup_episodes < 0 or args.num_demos < 0 or args.online_rl_eval_interval < 0
+            or args.eval_episodes < 0 or args.online_rl_checkpot_interval < 0):
+        raise ValueError('phase steps, warmup, demo count, eval settings, and checkpoint intervals must be nonnegative')
     if args.resume and args.overwrite:
         raise ValueError('resume and overwrite cannot be combined')
+    if args.online_rl_steps + args.offline_rl_steps + args.init_distill_steps == 0:
+        raise ValueError('at least one distillation, offline, or online step is required')
     from libero.libero import benchmark
     if args.suite not in LIBERO_SUITE_MAX_STEPS:
         raise ValueError(f'Unknown official LIBERO suite: {args.suite}')

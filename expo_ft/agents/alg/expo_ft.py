@@ -599,10 +599,13 @@ class EXPOLearner(AgentLearner, struct.PyTreeNode):
         return jnp.array(action), self.replace(rng=rng), sample_info
 
     def sample_batch_actions(self, batch):
-        critic_obs = jnp.squeeze(batch["next_observations"])
+        # Keep the leading batch dimension even when B=1.  Squeezing a
+        # `(1, H, W, C)` observation makes `H` look like the batch size and
+        # breaks the candidate-action reshape in low-memory smoke runs.
+        critic_obs = batch["next_observations"]
         critic_obs = jax.device_put(critic_obs)
         batch_size = critic_obs.shape[0]
-        states = jnp.squeeze(batch["next_states"])
+        states = batch["next_states"]
         states = jax.device_put(states, self.data_sharding)
         rng = self.rng
 
@@ -689,7 +692,9 @@ class EXPOLearner(AgentLearner, struct.PyTreeNode):
         }
 
         rng, _ = jax.random.split(rng, 2)
-        return jnp.array(best_actions.squeeze()), sample_info_extra, rng
+        # Preserve `(B, action_dim)` for B=1 as well as larger batches.  The
+        # critic target path expects one action row per transition.
+        return jnp.asarray(best_actions), sample_info_extra, rng
          
     def update_edit_actor(self, batch: DatasetDict) -> Tuple[AgentLearner, Dict[str, float]]:
         key, rng = jax.random.split(self.rng)
@@ -922,12 +927,22 @@ class EXPOLearner(AgentLearner, struct.PyTreeNode):
         # When actor_success_only, use the dedicated success-episode batch for
         # the Pi05 actor update; otherwise use the last critic minibatch.
         if self.actor_success_only:
-            actor_batch = actor_batch.copy()
-            rng, key = jax.random.split(new_agent.rng)
-            actor_batch["image"] = self.data_augmentation_fn(key, actor_batch["image"])
-            new_agent = new_agent.replace(rng=rng)
-            actor_batch = prepare_critic_batch(actor_batch, self.actor.model_config.action_dim, self.action_dim, self.state_dim, self.action_horizon, self.replan_steps, self.critic_camera_keys)
-            new_agent, actor_info = new_agent.update_actor(actor_batch)
+            if actor_batch is None:
+                # A replay window can contain no successful/HIL transition,
+                # especially immediately after resuming an unsuccessful run.
+                # Keep the success-only actor state unchanged while critic and
+                # editor updates continue.
+                actor_info = {
+                    "actor_loss": jnp.asarray(0.0, dtype=jnp.float32),
+                    "actor_grad_norm": jnp.asarray(0.0, dtype=jnp.float32),
+                }
+            else:
+                actor_batch = actor_batch.copy()
+                rng, key = jax.random.split(new_agent.rng)
+                actor_batch["image"] = self.data_augmentation_fn(key, actor_batch["image"])
+                new_agent = new_agent.replace(rng=rng)
+                actor_batch = prepare_critic_batch(actor_batch, self.actor.model_config.action_dim, self.action_dim, self.state_dim, self.action_horizon, self.replan_steps, self.critic_camera_keys)
+                new_agent, actor_info = new_agent.update_actor(actor_batch)
         else:
             new_agent, actor_info = new_agent.update_actor(last_minibatch)
 

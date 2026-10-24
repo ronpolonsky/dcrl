@@ -14,8 +14,8 @@ LIBERO, so actual simulator rollouts have not yet been run here.
 ```bash
 python -m dcrl.train_libero --suite libero_90 --task-id 60 \
   --demos-root datasets \
-  --num-offline-steps 2000 --offline-eval-interval 250 \
-  --num-steps 10000 --output-dir runs/small_expo_libero
+  --offline-rl-steps 2000 --offline-rl-eval-interval 250 \
+  --online-rl-steps 10000 --output-dir runs/small_expo_libero
 ```
 
 Use `--task-id` to select one zero-based task from the suite. The default is
@@ -28,7 +28,7 @@ demonstrations into online replay, as upstream does; a positive ratio keeps a
 separate offline replay and mixes its critic and actor examples. `--num-demos`
 limits the number seeded into replay; 0 uses all.
 
-`--num-offline-steps` runs a first `tqdm` loop of complete EXPO learner updates
+`--offline-rl-steps` runs a first `tqdm` loop of complete EXPO learner updates
 on demonstrations before the online action loop. Each offline update samples
 `batch_size * utd_ratio` critic examples and `batch_size` successful actor
 examples from the demo replay, then calls the same `agent.update()` used online.
@@ -36,8 +36,8 @@ This stage is optional (default 0) and is an addition to upstream EXPO-FT's
 synchronous trainer. The separate `--warmup-episodes 10` still applies once
 online collection starts; it collects episodes before online updates.
 
-`--offline-eval-interval` evaluates every N offline updates and at the last
-offline update (default 500, 0 disables). `--eval-every` controls online
+`--offline-rl-eval-interval` evaluates every N offline updates and at the last
+offline update (default 500, 0 disables). `--online-rl-eval-interval` controls online
 evaluation in environment actions (default 1000, 0 disables). Both use a
 separate LIBERO environment. Its reset and camera defaults match OpenPI's
 official π₀.₅ LIBERO client: seed 7, the first 50 benchmark initial states, 10 settling
@@ -63,11 +63,21 @@ captured at 128 pixels; live training and evaluation render at 256 pixels.
 
 Checkpoints contain the full learner state, including actor, editor, critic,
 target networks, temperature, optimizer states and RNG, plus replay rows and
-sampling RNG and phase counters. Offline
-checkpoints are written every `--checkpoint-every` updates and at the offline
-phase boundary. Online checkpoints are written at episode boundaries after the
-requested action interval and at the end. `--resume` restores a matching model
+sampling RNG and phase counters. Offline checkpoints are written every
+`--offline-rl-checkpoint-interval` updates and at the offline phase boundary.
+Online checkpoints are written at episode boundaries after
+`--online-rl-checkpot-interval` actions and at the end. `--resume` restores a matching model
 and replay snapshot and resumes the relevant phase; `--overwrite` starts fresh.
+
+The actor has two optimizer states: one for `--init-distill-steps` and one for
+both offline and online RL. They share actor parameters but do not share Adam
+moments or step counters. A checkpoint stores both states. To continue
+distillation, resume with a positive distillation target. To skip remaining
+distillation and begin RL from the checkpoint's actor weights, pass
+`--init-distill-steps 0`; the untouched RL optimizer starts at step zero. When
+resuming from an offline checkpoint, pass `--offline-rl-steps 0` to skip the
+offline phase and continue online RL with its restored optimizer state. Phase
+budgets are absolute per-phase targets when resuming.
 
 ## EXPO-FT behavior retained
 

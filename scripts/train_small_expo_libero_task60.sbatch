@@ -14,7 +14,7 @@
 set -euo pipefail
 
 PROJECT=/nlp/scr/ronpo/projects/dcrl
-EXPO=/iris/u/ronpo/projects/expo-ft
+EXPO="$PROJECT/third_party/expo-ft"
 PYTHON="$EXPO/.venv/bin/python"
 LIBERO_ROOT="$PROJECT/.deps/LIBERO/libero/libero"
 export PYTHONPATH="$PROJECT:$EXPO/expo_ft/agents/vla/openpi/src:$EXPO/expo_ft/agents/vla/openpi/packages/openpi-client/src:$PROJECT/.deps/LIBERO${PYTHONPATH:+:$PYTHONPATH}"
@@ -64,20 +64,21 @@ fi
 "$PYTHON" -m dcrl.train_libero "${RESUME_ARGS[@]}" \
   --suite libero_90 \
   --task-id 60 \
-  --num-steps 1000000 \
-  --num-offline-steps 10000 \
+  --online-rl-steps 1000000 \
+  --offline-rl-steps 10000 \
   --demos-root datasets \
   --update-type episode \
   --num-updates 3 \
   --batch-size 64 \
   --utd-ratio 20 \
-  --replan-steps 8 \
-  --action-horizon 16 \
-  --eval-every 25000 \
-  --offline-eval-interval 25000 \
+  --replan-steps 5 \
+  --action-horizon 10 \
+  --online-rl-eval-interval 25000 \
+  --offline-rl-eval-interval 25000 \
   --offline-ratio 0.5 \
   --eval-episodes 20 \
-  --checkpoint-every 25000 \
+  --offline-rl-checkpoint-interval 25000 \
+  --online-rl-checkpot-interval 25000 \
   --output-dir /nlp/scr/ronpo/dcrlcheckpoints/small_expo_learner \
   --wandb-entity distill_rl \
   --wandb-project dcrl \

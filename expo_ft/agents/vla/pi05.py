@@ -380,7 +380,6 @@ def build_pi05(config, seed, mesh, data_sharding, replicated_sharding,
 
     rng = jax.random.PRNGKey(seed)
     init_rng, rng = jax.random.split(rng)
-    target_rng, rng = jax.random.split(rng)
 
     actor, actor_train_state, _ = Pi05Agent.initialize(
         pi05_train_config,
@@ -393,10 +392,13 @@ def build_pi05(config, seed, mesh, data_sharding, replicated_sharding,
         freeze_pi05_encoder=freeze_encoder,
         infer_device=jax.devices()[0],
     )
-    if resume:
-        target_actor_params = actor.get_params(actor_train_state)
-    else:
-        target_actor_params = actor.init_target_params(target_rng, resume=resume)
+    # The target actor is a parameter copy, not a second train state.  Building
+    # another Pi05 train state here duplicates the full model, optimizer state,
+    # and compilation buffers.  On an 80 GB A100 that duplicate initialization
+    # OOMs before the first rollout.  EXPO's target update starts from the
+    # online actor and then tracks it with actor_tau, so copying the initialized
+    # actor parameters is both semantically correct and memory safe.
+    target_actor_params = actor.get_params(actor_train_state)
 
     metadata = dict(
         action_horizon=pi05_train_config.model.action_horizon,
@@ -694,4 +696,3 @@ class Pi05Agent(Model):
             transformed_inputs, train_state, key, prefix_padded, num_samples, noise=noise,
         )
         return self._unpad_actions(x_clean), None
-

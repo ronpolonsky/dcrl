@@ -97,6 +97,7 @@ def collect_teacher_chunks(
     target_replan_steps: int = 5,
     target_successes: int | None = None,
     target_failures: int | None = None,
+    max_attempts_override: int | None = None,
 ) -> None:
     """Collect 10/5 chunks from a frozen SmallExpo checkpoint.
 
@@ -119,14 +120,20 @@ def collect_teacher_chunks(
     output = Path(output)
     if (target_successes is None) != (target_failures is None):
         raise ValueError("provide both target_successes and target_failures, or neither")
-    if target_successes is not None and (target_successes <= 0 or target_failures <= 0):
-        raise ValueError("target_successes and target_failures must be positive")
+    if target_successes is not None and (target_successes <= 0 or target_failures < 0):
+        raise ValueError("target_successes must be positive and target_failures non-negative")
+    if target_successes == 0 and target_failures == 0:
+        raise ValueError("at least one collection target must be positive")
     # ``episodes`` remains the user-visible minimum attempt budget. Quota mode
     # gets the same four-times quota allowance as the Pi0.5 collector so a
     # difficult task has room to obtain both outcomes.
     max_attempts = int(episodes)
     if target_successes is not None:
         max_attempts = max(max_attempts, 4 * (int(target_successes) + int(target_failures)))
+    if max_attempts_override is not None:
+        if int(max_attempts_override) < max_attempts:
+            raise ValueError("max_attempts_override cannot be smaller than the quota attempt budget")
+        max_attempts = int(max_attempts_override)
     config = json.loads((teacher_dir / "run_config.json").read_text())
     teacher_horizon = int(config["action_horizon"])
     teacher_replan = int(config["replan_steps"])
@@ -217,8 +224,23 @@ def collect_teacher_chunks(
             direct_env = LiberoTaskEnv(config["suite"], config["task_id"], seed=seed,
                                        image_size=int(config["image_size"]))
         with h5py.File(partial, "a") as file:
-            if "metadata" in file.attrs and json.loads(file.attrs["metadata"]) != metadata:
-                raise ValueError("partial collection does not match request")
+            if "metadata" in file.attrs:
+                existing_metadata = json.loads(file.attrs["metadata"])
+                # A failed quota collection can be resumed with a larger
+                # attempt budget. It can also be finalized with a lower
+                # failure target when the existing partition already meets it.
+                comparable_existing = dict(existing_metadata)
+                comparable_requested = dict(metadata)
+                for key in ("episodes", "max_attempts", "target_failures"):
+                    comparable_existing.pop(key, None)
+                    comparable_requested.pop(key, None)
+                if comparable_existing != comparable_requested:
+                    raise ValueError("partial collection does not match request")
+                old_failures = existing_metadata.get("target_failures")
+                new_failures = metadata.get("target_failures")
+                if (old_failures is not None and new_failures is not None
+                        and int(new_failures) > int(old_failures)):
+                    raise ValueError("cannot increase the failure target while resuming a partial collection")
             file.attrs["metadata"] = json.dumps(metadata, sort_keys=True)
             file.attrs["instruction"] = instruction
             file.attrs["teacher_norm_stats"] = norm_bytes.decode()

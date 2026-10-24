@@ -45,6 +45,8 @@ def parse_args():
     parser.add_argument("--collection-failures", type=int, default=25)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--collection-episodes", type=int, default=200)
+    parser.add_argument("--collection-max-attempts", type=int, default=None,
+                        help="Override the quota attempt budget when resuming a partial collection.")
     parser.add_argument("--include-failures", action="store_true")
     parser.add_argument("--student-checkpoint", default="gs://openpi-assets/checkpoints/pi05_base")
     parser.add_argument("--num-sft-steps", type=int, default=PI05_STEPS)
@@ -318,6 +320,7 @@ def main():
                 target_action_horizon=PI05_HORIZON, target_replan_steps=PI05_REPLAN,
                 target_successes=args.collection_successes,
                 target_failures=args.collection_failures,
+                max_attempts_override=args.collection_max_attempts,
             )
         else:
             from dcrl.collect_pi05_libero import collect

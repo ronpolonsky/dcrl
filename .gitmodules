@@ -1,0 +1,3 @@
+[submodule "third_party/expo-ft"]
+	path = third_party/expo-ft
+	url = https://github.com/pd-perry/expo-ft.git

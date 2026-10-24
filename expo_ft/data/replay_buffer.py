@@ -244,8 +244,17 @@ class PiReplayBuffer(Dataset):
             self.dataset_dict["is_success"][:end_idx] = True
 
     def restore_success_marks(self, reward_threshold: float = 0.5) -> None:
-        """Rebuild is_success flags from episode rewards after resume."""
-        self.dataset_dict["is_success"][:] = False
+        """Rebuild success flags after resume without losing seeded expert data.
+
+        Offline LIBERO demonstrations are inserted as HIL transitions and are
+        intentionally eligible for the success-only actor update. Their
+        success flag is not encoded in the per-transition replay files, so
+        rebuilding from terminal rewards alone would erase those flags on
+        resume. Preserve HIL rows, then add successful online episodes.
+        """
+        self.dataset_dict["is_success"][:] = np.asarray(
+            self.dataset_dict["is_hil"], dtype=bool
+        )
         starts, ends = self._find_episode_boundaries_from_dones(
             self.dataset_dict["dones"], self._size
         )

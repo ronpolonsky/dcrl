@@ -3,6 +3,7 @@
 import dataclasses
 import logging
 import pathlib
+import os
 from typing import Any, Dict
 
 import etils.epath as epath
@@ -106,7 +107,8 @@ def set_compilation_cache_dir(tag: str) -> str:
     runs that place the same computation on the same device, so scope the dir by
     driver, learner, and device count (all three decide those placements).
     """
-    cache_dir = epath.Path("~/.cache/jax").expanduser() / f"{tag}-n{jax.device_count()}"
+    cache_root = os.environ.get("DCRL_JAX_CACHE_ROOT")
+    cache_dir = (epath.Path(cache_root) if cache_root else epath.Path("~/.cache/jax").expanduser()) / f"{tag}-n{jax.device_count()}"
     jax.config.update("jax_compilation_cache_dir", str(cache_dir))
     logging.info("JAX compilation cache: %s", cache_dir)
     return str(cache_dir)

@@ -155,3 +155,96 @@ The SFT launcher currently requests batch size 16. If an actual Pi0.5 training O
 - 2026-10-18: SFT job 17944297 was pending on fully occupied `sphinx10`; canceled and relaunched as 17944301 on available `iris-hgx-1` H100 (verified `gres/gpu:h100=1`). It loaded 1,768 success-only chunks and is progressing through the 50-episode initial evaluation.
 - 2026-10-18: Changed SFT evaluation default from 50 to 20 episodes in both `train_bc_distill.py` and all production launcher branches. Stopped preempted eval-50 SFT job 17944301, removed its unwanted incomplete config, and relaunched the same 500k-step LoRA run as job 17944395 on one H100; it is currently pending `QOSMaxGRESPerUser`.
 - 2026-10-18: Task2 Iris H200 racer 17944346 started after the QOS delay and emitted `Initialized Pi0.5 base actor`; canceled its queued Sphinx fallback 17944227. All five Pi-base tasks now have healthy Iris H100/H200 collectors (Task28=17944249, Task79=17944343, Task60=17944344, Task29=17944345, Task2=17944346).
+
+- 2026-10-18: Initial three-phase SmallExpo submissions 17949071-17949075 requested
+  H100 only and were projected to wait for the next day. They were canceled before
+  running and resubmitted as 17949126-17949130 with `constraint=hopper` and one
+  generic GPU, allowing either H100 or H200 while still excluding low-memory and
+  known-bad nodes. Tasks 2 and 28 started on separate H200 GPUs; the remaining
+  tasks are queued behind existing Hopper allocations.
+- 2026-10-18: The first three-phase launch hung before model initialization because
+  `WANDB_BASE_URL=https://forge.coreweave.com/wandb` makes the SDK POST GraphQL to
+  a UI path that returns HTTP 405. Those allocations (17949126-17949130) were
+  canceled and relaunched as 17949171-17949175 with the verified SDK endpoint
+  `https://forge.coreweave.com/api/wandb`. W&B now authenticates, creates online
+  runs, and reports run URLs; no GPU or JAX startup error was observed.
+- 2026-10-18: Compact-agent Hopper jobs were moved to non-Hopper hardware. Three
+  L40S attempts (17949207-17949209) on `iris9` failed during the preflight JAX
+  device check with `CUDA_ERROR_ECC_UNCORRECTABLE`; `iris9` is excluded from the
+  clean run. Fresh jobs 17949220-17949224 use a separate output root and are
+  restricted to A40/A6000 nodes (`iris5-7`), with task 2 on an A40 and tasks
+  28/29/60/79 on A6000 GPUs. All five passed CUDA/JAX and LIBERO startup; no
+  training OOM has been observed.
+- 2026-10-18: Submitted Sphinx SFT jobs 17949268-17949271 for tasks 2/28/60/79
+  using retained RL checkpoints 285184/260029/235055/410016 respectively. Each
+  job runs collection followed by 500k-step Pi0.5 LoRA SFT, with 20-episode
+  fixed-state evals and both eval/checkpoint cadence at 25k. The retained
+  teachers are legacy 16/8 agents by their saved configs, but
+  `collect_teacher_chunks` validates that relationship and truncates/executes
+  every target with the requested 10-action horizon and 5-action replanning;
+  SFT consumes those 10/5 chunks.
+
+- 2026-10-18: Sphinx SFT jobs 17949268-17949271 failed during collection before
+  any SFT update because the launcher formed the teacher path relative to the
+  project checkout (`/nlp/scr/ronpo/projects/dcrlcheckpoints/...`). The retained
+  RL teachers are under `/nlp/scr/ronpo/dcrlcheckpoints/...`. Corrected the
+  launcher to use the absolute checkpoint root and resubmitted tasks 2/28/60/79
+  as jobs 17949383-17949386; all four are pending Sphinx priority.
+
+- 2026-10-18: The first clean three-phase run exposed a normalization edge case
+  in Task 28 during Pi0.5 initialization distillation. Task-local demo stats
+  had q01=q99=-1 for the gripper dimension, so OpenPI's 1e-6 denominator
+  amplified varying Pi0.5 targets to roughly 1e6 and produced actor losses near
+  1e11. New runs 17949333-17949337 load the shared normalization statistics
+  embedded in the Pi0.5 collection HDF5 files; Task 28's gripper range is
+  approximately 1.9996 and current losses are ordinary (below 2). The prior
+  partial run remains under its original output root for audit.
+## 2026-10-19: RL resume GPU startup failures
+
+- Jobs 17961870 (iris8, task 28), 17961871 (iris7, task 29), and 17961872 (iris7, task 60) reached their allocations but stopped before the batch `nvidia-smi -L` probe printed a GPU. An overlapping `srun` probe on each host timed out and Slurm cancelled the probe step. The jobs were cancelled before training or checkpoint restore began.
+- `resume_small_expo_rl_from_50k.sbatch` now excludes iris7 and iris8 for retries. This is an allocation/GPU startup issue; no learner or checkpoint state was modified.
+
+- 2026-10-19, job 17962200: isolated A6000 probe on normal Iris node iris7 allocated successfully but never reached Python; batch output stopped after the startup line before `nvidia-smi -L`. A bounded in-allocation `nvidia-smi -L` health check hung and the Slurm step was killed. The probe was cancelled. Treat iris7/A6000 as problematic for this run; the four active RL jobs remain on iris6 A40.
+
+### 2026-10-20 agnostic SFT smoke GPU findings
+- Job 17983584 on iris6/A40 completed a real task-29 one-step agnostic SFT smoke: baseline and post-update evals, finite BC metrics, and a full ~15 GB Orbax checkpoint at step 1.
+- Resume jobs 17983971 and 17984015 on iris6/A40 restored the checkpoint but OOMed on the first resumed BC compilation while allocating ~5.37 GiB. Batch size was already 1; this is the full-learner checkpoint-resume memory limit on A40. The second job included the fix that removes eager inference-cache duplication, so the remaining A40 failure is capacity-related.
+- Job 17984055 on generic iris8/A4500 (24.6-GiB GPU) reached checkpoint restore after the resume/cache fixes, then failed OOM during resumed setup while allocating 535 MiB. Fresh one-step training does fit there only because its peak memory is lower; full checkpoint resume requires a larger GPU.
+- Job 17984072 on iris5/A40 (batch size 1, `--mem=32G`) restored the full learner checkpoint and then failed in the first resumed `bc_update` when XLA requested another 5.37 GiB of GPU memory. Slurm recorded 14.8 GiB maximum host RSS, so this was GPU VRAM exhaustion rather than a host-RAM limit. H100 job 17984156 is queued with 128 GiB host RAM; H200 fallback 17984168 is dependency-gated.
+- Job 17984431 on sphinx5/A100-SXM4-80GB completed the resumed agnostic SFT smoke successfully (Slurm exit 0, 12:17 elapsed, 40,466,802 KB peak host RSS). It restored full checkpoint 1, ran step 2 with finite actor loss 0.04714 and grad norm 0.82214, wrote eval step 2, and committed a second full ~15 GB Orbax checkpoint. The stale temporary smoke lock was removed after completion. A100 has enough VRAM for this resume path; A40/A4500 failures above were GPU-capacity failures.
+- H100/H200 fallback smoke jobs 17984156 and 17984168 (plus the Iris H100/H200 racers 17984369/17984370) were canceled after A100 job 17984431 started and completed the same test; no training artifacts were written by the canceled jobs.
+- Task-2 RL resume job 17967834 on `iris-hgx-1` successfully restored the dual-optimizer 50k checkpoint and ran the offline loop, but the first 20-episode evaluation ended in a native Robosuite/MuJoCo abort inside `binding_utils.read_pixels()` during camera rendering. This was a host/rendering failure rather than a checkpoint or learner update error; the other resumed RL jobs evaluated successfully on iris6/A40. Treat `iris-hgx-1` as problematic for this LIBERO rendering path until separately verified.
+- RL launcher rendering fix: `resume_small_expo_rl_from_50k.sbatch` and `train_small_expo_libero_3phase.sbatch` now select OSMesa only when Slurm allocates an `iris-hgx-*` node, while retaining EGL on all other nodes. The HGX exclusions were removed so those nodes can be used with the workaround. No learner or RL update code changed; existing running jobs keep their original environment.
+
+### 2026-10-20 direct official-demo Pi SFT smoke GPU finding
+- Direct baseline smoke jobs 17989835/17989837/17989838/17989839/17989840 ran on separate RTX 4500 GPUs on iris8 with batch size 1 and official LIBERO HDF5 demonstrations. JAX/GPU startup and fixed-state step-0 evaluation succeeded, but Task 79 (17989840) failed at the first Pi0.5 BC update with `RESOURCE_EXHAUSTED` while allocating 5,759,254,776 bytes of GPU memory. RTX 4500 VRAM is insufficient for this direct Pi0.5 update even with LoRA and batch 1; this is a capacity finding, not a data or loss failure. The remaining four jobs were stopped before their first update and will be retried on H100.
+- The direct official-demo loader was checked against all five requested `libero_90` files: each contains 50 demonstrations and produces 224x224 RGB observations, 8D states, and 10x7 action chunks. Row counts are task 2: 6158, task 28: 3712, task 29: 6057, task 60: 6126, and task 79: 6054. Instructions and BDDL metadata match the requested task descriptions.
+
+2026-10-20 direct Pi0.5 RL smoke: generic regular-Iris submissions 17990782, 17990784, 17990786, 17990788, 17990790 all landed on iris8 (RTX 4500 Ada) and initialized JAX/W&B, then failed in Pi05Agent.initialize during JIT train-state creation with Xla RESOURCE_EXHAUSTED trying to allocate 4,831,838,208 bytes. No rollout, eval, checkpoint, or replay data was produced. RTX 4500 is insufficient for this direct Pi0.5 EXPO RL smoke configuration; use A100/H100/H200 instead.
+
+2026-10-20 direct Pi0.5 RL smoke jobs 17991182-17991186: W&B, JAX, official HDF5 loading, Pi0.5 base checkpoint restore, and official LIBERO norm-stat loading all succeeded. Tasks 2/29/79 on Sphinx A100-SXM4-80GB and tasks 28/60 on A100-40GB then failed before rollout in `build_pi05` while creating `target_actor_params`; `Pi05Agent.init_target_params` built a second full Pi0.5 train state and XLA requested an additional 2.25-4.50 GiB after a 49.97 GiB peak. The target should start as a parameter copy of the online actor and be updated by EXPO's actor_tau; local `expo_ft/agents/vla/pi05.py` now uses `actor.get_params(actor_train_state)` to avoid duplicate model/optimizer compilation. No rollout, eval, or checkpoint data was produced by these runs.
+
+2026-10-20 direct Pi0.5 RL smoke retry: the target-parameter copy fix allowed task 2 job 17995283 on Sphinx3 A100-SXM4-80GB to restore Pi0.5, initialize EXPO, load official LIBERO normalization, create the environment, run fixed-state evaluations, execute real 10/5 LIBERO rollouts, and write finite local metrics. A second failure in `record_local_metrics` attempted to cast the evaluation `trials` list to float; the logger now persists numeric scalars only, while full trial details remain in each evaluation JSON. The corrected five-task Sphinx jobs are 17995283-17995287; the original Iris H100 racers for tasks 28/29/60/79 remain queued until each Sphinx counterpart starts. Task 2 has finalized full Orbax checkpoints at steps 16 and 32 and resumed rollout successfully; each full checkpoint is about 35 GB and takes roughly 200 seconds on shared storage.
+
+Task 2 job 17995283 then reached the first EXPO update after ten episodes and exposed a batch-size-one bug in `EXPOLearner.sample_batch_actions`: `jnp.squeeze` removed the leading batch axis from `(1, 224, 224, 6)`, producing an invalid `(8, 5, 7) -> (224, 8, 35)` reshape. `expo_ft/agents/alg/expo_ft.py` now preserves the batch dimension for observations and states. Jobs 17995755-17995759 rerun all five tasks under a new output root so the earlier successful initialization/evaluation/checkpoint artifacts remain intact.
+
+The same sampler also returned `best_actions.squeeze()`, which would have removed the batch axis after candidate selection when `B=1`. It now returns `(B, action_dim)` directly; behavior for `B>=2` is unchanged. Syntax and diff checks pass. Fresh smoke racers 17995768-17995777 use `batch_size=2` and remain pending GPU availability/priority.
+
+The batch-size-two rerun keeps the original EXPO update cadence (`utd_ratio=20`, one episode-triggered update) and official 10-action chunk / 5-action execution. No additional offline phase or learner component was introduced.
+
+The direct trainer resume audit found interval anchors were initialized from the first resumed step. It now evaluates at the next interval boundary and anchors checkpoint cadence to the last saved step, preserving cadence across the smoke-test resume invocation. Python compilation passes.
+
+The first direct racers (17995768-17995777) were canceled while still pending and replaced by generic-GPU racers 17996043-17996052. Sphinx jobs allow `sphinx4-11`; Iris jobs request generic `gpu:1` and exclude only `iris1-4,7,9-10` and `iris-hp-z8`. This intentionally measures lower-VRAM capacity while retaining eligible high-memory nodes; all ten are currently pending priority.
+
+2026-10-20 direct Pi0.5 RL generic-Iris capacity test: jobs 17996048 (task 2), 17996049 (task 28), 17996050 (task 29), 17996051 (task 60), and 17996052 (task 79) all landed on `iris8` RTX 4500 Ada despite generic GPU requests. Each failed during Pi05Agent initialization with the same XLA `RESOURCE_EXHAUSTED` allocation of 4,831,838,208 bytes; no rollout, evaluation, checkpoint, or replay data was produced. The five Sphinx duplicates 17996043-17996047 remain pending and are retained as the viable racers. This confirms that broad generic requests are safe for scheduling but RTX 4500 cannot run direct Pi0.5 EXPO RL; high-memory Sphinx GPUs are still required.
+
+Iris9 is a 48 GiB L40S but prior Pi0.5 collection jobs on it reported both initialization OOM and `CUDA_ERROR_ECC_UNCORRECTABLE`; iris9-10 remain excluded for this direct run. The newly submitted Iris racers 17996154-17996158 retain the original exclusions for Iris1-4, 7-10 and iris-hp-z8; Sphinx racers remain the fallback. At the latest check all ten racers are pending: the Sphinx scheduler estimates task 2 first at 03:15, followed by the other four, while the Iris jobs wait for resources.
+
+The long pending racers were replaced with short end-to-end smoke racers 17996211-17996215 (Sphinx tasks 2/28/29/60/79) and 17996216-17996219, 17996221 (Iris tasks 2/28/29/60/79). The short smoke keeps real official HDF5 data, batch size 2, `utd_ratio=20`, episode-triggered updates, 10-action plans with 5-action execution, evaluations every 16 steps, one full checkpoint at step 80, and a resume from that checkpoint to step 96. Each reservation is 20 minutes; no learner or loss logic changed.
+
+### 2026-10-21 direct Pi0.5 RL production retry: iris7 XLA compiler abort
+- Jobs 18006458 (task 28) and 18006459 (task 29) on iris7/A6000 both reached the first EXPO update and aborted inside XLA GPU compilation with shape_util.cc:1128 Check failed: return_shape->IsTuple(). The compiler reported a 23.8 GiB generated program and could not reduce memory below 23.68 GiB. Both jobs were canceled after crash-handler processes remained active; task29 recorded exit 134.
+- No evaluation or checkpoint was produced by either job. Treat iris7 as problematic for this direct Pi0.5 EXPO configuration and exclude it from retries. The learner/trainer code was not changed.
+
+- 2026-10-21: Pi0.5 LIBERO Sphinx job 18009807 (task 60, Sphinx8) failed at step 5,599/200,001 with JAX `RESOURCE_EXHAUSTED` while allocating ~184 MiB during replay batch image conversion. The other task runs use batch 16; task 60 was requeued as job 18012382 with the same batch 16/UTD 20/15 updates settings, Sphinx8 excluded, and `XLA_PYTHON_CLIENT_PREALLOCATE=false`. The failed artifacts were preserved under `pi_robo_libero_prod_200k_sphinx/task60_oom_18009807`.
+- 2026-10-21: Removed obsolete task-2 smoke output roots and smoke Slurm logs after the H200 end-to-end smoke (job 18012170) completed successfully. Production RL directories and the preserved task-60 Sphinx8 OOM artifacts were not removed.
