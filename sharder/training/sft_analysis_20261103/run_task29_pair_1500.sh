@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ulimit -c 0
+ARM=${1:?use no_replay or demo50}
+case "$ARM" in
+  no_replay)
+    RATIO=0.0
+    OUTPUT=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_task29_replay_ablation_20261103/no_replay_1500
+    RUNTIME=/tmp/rpolonsky-sft-task29-no_replay
+    DEMO_ARGS=()
+    WANDB_NAME=sft_task29_no_replay_zeroB_1500_seed42
+    ;;
+  demo50)
+    RATIO=0.5
+    OUTPUT=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_task29_replay_ablation_20261103/demo50_1500
+    RUNTIME=/tmp/rpolonsky-sft-task29-demo50-pathfix
+    DEMO_ARGS=(--official-demo-root /projects/bgqe/rpolonsky/dcrl/datasets)
+    WANDB_NAME=sft_task29_demo50_zeroB_1500_seed42
+    ;;
+  *) echo "unknown arm: $ARM" >&2; exit 2 ;;
+esac
+PROJECT=/projects/bgqe/rpolonsky/dcrl
+AUDIT=/projects/bgqe/rpolonsky/dcrl/sharder/training/sft_analysis_20261103
+SOURCE=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_29_teacher_375380_success150_sft200k
+BASE=/projects/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero
+export PYTHONPATH="$AUDIT:$PROJECT:$PROJECT/third_party/expo-ft/expo_ft/agents/vla/openpi/src:$PROJECT/third_party/expo-ft/expo_ft/agents/vla/openpi/packages/openpi-client/src:$PROJECT/.deps/LIBERO"
+export LIBERO_CONFIG_PATH="$PROJECT/sharder/training/runtime/libero_config"
+export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
+export XLA_PYTHON_CLIENT_PREALLOCATE=false TOKENIZERS_PARALLELISM=false
+export OPENPI_DATA_HOME=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONUNBUFFERED=1 PYTHONFAULTHANDLER=1
+export JAX_COMPILATION_CACHE_DIR="$RUNTIME/jax_cache" TMPDIR="$RUNTIME/tmp"
+export WANDB_DIR="$OUTPUT/wandb" WANDB_CACHE_DIR="$RUNTIME/wandb-cache" WANDB_DATA_DIR="$RUNTIME/wandb-data"
+mkdir -p "$OUTPUT" "$TMPDIR" "$JAX_COMPILATION_CACHE_DIR" "$WANDB_DIR" "$WANDB_CACHE_DIR" "$WANDB_DATA_DIR"
+if [[ ! -e "$OUTPUT/pi_base_data" ]]; then ln -s "$SOURCE/pi_base_data" "$OUTPUT/pi_base_data"; fi
+set -a
+source /work/hdd/bgqe/rpolonsky/.env
+set +a
+: "${WANDB_API_KEY:?Missing W&B key}"
+cd "$PROJECT"
+exec "$PROJECT/third_party/expo-ft/.venv/bin/python" "$AUDIT/train_sft_retention.py" \
+  --phase train --collection-source small_expo \
+  --teacher-dir /u/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_newgpu/libero_90/task_29 \
+  --teacher-step 375380 --source-checkpoint "$BASE" --student-checkpoint "$BASE" \
+  --norm-stats "$BASE/assets/physical-intelligence/libero/norm_stats.json" \
+  --source-suite libero_90 --source-task-id 29 --output-dir "$OUTPUT" \
+  --collection-episodes 200 --collection-successes 150 --collection-failures 0 \
+  --learner-config audit_sft_config --trainable-scope lora_only --zero-lora-b \
+  --retention-tasks 2 28 29 60 --num-sft-steps 1500 --batch-size 16 --finetune-mode lora \
+  --official-demo-ratio "$RATIO" "${DEMO_ARGS[@]}" \
+  --learning-rate 5e-5 --warmup-steps 10000 --lr-decay-steps 1000000 \
+  --eval-every 500 --eval-episodes 20 --checkpoint-every 500 --seed 42 --eval-seed 7 \
+  --wandb-project dcrl --wandb-entity distill_rl \
+  --wandb-name "$WANDB_NAME" --wandb-mode online --wandb-log-every 10

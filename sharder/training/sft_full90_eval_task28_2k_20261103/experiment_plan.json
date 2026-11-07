@@ -1,0 +1,20 @@
+{
+  "status": "probe_then_full_suite_if_probe_succeeds",
+  "purpose": "Measure the current four-task Task-28 LoRA-only SFT checkpoint on all LIBERO-90 tasks and verify the isolated actor-only evaluator at runtime.",
+  "checkpoint": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/latest_checkpoints/2000",
+  "checkpoint_step": 2000,
+  "checkpoint_contents": "Full latest evaluated learner checkpoint, including optimizer state; evaluation uses only the actor.",
+  "evaluation": {
+    "suite": "libero_90",
+    "mode": "sft_pi",
+    "episodes_per_task": 20,
+    "eval_seed": 7,
+    "seed": 42,
+    "action_horizon": 10,
+    "replan_steps": 5,
+    "shards": 3
+  },
+  "shard_mapping": "task_id modulo 3",
+  "comparison_limit": "Actor-only SFT result. Existing Full EXPO 90-task measurements are deployed-system results unless separately labeled actor-only; do not present them as a matched actor-only causal comparison.",
+  "outputs": "/work/hdd/bgqe/rpolonsky/sharder/training/sft_full90_eval_task28_2k_20261103/results"
+}

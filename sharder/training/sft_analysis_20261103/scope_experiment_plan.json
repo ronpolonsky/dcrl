@@ -1,0 +1,53 @@
+{
+  "training_task": 28,
+  "teacher_step": 275001,
+  "seed": 42,
+  "eval_seed": 7,
+  "steps": 2000,
+  "batch_size": 16,
+  "eval_every": 500,
+  "eval_episodes_per_task": 20,
+  "development_tasks": [
+    2,
+    28,
+    29,
+    60
+  ],
+  "official_demo_ratio": 0,
+  "finetune_mode": "lora",
+  "initialization": "unchanged random A/B; both arms identical, but not exact official-base policy",
+  "baseline_warning": "step-0 retention is paired within the fresh-LoRA initialization and must not be interpreted as exact pi05_libero retention",
+  "required_baseline_controls": [
+    "evaluate official_pi05 through the isolated evaluator with the same eval_seed and initial-state indices",
+    "if adapter-only training is selected, compare a zero-output-initialized adapter or report the random-LoRA initialization as a separate intervention"
+  ],
+  "precision": "original LLM freeze/cast mask preserved in both arms",
+  "varied_factor": "gradient trainability scope only",
+  "arms": {
+    "existing": {
+      "parameters": 466957072,
+      "allocation": "23352795_4",
+      "node": "gpua062",
+      "tmux": "sft_scope_existing_task28"
+    },
+    "lora_only": {
+      "parameters": 49987584,
+      "allocation": "23352795_5",
+      "node": "gpua011",
+      "tmux": "sft_scope_lora_only_task28"
+    }
+  },
+  "checkpoint_policy": "one best development-macro checkpoint plus one latest evaluated full learner, each including optimizer state",
+  "final_evaluation": "full LIBERO-90 remains required; development quartet is not sufficient evidence of a remedy",
+  "git_head": "8caf066e1f032917a5736c28c6fdef63c8d2fda3",
+  "source_sha256": {
+    "/work/hdd/bgqe/rpolonsky/sharder/training/sft_analysis_20261103/train_sft_retention.py": "093c6859637f18c7c3e74894497e59a6eb3180ac3b58d86e4c70c8cc0bd1e49b",
+    "/work/hdd/bgqe/rpolonsky/sharder/training/sft_analysis_20261103/audit_sft_config.py": "7ecd491a3548ee9deebef71daac7aca433abbf1af1516863c74c2dddfe621755",
+    "/work/hdd/bgqe/rpolonsky/sharder/training/sft_analysis_20261103/audit_scope_config.py": "22f2315d046f91cfd4e8e668c3953f2e3b4260f7069f228677402dcfddb78195",
+    "/work/hdd/bgqe/rpolonsky/sharder/training/sft_analysis_20261103/run_scope_arm.sh": "43ba0e6eeff6ca3768e3f16058564c7db9613b04d8c880038890b7d771dce4eb",
+    "/projects/bgqe/rpolonsky/dcrl/dcrl/agents/my_expo_learner.py": "af91be859965fa9a4b1b225f3c6025183ea37a7379acbfeb646bb0015eb5b92f",
+    "/projects/bgqe/rpolonsky/dcrl/dcrl/expo/agents/vla/pi05.py": "1a532cf68ad6eda1ada0553c55a7ed36555664adf14d9621a8543d1c28a0309e",
+    "/projects/bgqe/rpolonsky/dcrl/dcrl/bc_distill_data.py": "1a03d2f6096d1f4a5b911c0fcbdddd2e8ae6b5124cff5dbca48426a55b73debe",
+    "/projects/bgqe/rpolonsky/dcrl/dcrl/libero_env.py": "bca8c9166df0ce6698dad25da3b4f0092af54b7e2b4ff7120a7716ab0a59d6f6"
+  }
+}

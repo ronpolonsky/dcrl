@@ -1,0 +1,2285 @@
+{
+  "task_02_teacher_375398_success150_sft200k": {
+    "config": {
+      "collection_source": "small_expo",
+      "teacher_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_work/libero_90/task_02",
+      "teacher_step": 375398,
+      "source_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "norm_stats": "gs://openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+      "source_suite": "libero_90",
+      "source_task_id": 2,
+      "collection_successes": 150,
+      "collection_failures": 0,
+      "collection_episodes": 200,
+      "collection_max_attempts": null,
+      "include_failures": false,
+      "output_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_02_teacher_375398_success150_sft200k",
+      "student_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "learner_config": "configs.sft.my_expo_libero",
+      "action_horizon": 10,
+      "replan_steps": 5,
+      "image_size": 224,
+      "batch_size": 16,
+      "learning_rate": 5e-05,
+      "warmup_steps": 10000,
+      "lr_decay_steps": 1000000,
+      "finetune_mode": "lora",
+      "eval_every": 20000,
+      "eval_episodes": 20,
+      "checkpoint_every": 20000,
+      "seed": 42,
+      "eval_seed": 7,
+      "wandb_project": "dcrl",
+      "wandb_entity": "distill_rl",
+      "wandb_name": "sft_agnostic_small_expo_libero90_task02_teacher375398_lora_200k_seed42",
+      "wandb_mode": "online",
+      "wandb_log_every": 10,
+      "collection": {
+        "checkpoint_step": 375398,
+        "episodes": 200,
+        "format_version": 2,
+        "max_attempts": 600,
+        "norm_sha256": "b7a151900cfcbc229ddd4867153c112d06a6f5d5a98f83ca9300606a2068ed1c",
+        "seed": 7,
+        "target_action_horizon": 10,
+        "target_failures": 0,
+        "target_replan_steps": 5,
+        "target_successes": 150,
+        "teacher_config": {
+          "action_horizon": 10,
+          "batch_size": 32,
+          "demos_root": "/u/rpolonsky/libero_demos",
+          "distill_data_path": null,
+          "distill_data_root": "/u/rpolonsky/dcrlcheckpoints/pi_base_data/fixed125",
+          "distill_success_only": false,
+          "eval_episodes": 20,
+          "eval_seed": 7,
+          "image_size": 224,
+          "init_distill_steps": 0,
+          "max_episode_steps": null,
+          "num_batch": 1,
+          "num_demos": 0,
+          "num_updates": 3,
+          "offline_ratio": 0.5,
+          "offline_rl_checkpoint_interval": 25000,
+          "offline_rl_eval_interval": 25000,
+          "offline_rl_steps": 50000,
+          "online_rl_checkpot_interval": 25000,
+          "online_rl_eval_interval": 25000,
+          "online_rl_steps": 500000,
+          "pi_distill_chckpt_interval": 50000,
+          "pi_distill_eval_interval": 50000,
+          "replan_steps": 5,
+          "replay_capacity": 10000,
+          "seed": 42,
+          "suite": "libero_90",
+          "task_id": 2,
+          "update_type": "episode",
+          "utd_ratio": 20,
+          "warmup_episodes": 10
+        },
+        "teacher_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_work/libero_90/task_02"
+      },
+      "loss": "full_chunk_flow_matching",
+      "student_action_horizon": 10,
+      "student_replan_steps": 5,
+      "official_pi05_libero": true
+    },
+    "source": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_02_teacher_375398_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+    "instruction": "put the black bowl in the top drawer of the cabinet",
+    "image_shapes": {
+      "base_0_rgb": [
+        11,
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        11,
+        224,
+        224,
+        3
+      ]
+    },
+    "image_dtypes": {
+      "base_0_rgb": "uint8",
+      "left_wrist_0_rgb": "uint8"
+    },
+    "episodes": 150,
+    "chunks": 1727,
+    "unique_initial_states": 49,
+    "rows_per_episode": {
+      "min": 10,
+      "median": 11.0,
+      "max": 37
+    },
+    "action_shape": [
+      1727,
+      10,
+      7
+    ],
+    "all_finite": true,
+    "action_quantiles": [
+      [
+        -0.5457431077957153,
+        -2.31136155128479,
+        -3.228013038635254,
+        -0.22278478741645813,
+        -0.16498692333698273,
+        -0.2416898012161255,
+        -1.9616010189056396
+      ],
+      [
+        -0.2791272485256195,
+        -1.8292607748508454,
+        -2.301510999202728,
+        -0.16758495762944223,
+        -0.10596024587750436,
+        -0.08829019106924534,
+        -1.2594061076641083
+      ],
+      [
+        0.271039217710495,
+        -0.0702933706343174,
+        -0.038477787747979164,
+        -0.051374856382608414,
+        0.004785001277923584,
+        -0.020407368429005146,
+        0.8261395692825317
+      ],
+      [
+        0.9357753348350526,
+        0.6086101168394095,
+        1.5964705848693854,
+        0.21404140740633013,
+        0.11271129980683373,
+        0.08221727699041372,
+        1.3591517269611368
+      ],
+      [
+        1.2091985940933228,
+        0.9862034320831299,
+        1.931904911994934,
+        0.2663648724555969,
+        0.1926468461751938,
+        0.1465795338153839,
+        1.7642321586608887
+      ]
+    ],
+    "normalized_outside_unit_per_dim": [
+      0.009785755645628258,
+      0.24337000579038795,
+      0.5914881297046902,
+      0.2676317313259988,
+      0.00028951939779965256,
+      0.0004632310364794441,
+      0.32119281991893456
+    ],
+    "prefix_outside_unit_per_dim": [
+      0.008338158656629993,
+      0.20718008106543137,
+      0.6047481181239143,
+      0.26160972785176606,
+      0.00023161551823972206,
+      0.0004632310364794441,
+      0.3455703532136653
+    ],
+    "tail_outside_unit_per_dim": [
+      0.01123335263462652,
+      0.2795599305153445,
+      0.5782281412854662,
+      0.27365373480023164,
+      0.0003474232773595831,
+      0.0004632310364794441,
+      0.2968152866242038
+    ],
+    "executed_prefix_counts": {
+      "1": 6,
+      "2": 12,
+      "3": 53,
+      "4": 52,
+      "5": 1604
+    },
+    "state_quantiles": [
+      [
+        -0.21893608570098877,
+        -0.17401714622974396,
+        0.9159324169158936,
+        2.2501068115234375,
+        -1.3669114112854004,
+        -0.49573686718940735,
+        0.00023461799719370902,
+        -0.04014206305146217
+      ],
+      [
+        -0.136811763048172,
+        0.03741326183080673,
+        1.0582081079483032,
+        2.8484365940093994,
+        0.04994816705584526,
+        -0.04826429858803749,
+        0.007683484815061092,
+        -0.01134841050952673
+      ],
+      [
+        0.16597841680049896,
+        0.08233693987131119,
+        1.2434353828430176,
+        3.1553826332092285,
+        0.1923408955335617,
+        0.4297425150871277,
+        0.04018375277519226,
+        0.00047681466094218194
+      ]
+    ],
+    "norm_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "last_metrics": {
+      "step": 26170,
+      "actor_grad_norm": 0.12850040197372437,
+      "actor_loss": 0.011914375238120556,
+      "actor_lr": 4.999999873689376e-05,
+      "actor_param_norm": 1838.078369140625,
+      "actor_state_step": 26169.0
+    },
+    "loss_median_by_1k": {
+      "0": 0.09566845744848251,
+      "1000": 0.03455163538455963,
+      "2000": 0.02724560908973217,
+      "3000": 0.02592213824391365,
+      "4000": 0.024470129981637,
+      "5000": 0.02207727637141943,
+      "6000": 0.0232514888048172,
+      "7000": 0.02146609779447317,
+      "8000": 0.020422030240297318,
+      "9000": 0.019337261095643044,
+      "10000": 0.018219520337879658,
+      "11000": 0.016713335178792477,
+      "12000": 0.015118423849344254,
+      "13000": 0.013636121992021799,
+      "14000": 0.012938527390360832,
+      "15000": 0.011425499338656664,
+      "16000": 0.01045369915664196,
+      "17000": 0.009031056426465511,
+      "18000": 0.008271120954304934,
+      "19000": 0.008499206975102425,
+      "20000": 0.007505868095904589,
+      "21000": 0.0072738251183182,
+      "22000": 0.00691781984642148,
+      "23000": 0.006730507127940655,
+      "24000": 0.006489597028121352,
+      "25000": 0.006320802494883537,
+      "26000": 0.006326908711344004
+    },
+    "sample_exposure_at_last_step": 242.45512449334106,
+    "sample_exposure_at_5k": 46.323103647944414,
+    "evals": [
+      {
+        "step": 0,
+        "eval/success_rate": 0.55,
+        "eval/mean_steps": 325.5,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 222
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 91
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 377
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 300
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 289
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 155
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 346
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 237
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 248
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 335
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 310
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": false,
+            "steps": 400
+          }
+        ]
+      },
+      {
+        "step": 20000,
+        "eval/success_rate": 1.0,
+        "eval/mean_steps": 53.1,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 56
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 52
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 51
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 54
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 51
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 51
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 53
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": true,
+            "steps": 53
+          }
+        ]
+      }
+    ]
+  },
+  "task_28_teacher_275001_success150_sft200k": {
+    "config": {
+      "collection_source": "small_expo",
+      "teacher_dir": "/u/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_newgpu/libero_90/task_28",
+      "teacher_step": 275001,
+      "source_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "norm_stats": "gs://openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+      "source_suite": "libero_90",
+      "source_task_id": 28,
+      "collection_successes": 150,
+      "collection_failures": 0,
+      "collection_episodes": 200,
+      "collection_max_attempts": null,
+      "include_failures": false,
+      "output_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_28_teacher_275001_success150_sft200k",
+      "student_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "learner_config": "configs.sft.my_expo_libero",
+      "action_horizon": 10,
+      "replan_steps": 5,
+      "image_size": 224,
+      "batch_size": 16,
+      "learning_rate": 5e-05,
+      "warmup_steps": 10000,
+      "lr_decay_steps": 1000000,
+      "finetune_mode": "lora",
+      "eval_every": 20000,
+      "eval_episodes": 20,
+      "checkpoint_every": 20000,
+      "seed": 42,
+      "eval_seed": 7,
+      "wandb_project": "dcrl",
+      "wandb_entity": "distill_rl",
+      "wandb_name": "sft_agnostic_small_expo_libero90_task28_teacher275001_lora_200k_seed42",
+      "wandb_mode": "online",
+      "wandb_log_every": 10,
+      "collection": {
+        "checkpoint_step": 275001,
+        "episodes": 200,
+        "format_version": 2,
+        "max_attempts": 600,
+        "norm_sha256": "417752397dab9377b0af59be917a0c2f7c5ddd5dd0c3251dbd7469b86d8e46fa",
+        "seed": 7,
+        "target_action_horizon": 10,
+        "target_failures": 0,
+        "target_replan_steps": 5,
+        "target_successes": 150,
+        "teacher_config": {
+          "action_horizon": 10,
+          "batch_size": 32,
+          "demos_root": "/u/rpolonsky/libero_demos",
+          "distill_data_path": null,
+          "distill_data_root": "/u/rpolonsky/dcrlcheckpoints/pi_base_data/fixed125",
+          "distill_success_only": false,
+          "eval_episodes": 20,
+          "eval_seed": 7,
+          "image_size": 224,
+          "init_distill_steps": 0,
+          "max_episode_steps": null,
+          "num_batch": 1,
+          "num_demos": 0,
+          "num_updates": 3,
+          "offline_ratio": 0.5,
+          "offline_rl_checkpoint_interval": 25000,
+          "offline_rl_eval_interval": 25000,
+          "offline_rl_steps": 50000,
+          "online_rl_checkpot_interval": 25000,
+          "online_rl_eval_interval": 25000,
+          "online_rl_steps": 500000,
+          "pi_distill_chckpt_interval": 50000,
+          "pi_distill_eval_interval": 50000,
+          "replan_steps": 5,
+          "replay_capacity": 10000,
+          "seed": 42,
+          "suite": "libero_90",
+          "task_id": 28,
+          "update_type": "episode",
+          "utd_ratio": 20,
+          "warmup_episodes": 10
+        },
+        "teacher_dir": "/u/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_newgpu/libero_90/task_28"
+      },
+      "loss": "full_chunk_flow_matching",
+      "student_action_horizon": 10,
+      "student_replan_steps": 5,
+      "official_pi05_libero": true
+    },
+    "source": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_28_teacher_275001_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+    "instruction": "close the top drawer of the cabinet",
+    "image_shapes": {
+      "base_0_rgb": [
+        5,
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        5,
+        224,
+        224,
+        3
+      ]
+    },
+    "image_dtypes": {
+      "base_0_rgb": "uint8",
+      "left_wrist_0_rgb": "uint8"
+    },
+    "episodes": 150,
+    "chunks": 760,
+    "unique_initial_states": 50,
+    "rows_per_episode": {
+      "min": 5,
+      "median": 5.0,
+      "max": 6
+    },
+    "action_shape": [
+      760,
+      10,
+      7
+    ],
+    "all_finite": true,
+    "action_quantiles": [
+      [
+        -0.018077293410897255,
+        -1.0193008184432983,
+        -0.9635835289955139,
+        -0.08153903484344482,
+        -0.09628709405660629,
+        -0.0637112557888031,
+        -1.000000238418579
+      ],
+      [
+        0.14308401316404343,
+        -0.6590072792768479,
+        -0.8267317241430283,
+        -0.04731471501290798,
+        -0.04935522921383381,
+        -0.013359367866069078,
+        -1.0000001192092896
+      ],
+      [
+        0.47466975450515747,
+        1.1273077130317688,
+        -0.22979791462421417,
+        -0.0007678629190195352,
+        0.0017268542433157563,
+        0.019066454842686653,
+        -0.9999999403953552
+      ],
+      [
+        1.3909942269325262,
+        1.5304987549781803,
+        -0.04564154952764508,
+        0.03921208620071415,
+        0.04893000505864622,
+        0.04908092044293881,
+        -0.9999997615814209
+      ],
+      [
+        1.627748966217041,
+        1.7176679372787476,
+        0.047707267105579376,
+        0.0969465970993042,
+        0.0723554864525795,
+        0.11543552577495575,
+        -0.9999996423721313
+      ]
+    ],
+    "normalized_outside_unit_per_dim": [
+      0.25026315789473685,
+      0.6764473684210527,
+      0.0002631578947368421,
+      0.0,
+      0.0,
+      0.0,
+      0.05144736842105263
+    ],
+    "prefix_outside_unit_per_dim": [
+      0.34842105263157896,
+      0.5857894736842105,
+      0.0005263157894736842,
+      0.0,
+      0.0,
+      0.0,
+      0.06894736842105263
+    ],
+    "tail_outside_unit_per_dim": [
+      0.15210526315789474,
+      0.7671052631578947,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.03394736842105263
+    ],
+    "executed_prefix_counts": {
+      "1": 6,
+      "2": 1,
+      "3": 4,
+      "4": 57,
+      "5": 692
+    },
+    "state_quantiles": [
+      [
+        -0.22463159263134003,
+        -0.04565431550145149,
+        1.0472612380981445,
+        2.9921059608459473,
+        -0.012338574975728989,
+        -0.9490912556648254,
+        0.03871997445821762,
+        -0.04085148498415947
+      ],
+      [
+        -0.10198955237865448,
+        -0.0034180330112576485,
+        1.0859114527702332,
+        3.1302168369293213,
+        0.034203896299004555,
+        -0.016536051407456398,
+        0.039223501458764076,
+        -0.03931945562362671
+      ],
+      [
+        -0.011725876480340958,
+        0.12516452372074127,
+        1.200341820716858,
+        3.159335136413574,
+        0.5557704567909241,
+        0.08004192262887955,
+        0.039707284420728683,
+        -0.03872009739279747
+      ]
+    ],
+    "norm_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "last_metrics": {
+      "step": 41330,
+      "actor_grad_norm": 0.06083633005619049,
+      "actor_loss": 0.0029430710710585117,
+      "actor_lr": 4.999999873689376e-05,
+      "actor_param_norm": 1840.878173828125,
+      "actor_state_step": 41329.0
+    },
+    "loss_median_by_1k": {
+      "0": 0.03179614618420601,
+      "1000": 0.012471470981836319,
+      "2000": 0.009736763313412666,
+      "3000": 0.009364294819533825,
+      "4000": 0.00840013287961483,
+      "5000": 0.007135022431612015,
+      "6000": 0.00788511149585247,
+      "7000": 0.006686715874820948,
+      "8000": 0.006343468325212598,
+      "9000": 0.005451183766126633,
+      "10000": 0.005460837623104453,
+      "11000": 0.004509607562795281,
+      "12000": 0.003871862660162151,
+      "13000": 0.0035930187441408634,
+      "14000": 0.0035172324860468507,
+      "15000": 0.0028435110580176115,
+      "16000": 0.0027641759952530265,
+      "17000": 0.0022718346444889903,
+      "18000": 0.0021394804352894425,
+      "19000": 0.002304673660546541,
+      "20000": 0.0019373681861907244,
+      "21000": 0.0018452529329806566,
+      "22000": 0.0018519097939133644,
+      "23000": 0.0018044132739305496,
+      "24000": 0.0017189868376590312,
+      "25000": 0.0017681003082543612,
+      "26000": 0.0015435853856615722,
+      "27000": 0.0014601716538891196,
+      "28000": 0.001476115605328232,
+      "29000": 0.0015286331763491035,
+      "30000": 0.0014007481513544917,
+      "31000": 0.0013126525445841253,
+      "32000": 0.0012387458700686693,
+      "33000": 0.0011877898359671235,
+      "34000": 0.0011390111758373678,
+      "35000": 0.0011024284758605063,
+      "36000": 0.0012349839671514928,
+      "37000": 0.0011565705062821507,
+      "38000": 0.0010188359883613884,
+      "39000": 0.0010815354762598872,
+      "40000": 0.0010762297897599638,
+      "41000": 0.0010897577740252018
+    },
+    "sample_exposure_at_last_step": 870.1052631578947,
+    "sample_exposure_at_5k": 105.26315789473684,
+    "evals": [
+      {
+        "step": 0,
+        "eval/success_rate": 0.45,
+        "eval/mean_steps": 327.4,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 211
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 209
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 374
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 261
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 156
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 299
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 62
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 374
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 202
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": false,
+            "steps": 400
+          }
+        ]
+      },
+      {
+        "step": 20000,
+        "eval/success_rate": 1.0,
+        "eval/mean_steps": 24.7,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 26
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": true,
+            "steps": 25
+          }
+        ]
+      },
+      {
+        "step": 40000,
+        "eval/success_rate": 1.0,
+        "eval/mean_steps": 24.45,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 25
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 24
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": true,
+            "steps": 25
+          }
+        ]
+      }
+    ]
+  },
+  "task_29_teacher_375380_success150_sft200k": {
+    "config": {
+      "collection_source": "small_expo",
+      "teacher_dir": "/u/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_newgpu/libero_90/task_29",
+      "teacher_step": 375380,
+      "source_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "norm_stats": "gs://openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+      "source_suite": "libero_90",
+      "source_task_id": 29,
+      "collection_successes": 150,
+      "collection_failures": 0,
+      "collection_episodes": 200,
+      "collection_max_attempts": null,
+      "include_failures": false,
+      "output_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_29_teacher_375380_success150_sft200k",
+      "student_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "learner_config": "configs.sft.my_expo_libero",
+      "action_horizon": 10,
+      "replan_steps": 5,
+      "image_size": 224,
+      "batch_size": 16,
+      "learning_rate": 5e-05,
+      "warmup_steps": 10000,
+      "lr_decay_steps": 1000000,
+      "finetune_mode": "lora",
+      "eval_every": 20000,
+      "eval_episodes": 20,
+      "checkpoint_every": 20000,
+      "seed": 42,
+      "eval_seed": 7,
+      "wandb_project": "dcrl",
+      "wandb_entity": "distill_rl",
+      "wandb_name": "sft_agnostic_small_expo_libero90_task29_teacher375380_lora_200k_seed42",
+      "wandb_mode": "online",
+      "wandb_log_every": 10,
+      "collection": {
+        "checkpoint_step": 375380,
+        "episodes": 200,
+        "format_version": 2,
+        "max_attempts": 600,
+        "norm_sha256": "96f2a9cc0be32b67373244b6ca38776dd8391a0413b2eb71b60fe4f6531fcbd6",
+        "seed": 7,
+        "target_action_horizon": 10,
+        "target_failures": 0,
+        "target_replan_steps": 5,
+        "target_successes": 150,
+        "teacher_config": {
+          "action_horizon": 10,
+          "batch_size": 32,
+          "demos_root": "/u/rpolonsky/libero_demos",
+          "distill_data_path": null,
+          "distill_data_root": "/u/rpolonsky/dcrlcheckpoints/pi_base_data/fixed125",
+          "distill_success_only": false,
+          "eval_episodes": 20,
+          "eval_seed": 7,
+          "image_size": 224,
+          "init_distill_steps": 0,
+          "max_episode_steps": null,
+          "num_batch": 1,
+          "num_demos": 0,
+          "num_updates": 3,
+          "offline_ratio": 0.5,
+          "offline_rl_checkpoint_interval": 25000,
+          "offline_rl_eval_interval": 25000,
+          "offline_rl_steps": 50000,
+          "online_rl_checkpot_interval": 25000,
+          "online_rl_eval_interval": 25000,
+          "online_rl_steps": 500000,
+          "pi_distill_chckpt_interval": 50000,
+          "pi_distill_eval_interval": 50000,
+          "replan_steps": 5,
+          "replay_capacity": 10000,
+          "seed": 42,
+          "suite": "libero_90",
+          "task_id": 29,
+          "update_type": "episode",
+          "utd_ratio": 20,
+          "warmup_episodes": 10
+        },
+        "teacher_dir": "/u/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_newgpu/libero_90/task_29"
+      },
+      "loss": "full_chunk_flow_matching",
+      "student_action_horizon": 10,
+      "student_replan_steps": 5,
+      "official_pi05_libero": true
+    },
+    "source": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_29_teacher_375380_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+    "instruction": "put the black bowl in the top drawer of the cabinet",
+    "image_shapes": {
+      "base_0_rgb": [
+        14,
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        14,
+        224,
+        224,
+        3
+      ]
+    },
+    "image_dtypes": {
+      "base_0_rgb": "uint8",
+      "left_wrist_0_rgb": "uint8"
+    },
+    "episodes": 150,
+    "chunks": 2150,
+    "unique_initial_states": 50,
+    "rows_per_episode": {
+      "min": 13,
+      "median": 14.0,
+      "max": 24
+    },
+    "action_shape": [
+      2150,
+      10,
+      7
+    ],
+    "all_finite": true,
+    "action_quantiles": [
+      [
+        -1.2215417623519897,
+        -1.137886881828308,
+        -1.5254755020141602,
+        -0.16127373278141022,
+        -0.2538190484046936,
+        -0.1427358090877533,
+        -1.7355889081954956
+      ],
+      [
+        -0.9527484035491943,
+        -0.6628655588626862,
+        -1.1568339920043946,
+        -0.10460456013679505,
+        -0.1552554850280285,
+        -0.10541678808629512,
+        -1.1888153553009033
+      ],
+      [
+        0.2501955181360245,
+        0.10630742833018303,
+        -0.17591112852096558,
+        0.007385871140286326,
+        0.050243914127349854,
+        -0.009483969304710627,
+        0.8038139939308167
+      ],
+      [
+        1.2072405600547786,
+        1.082274794578552,
+        1.2872537767887113,
+        0.13619685634970657,
+        0.13869312450289717,
+        0.06885897383093813,
+        1.260365768671035
+      ],
+      [
+        1.5277049541473389,
+        1.3505719900131226,
+        1.5666238069534302,
+        0.19231025874614716,
+        0.20769444108009338,
+        0.10253003239631653,
+        1.7257298231124878
+      ]
+    ],
+    "normalized_outside_unit_per_dim": [
+      0.17627906976744187,
+      0.09906976744186047,
+      0.23916279069767443,
+      0.011255813953488372,
+      0.004325581395348837,
+      0.0,
+      0.2724651162790698
+    ],
+    "prefix_outside_unit_per_dim": [
+      0.17246511627906977,
+      0.10167441860465116,
+      0.24325581395348836,
+      0.015255813953488372,
+      0.007069767441860465,
+      0.0,
+      0.29237209302325584
+    ],
+    "tail_outside_unit_per_dim": [
+      0.18009302325581394,
+      0.09646511627906977,
+      0.23506976744186048,
+      0.007255813953488372,
+      0.0015813953488372093,
+      0.0,
+      0.2525581395348837
+    ],
+    "executed_prefix_counts": {
+      "1": 24,
+      "2": 34,
+      "3": 33,
+      "4": 34,
+      "5": 2025
+    },
+    "state_quantiles": [
+      [
+        -0.2229725867509842,
+        -0.12677830457687378,
+        0.9181711077690125,
+        3.1314048767089844,
+        -0.6654276847839355,
+        -0.41618648171424866,
+        0.0012197279138490558,
+        -0.03975638747215271
+      ],
+      [
+        0.019228074699640274,
+        -0.07617014274001122,
+        1.0855570435523987,
+        3.298854112625122,
+        -0.308325856924057,
+        0.2060769721865654,
+        0.01613533776253462,
+        -0.015521100256592035
+      ],
+      [
+        0.10827924311161041,
+        0.12040455639362335,
+        1.242806315422058,
+        3.5095736980438232,
+        0.010785136371850967,
+        0.5284460186958313,
+        0.04056040942668915,
+        -0.0004674636584240943
+      ]
+    ],
+    "norm_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "last_metrics": {
+      "step": 38439,
+      "actor_grad_norm": 0.03943104296922684,
+      "actor_loss": 0.003061037277802825,
+      "actor_lr": 4.999999873689376e-05,
+      "actor_param_norm": 1840.8466796875,
+      "actor_state_step": 38438.0
+    },
+    "loss_median_by_1k": {
+      "0": 0.060669708997011185,
+      "1000": 0.027329121716320515,
+      "2000": 0.022265861742198467,
+      "3000": 0.021344135515391827,
+      "4000": 0.020318991504609585,
+      "5000": 0.018739642575383186,
+      "6000": 0.01948309689760208,
+      "7000": 0.018431630916893482,
+      "8000": 0.017575913108885288,
+      "9000": 0.017051816917955875,
+      "10000": 0.01665674429386854,
+      "11000": 0.014935333747416735,
+      "12000": 0.014220711775124073,
+      "13000": 0.01372003136202693,
+      "14000": 0.013271919917315245,
+      "15000": 0.011983077973127365,
+      "16000": 0.011285428423434496,
+      "17000": 0.009744707029312849,
+      "18000": 0.009231094270944595,
+      "19000": 0.009176860097795725,
+      "20000": 0.008285388350486755,
+      "21000": 0.0075675067491829395,
+      "22000": 0.007306361338123679,
+      "23000": 0.007342326920479536,
+      "24000": 0.006905677262693644,
+      "25000": 0.006717087002471089,
+      "26000": 0.0060967744793742895,
+      "27000": 0.005602369317784905,
+      "28000": 0.005636916728690267,
+      "29000": 0.005740686785429716,
+      "30000": 0.005209891591221094,
+      "31000": 0.005232316674664617,
+      "32000": 0.004786750767379999,
+      "33000": 0.004674775525927544,
+      "34000": 0.0043432870879769325,
+      "35000": 0.004316159524023533,
+      "36000": 0.004588446347042918,
+      "37000": 0.0044553750194609165,
+      "38000": 0.004070857539772987
+    },
+    "sample_exposure_at_last_step": 286.0576744186047,
+    "sample_exposure_at_5k": 37.2093023255814,
+    "evals": [
+      {
+        "step": 0,
+        "eval/success_rate": 0.75,
+        "eval/mean_steps": 213.1,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 157
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 129
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 134
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 312
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 203
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 134
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 115
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 122
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 214
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 128
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 115
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 121
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 126
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 125
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": true,
+            "steps": 127
+          }
+        ]
+      },
+      {
+        "step": 20000,
+        "eval/success_rate": 1.0,
+        "eval/mean_steps": 68.1,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 69
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 71
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 68
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 68
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": true,
+            "steps": 65
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 68
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 66
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 68
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 71
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 74
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 68
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": true,
+            "steps": 70
+          }
+        ]
+      }
+    ]
+  },
+  "task_60_teacher_450223_success150_sft200k": {
+    "config": {
+      "collection_source": "small_expo",
+      "teacher_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_work/libero_90/task_60",
+      "teacher_step": 450223,
+      "source_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "norm_stats": "gs://openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+      "source_suite": "libero_90",
+      "source_task_id": 60,
+      "collection_successes": 150,
+      "collection_failures": 0,
+      "collection_episodes": 200,
+      "collection_max_attempts": null,
+      "include_failures": false,
+      "output_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_60_teacher_450223_success150_sft200k",
+      "student_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+      "learner_config": "configs.sft.my_expo_libero",
+      "action_horizon": 10,
+      "replan_steps": 5,
+      "image_size": 224,
+      "batch_size": 16,
+      "learning_rate": 5e-05,
+      "warmup_steps": 10000,
+      "lr_decay_steps": 1000000,
+      "finetune_mode": "lora",
+      "eval_every": 20000,
+      "eval_episodes": 20,
+      "checkpoint_every": 20000,
+      "seed": 42,
+      "eval_seed": 7,
+      "wandb_project": "dcrl",
+      "wandb_entity": "distill_rl",
+      "wandb_name": "sft_agnostic_small_expo_libero90_task60_teacher450223_lora_200k_seed42",
+      "wandb_mode": "online",
+      "wandb_log_every": 10,
+      "collection": {
+        "checkpoint_step": 450223,
+        "episodes": 200,
+        "format_version": 2,
+        "max_attempts": 600,
+        "norm_sha256": "01301c8112a329d9deb31d7432bd5a646d1029e931f8a116e9e21943f21c0322",
+        "seed": 7,
+        "target_action_horizon": 10,
+        "target_failures": 0,
+        "target_replan_steps": 5,
+        "target_successes": 150,
+        "teacher_config": {
+          "action_horizon": 10,
+          "batch_size": 32,
+          "demos_root": "/u/rpolonsky/libero_demos",
+          "distill_data_path": null,
+          "distill_data_root": "/u/rpolonsky/dcrlcheckpoints/pi_base_data/fixed125",
+          "distill_success_only": false,
+          "eval_episodes": 20,
+          "eval_seed": 7,
+          "image_size": 224,
+          "init_distill_steps": 0,
+          "max_episode_steps": null,
+          "num_batch": 1,
+          "num_demos": 0,
+          "num_updates": 3,
+          "offline_ratio": 0.5,
+          "offline_rl_checkpoint_interval": 25000,
+          "offline_rl_eval_interval": 25000,
+          "offline_rl_steps": 50000,
+          "online_rl_checkpot_interval": 25000,
+          "online_rl_eval_interval": 25000,
+          "online_rl_steps": 500000,
+          "pi_distill_chckpt_interval": 50000,
+          "pi_distill_eval_interval": 50000,
+          "replan_steps": 5,
+          "replay_capacity": 10000,
+          "seed": 42,
+          "suite": "libero_90",
+          "task_id": 60,
+          "update_type": "episode",
+          "utd_ratio": 20,
+          "warmup_episodes": 10
+        },
+        "teacher_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_rl_10_5_offline50k_online500k_resume_work/libero_90/task_60"
+      },
+      "loss": "full_chunk_flow_matching",
+      "student_action_horizon": 10,
+      "student_replan_steps": 5,
+      "official_pi05_libero": true
+    },
+    "source": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_60_teacher_450223_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+    "instruction": "pick up the black bowl on the left and put it in the tray",
+    "image_shapes": {
+      "base_0_rgb": [
+        13,
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        13,
+        224,
+        224,
+        3
+      ]
+    },
+    "image_dtypes": {
+      "base_0_rgb": "uint8",
+      "left_wrist_0_rgb": "uint8"
+    },
+    "episodes": 150,
+    "chunks": 2226,
+    "unique_initial_states": 48,
+    "rows_per_episode": {
+      "min": 12,
+      "median": 14.0,
+      "max": 41
+    },
+    "action_shape": [
+      2226,
+      10,
+      7
+    ],
+    "all_finite": true,
+    "action_quantiles": [
+      [
+        -0.7424041628837585,
+        -1.6234391927719116,
+        -1.4455901384353638,
+        -0.1515163630247116,
+        -0.14220939576625824,
+        -0.12154200673103333,
+        -1.669674277305603
+      ],
+      [
+        -0.44419330030679705,
+        -1.1462479877471923,
+        -1.068503497838974,
+        -0.08264834307134152,
+        -0.0823538500070572,
+        -0.07624027699232101,
+        -1.2709211277961732
+      ],
+      [
+        0.10273418948054314,
+        0.3297872841358185,
+        -0.18016789853572845,
+        -0.007899879943579435,
+        0.009359023999422789,
+        -0.022057686001062393,
+        0.8385950922966003
+      ],
+      [
+        0.4529513144493103,
+        1.3088368582725525,
+        0.7730669540166853,
+        0.11758020415902136,
+        0.13254757046699522,
+        0.03562971405684947,
+        1.3158943307399749
+      ],
+      [
+        0.6125279664993286,
+        1.561963438987732,
+        1.1767542362213135,
+        0.16853421926498413,
+        0.20981182157993317,
+        0.07868614047765732,
+        1.7379224300384521
+      ]
+    ],
+    "normalized_outside_unit_per_dim": [
+      0.0,
+      0.40350404312668464,
+      0.03391734052111411,
+      0.0013027852650494159,
+      0.0011230907457322552,
+      0.0,
+      0.4541329739442947
+    ],
+    "prefix_outside_unit_per_dim": [
+      0.0,
+      0.4122192273135669,
+      0.03827493261455526,
+      0.0018867924528301887,
+      0.0009883198562443845,
+      0.0,
+      0.45309973045822105
+    ],
+    "tail_outside_unit_per_dim": [
+      0.0,
+      0.3947888589398023,
+      0.029559748427672956,
+      0.0007187780772686433,
+      0.0012578616352201257,
+      0.0,
+      0.4551662174303684
+    ],
+    "executed_prefix_counts": {
+      "1": 35,
+      "2": 25,
+      "3": 27,
+      "4": 35,
+      "5": 2104
+    },
+    "state_quantiles": [
+      [
+        -0.1407584398984909,
+        -0.2198796570301056,
+        0.45636358857154846,
+        2.676048994064331,
+        -1.9980854988098145,
+        -1.3587818145751953,
+        0.0013017536839470267,
+        -0.04031019285321236
+      ],
+      [
+        -0.07406863942742348,
+        -0.105893824249506,
+        0.5573026537895203,
+        3.266333222389221,
+        -0.10794024541974068,
+        -0.20814014226198196,
+        0.0333106592297554,
+        -0.03341737575829029
+      ],
+      [
+        0.007694706786423922,
+        0.7283832430839539,
+        0.6995266079902649,
+        3.3880503177642822,
+        0.04888579621911049,
+        -0.050796203315258026,
+        0.04054676741361618,
+        0.0013264775043353438
+      ]
+    ],
+    "norm_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+    "last_metrics": {
+      "step": 35112,
+      "actor_grad_norm": 0.05626123771071434,
+      "actor_loss": 0.005437353625893593,
+      "actor_lr": 4.999999873689376e-05,
+      "actor_param_norm": 1840.1185302734375,
+      "actor_state_step": 35111.0
+    },
+    "loss_median_by_1k": {
+      "0": 0.0595657043159008,
+      "1000": 0.028134094551205635,
+      "2000": 0.02347426675260067,
+      "3000": 0.022702633403241634,
+      "4000": 0.02133789472281933,
+      "5000": 0.01993532944470644,
+      "6000": 0.020401041954755783,
+      "7000": 0.01941879279911518,
+      "8000": 0.018582064658403397,
+      "9000": 0.017877541482448578,
+      "10000": 0.017952412366867065,
+      "11000": 0.016508158296346664,
+      "12000": 0.015605492983013391,
+      "13000": 0.014845256227999926,
+      "14000": 0.014388171024620533,
+      "15000": 0.012905668932944536,
+      "16000": 0.012138959486037493,
+      "17000": 0.010821932926774025,
+      "18000": 0.010043383575975895,
+      "19000": 0.010542179923504591,
+      "20000": 0.009040201548486948,
+      "21000": 0.008845725562423468,
+      "22000": 0.008719184435904026,
+      "23000": 0.008179814089089632,
+      "24000": 0.007963026873767376,
+      "25000": 0.007953149732202291,
+      "26000": 0.007004621438682079,
+      "27000": 0.006797609850764275,
+      "28000": 0.006955114891752601,
+      "29000": 0.006806701188907027,
+      "30000": 0.006443464895710349,
+      "31000": 0.006098698126152158,
+      "32000": 0.006048915209248662,
+      "33000": 0.005960002541542053,
+      "34000": 0.005387519486248493,
+      "35000": 0.005437353625893593
+    },
+    "sample_exposure_at_last_step": 252.37735849056602,
+    "sample_exposure_at_5k": 35.93890386343217,
+    "evals": [
+      {
+        "step": 0,
+        "eval/success_rate": 0.45,
+        "eval/mean_steps": 272.7,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 115
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 111
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 117
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 122
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 131
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 112
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 117
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": true,
+            "steps": 115
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 114
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": false,
+            "steps": 400
+          }
+        ]
+      },
+      {
+        "step": 20000,
+        "eval/success_rate": 0.9,
+        "eval/mean_steps": 101.1,
+        "trials": [
+          {
+            "episode": 0,
+            "initial_state_index": 0,
+            "success": true,
+            "steps": 61
+          },
+          {
+            "episode": 1,
+            "initial_state_index": 1,
+            "success": true,
+            "steps": 70
+          },
+          {
+            "episode": 2,
+            "initial_state_index": 2,
+            "success": true,
+            "steps": 62
+          },
+          {
+            "episode": 3,
+            "initial_state_index": 3,
+            "success": true,
+            "steps": 64
+          },
+          {
+            "episode": 4,
+            "initial_state_index": 4,
+            "success": true,
+            "steps": 78
+          },
+          {
+            "episode": 5,
+            "initial_state_index": 5,
+            "success": true,
+            "steps": 65
+          },
+          {
+            "episode": 6,
+            "initial_state_index": 6,
+            "success": true,
+            "steps": 61
+          },
+          {
+            "episode": 7,
+            "initial_state_index": 7,
+            "success": true,
+            "steps": 63
+          },
+          {
+            "episode": 8,
+            "initial_state_index": 8,
+            "success": true,
+            "steps": 71
+          },
+          {
+            "episode": 9,
+            "initial_state_index": 9,
+            "success": true,
+            "steps": 64
+          },
+          {
+            "episode": 10,
+            "initial_state_index": 10,
+            "success": true,
+            "steps": 63
+          },
+          {
+            "episode": 11,
+            "initial_state_index": 11,
+            "success": true,
+            "steps": 64
+          },
+          {
+            "episode": 12,
+            "initial_state_index": 12,
+            "success": true,
+            "steps": 65
+          },
+          {
+            "episode": 13,
+            "initial_state_index": 13,
+            "success": true,
+            "steps": 63
+          },
+          {
+            "episode": 14,
+            "initial_state_index": 14,
+            "success": false,
+            "steps": 400
+          },
+          {
+            "episode": 15,
+            "initial_state_index": 15,
+            "success": true,
+            "steps": 72
+          },
+          {
+            "episode": 16,
+            "initial_state_index": 16,
+            "success": true,
+            "steps": 105
+          },
+          {
+            "episode": 17,
+            "initial_state_index": 17,
+            "success": true,
+            "steps": 64
+          },
+          {
+            "episode": 18,
+            "initial_state_index": 18,
+            "success": true,
+            "steps": 67
+          },
+          {
+            "episode": 19,
+            "initial_state_index": 19,
+            "success": false,
+            "steps": 400
+          }
+        ]
+      }
+    ]
+  }
+}

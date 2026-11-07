@@ -1,0 +1,378 @@
+{
+  "protocol": {
+    "suite": "libero_90",
+    "episodes_per_task": 20,
+    "total_episodes": 1800,
+    "eval_seed": 7,
+    "max_steps": 400,
+    "action_horizon": 10,
+    "replan_steps": 5,
+    "paired_initial_state_indices": true
+  },
+  "interpretation": {
+    "sft": "actor-only policy evaluations",
+    "expo": "full EXPO deployed-system evaluations with editor/critic candidate selection; not actor-only causal comparisons"
+  },
+  "results": [
+    {
+      "name": "official_pi05_actor",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 512,
+      "success_rate": 0.28444444444444444,
+      "paired_vs_official_base": {
+        "both": 512,
+        "base_only": 0,
+        "model_only": 0,
+        "neither": 1288
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 14,
+          "episodes": 20,
+          "rate": 0.7
+        },
+        "28": {
+          "successes": 10,
+          "episodes": 20,
+          "rate": 0.5
+        },
+        "29": {
+          "successes": 14,
+          "episodes": 20,
+          "rate": 0.7
+        },
+        "60": {
+          "successes": 9,
+          "episodes": 20,
+          "rate": 0.45
+        },
+        "79": {
+          "successes": 5,
+          "episodes": 20,
+          "rate": 0.25
+        }
+      }
+    },
+    {
+      "name": "sft_task02_20k_actor",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 112,
+      "success_rate": 0.06222222222222222,
+      "paired_vs_official_base": {
+        "both": 81,
+        "base_only": 431,
+        "model_only": 31,
+        "neither": 1257
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 19,
+          "episodes": 20,
+          "rate": 0.95
+        },
+        "28": {
+          "successes": 8,
+          "episodes": 20,
+          "rate": 0.4
+        },
+        "29": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "60": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "79": {
+          "successes": 1,
+          "episodes": 20,
+          "rate": 0.05
+        }
+      }
+    },
+    {
+      "name": "sft_task28_40k_actor",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 46,
+      "success_rate": 0.025555555555555557,
+      "paired_vs_official_base": {
+        "both": 16,
+        "base_only": 496,
+        "model_only": 30,
+        "neither": 1258
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "28": {
+          "successes": 20,
+          "episodes": 20,
+          "rate": 1.0
+        },
+        "29": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "60": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "79": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        }
+      }
+    },
+    {
+      "name": "sft_task29_20k_actor",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 219,
+      "success_rate": 0.12166666666666667,
+      "paired_vs_official_base": {
+        "both": 161,
+        "base_only": 351,
+        "model_only": 58,
+        "neither": 1230
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 5,
+          "episodes": 20,
+          "rate": 0.25
+        },
+        "28": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "29": {
+          "successes": 20,
+          "episodes": 20,
+          "rate": 1.0
+        },
+        "60": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "79": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        }
+      }
+    },
+    {
+      "name": "expo_task02_60k_full_system",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 447,
+      "success_rate": 0.24833333333333332,
+      "paired_vs_official_base": {
+        "both": 351,
+        "base_only": 161,
+        "model_only": 96,
+        "neither": 1192
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 19,
+          "episodes": 20,
+          "rate": 0.95
+        },
+        "28": {
+          "successes": 7,
+          "episodes": 20,
+          "rate": 0.35
+        },
+        "29": {
+          "successes": 9,
+          "episodes": 20,
+          "rate": 0.45
+        },
+        "60": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "79": {
+          "successes": 8,
+          "episodes": 20,
+          "rate": 0.4
+        }
+      }
+    },
+    {
+      "name": "expo_task28_40k_full_system",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 451,
+      "success_rate": 0.25055555555555553,
+      "paired_vs_official_base": {
+        "both": 350,
+        "base_only": 162,
+        "model_only": 101,
+        "neither": 1187
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 12,
+          "episodes": 20,
+          "rate": 0.6
+        },
+        "28": {
+          "successes": 20,
+          "episodes": 20,
+          "rate": 1.0
+        },
+        "29": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "60": {
+          "successes": 2,
+          "episodes": 20,
+          "rate": 0.1
+        },
+        "79": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        }
+      }
+    },
+    {
+      "name": "expo_task29_60k_full_system",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 441,
+      "success_rate": 0.245,
+      "paired_vs_official_base": {
+        "both": 347,
+        "base_only": 165,
+        "model_only": 94,
+        "neither": 1194
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 0,
+          "episodes": 20,
+          "rate": 0.0
+        },
+        "28": {
+          "successes": 2,
+          "episodes": 20,
+          "rate": 0.1
+        },
+        "29": {
+          "successes": 16,
+          "episodes": 20,
+          "rate": 0.8
+        },
+        "60": {
+          "successes": 11,
+          "episodes": 20,
+          "rate": 0.55
+        },
+        "79": {
+          "successes": 13,
+          "episodes": 20,
+          "rate": 0.65
+        }
+      }
+    },
+    {
+      "name": "expo_task60_60k_full_system",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 368,
+      "success_rate": 0.20444444444444446,
+      "paired_vs_official_base": {
+        "both": 276,
+        "base_only": 236,
+        "model_only": 92,
+        "neither": 1196
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 4,
+          "episodes": 20,
+          "rate": 0.2
+        },
+        "28": {
+          "successes": 14,
+          "episodes": 20,
+          "rate": 0.7
+        },
+        "29": {
+          "successes": 1,
+          "episodes": 20,
+          "rate": 0.05
+        },
+        "60": {
+          "successes": 20,
+          "episodes": 20,
+          "rate": 1.0
+        },
+        "79": {
+          "successes": 12,
+          "episodes": 20,
+          "rate": 0.6
+        }
+      }
+    },
+    {
+      "name": "expo_task79_60k_full_system",
+      "tasks": 90,
+      "episodes": 1800,
+      "successes": 483,
+      "success_rate": 0.2683333333333333,
+      "paired_vs_official_base": {
+        "both": 373,
+        "base_only": 139,
+        "model_only": 110,
+        "neither": 1178
+      },
+      "target_task_counts": {
+        "2": {
+          "successes": 6,
+          "episodes": 20,
+          "rate": 0.3
+        },
+        "28": {
+          "successes": 6,
+          "episodes": 20,
+          "rate": 0.3
+        },
+        "29": {
+          "successes": 14,
+          "episodes": 20,
+          "rate": 0.7
+        },
+        "60": {
+          "successes": 5,
+          "episodes": 20,
+          "rate": 0.25
+        },
+        "79": {
+          "successes": 20,
+          "episodes": 20,
+          "rate": 1.0
+        }
+      }
+    }
+  ]
+}

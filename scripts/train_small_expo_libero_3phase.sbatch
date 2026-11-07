@@ -30,11 +30,11 @@ export TASK_ID
 : "${WANDB_PROJECT_NAME:=small_learner}"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT="${PROJECT_ROOT:-/u/rpolonsky/dcrl_src}"
+PROJECT="${PROJECT_ROOT:-/projects/bgqe/rpolonsky/dcrl}"
 PROJECT_PARENT="$(cd -- "$PROJECT/.." && pwd)"
 EXPO="$PROJECT/third_party/expo-ft"
 PYTHON="${PYTHON:-/projects/bgqe/rpolonsky/dcrl/third_party/expo-ft/.venv/bin/python}"
-CODE_ROOT="${CODE_ROOT:-/scratch/bgqe/rpolonsky/tuned_src}"
+CODE_ROOT="${CODE_ROOT:-/projects/bgqe/rpolonsky/dcrl}"
 LIBERO_ROOT="$PROJECT/.deps/LIBERO/libero/libero"
 RUNTIME_ROOT="${RUNTIME_ROOT:-/tmp/dcrl_runtime_${SLURM_JOB_ID:-$$}}"
 LOG_ROOT="${LOG_ROOT:-$RUNTIME_ROOT/logs}"

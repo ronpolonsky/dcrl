@@ -1,0 +1,1295 @@
+{
+  "script": "/work/hdd/bgqe/rpolonsky/sharder/training/sft_analysis_20261103/audit_preprocessing_parity.py",
+  "norm_stats": "/projects/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json",
+  "norm_stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+  "model_type": "pi05",
+  "discrete_state_input": false,
+  "use_quantile_norm": true,
+  "action_horizon": 10,
+  "model_action_dim": 32,
+  "cases": [
+    {
+      "name": "task_02",
+      "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_02_teacher_375398_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+      "episode": "episode_000001",
+      "row": 0,
+      "raw": {
+        "observation/image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "observation/wrist_image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 233.0
+        },
+        "observation/state": {
+          "shape": [
+            8
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -0.20498286187648773,
+          "max": 3.141042947769165
+        },
+        "actions": {
+          "shape": [
+            10,
+            7
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -2.3025574684143066,
+          "max": 0.8498104810714722
+        }
+      },
+      "training_transform_leaves": {
+        "actions": {
+          "shape": [
+            10,
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -2.4563517932796266,
+          "max": 0.988293830939442
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 233.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9313346468922268,
+          "max": 0.9178793962296059
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "inference_transform_leaves": {
+        "actions": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.23129088932449227,
+          "max": 0.0001995398081917621
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 233.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9313346468922268,
+          "max": 0.9178793962296059
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "observation_parity": {
+        "exact": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "leaves": [
+          {
+            "path": "image/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "state",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "token_ar_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "token_loss_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "tokenized_prompt",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "tokenized_prompt_mask",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "action_roundtrip": {
+        "max_abs": 1.1102230246251565e-16,
+        "mean_abs": 1.784287003861859e-17,
+        "finite": true,
+        "within_1e-5": true
+      }
+    },
+    {
+      "name": "task_28",
+      "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_28_teacher_275001_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+      "episode": "episode_000000",
+      "row": 0,
+      "raw": {
+        "observation/image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "observation/wrist_image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 234.0
+        },
+        "observation/state": {
+          "shape": [
+            8
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -0.2034415900707245,
+          "max": 3.1398544311523438
+        },
+        "actions": {
+          "shape": [
+            10,
+            7
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -1.0,
+          "max": 1.2157416343688965
+        }
+      },
+      "training_transform_leaves": {
+        "actions": {
+          "shape": [
+            10,
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -1.0,
+          "max": 1.330799013320736
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 234.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9314489569792115,
+          "max": 0.9177653005369388
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "inference_transform_leaves": {
+        "actions": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.23129088932449227,
+          "max": 0.0001995398081917621
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 234.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9314489569792115,
+          "max": 0.9177653005369388
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "observation_parity": {
+        "exact": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "leaves": [
+          {
+            "path": "image/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "state",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "token_ar_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "token_loss_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "tokenized_prompt",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "tokenized_prompt_mask",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "action_roundtrip": {
+        "max_abs": 4.440892098500626e-16,
+        "mean_abs": 1.784287003861859e-17,
+        "finite": true,
+        "within_1e-5": true
+      }
+    },
+    {
+      "name": "task_29",
+      "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_29_teacher_375380_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+      "episode": "episode_000000",
+      "row": 0,
+      "raw": {
+        "observation/image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "observation/wrist_image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 237.0
+        },
+        "observation/state": {
+          "shape": [
+            8
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -0.2207658588886261,
+          "max": 3.140998363494873
+        },
+        "actions": {
+          "shape": [
+            10,
+            7
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -1.140925645828247,
+          "max": 1.1233489513397217
+        }
+      },
+      "training_transform_leaves": {
+        "actions": {
+          "shape": [
+            10,
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -1.140953766104585,
+          "max": 1.2211016215956199
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 237.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9313255098614645,
+          "max": 0.9178882767742129
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "inference_transform_leaves": {
+        "actions": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.23129088932449227,
+          "max": 0.0001995398081917621
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 255.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 237.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9313255098614645,
+          "max": 0.9178882767742129
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 39635.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "observation_parity": {
+        "exact": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "leaves": [
+          {
+            "path": "image/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "state",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "token_ar_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "token_loss_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "tokenized_prompt",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "tokenized_prompt_mask",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "action_roundtrip": {
+        "max_abs": 4.440892098500626e-16,
+        "mean_abs": 1.9825411154020653e-17,
+        "finite": true,
+        "within_1e-5": true
+      }
+    },
+    {
+      "name": "task_60",
+      "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_60_teacher_450223_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+      "episode": "episode_000000",
+      "row": 0,
+      "raw": {
+        "observation/image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 239.0
+        },
+        "observation/wrist_image": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 204.0
+        },
+        "observation/state": {
+          "shape": [
+            8
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -0.08705385774374008,
+          "max": 3.140030860900879
+        },
+        "actions": {
+          "shape": [
+            10,
+            7
+          ],
+          "dtype": "float32",
+          "finite": true,
+          "min": -1.2034035921096802,
+          "max": 0.11791090667247772
+        }
+      },
+      "training_transform_leaves": {
+        "actions": {
+          "shape": [
+            10,
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -1.491993472088117,
+          "max": 0.8256759128786137
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 239.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 204.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9314188242181867,
+          "max": 0.9177952241111578
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 24655.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "inference_transform_leaves": {
+        "actions": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.23129088932449227,
+          "max": 0.0001995398081917621
+        },
+        "image/base_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 239.0
+        },
+        "image/left_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 204.0
+        },
+        "image/right_wrist_0_rgb": {
+          "shape": [
+            224,
+            224,
+            3
+          ],
+          "dtype": "uint8",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "image_mask/base_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/left_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "image_mask/right_wrist_0_rgb": {
+          "shape": [],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "state": {
+          "shape": [
+            32
+          ],
+          "dtype": "float64",
+          "finite": true,
+          "min": -0.9314188242181867,
+          "max": 0.9177952241111578
+        },
+        "tokenized_prompt": {
+          "shape": [
+            200
+          ],
+          "dtype": "int64",
+          "finite": true,
+          "min": 0.0,
+          "max": 24655.0
+        },
+        "tokenized_prompt_mask": {
+          "shape": [
+            200
+          ],
+          "dtype": "bool",
+          "finite": true,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "observation_parity": {
+        "exact": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "leaves": [
+          {
+            "path": "image/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/base_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/left_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "image_mask/right_wrist_0_rgb",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "state",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "token_ar_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "token_loss_mask",
+            "status": "ok",
+            "exact": true
+          },
+          {
+            "path": "tokenized_prompt",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "path": "tokenized_prompt_mask",
+            "status": "ok",
+            "exact": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "action_roundtrip": {
+        "max_abs": 1.1102230246251565e-16,
+        "mean_abs": 1.982541115402065e-18,
+        "finite": true,
+        "within_1e-5": true
+      }
+    }
+  ],
+  "all_observation_parity_exact": true,
+  "all_observation_parity_within_1e-6": true,
+  "all_action_roundtrips_within_1e-5": true
+}

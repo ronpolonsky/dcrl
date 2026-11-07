@@ -1,0 +1,432 @@
+{
+  "root": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103",
+  "arms": {
+    "existing": {
+      "status": "ok",
+      "evals": [
+        {
+          "step": 0,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_existing/evals/00000000.json",
+          "macro_success_rate": 0.6,
+          "tasks": {
+            "2": {
+              "success_rate": 0.75,
+              "mean_steps": 274.05
+            },
+            "28": {
+              "success_rate": 0.45,
+              "mean_steps": 327.4
+            },
+            "29": {
+              "success_rate": 0.7,
+              "mean_steps": 227.95
+            },
+            "60": {
+              "success_rate": 0.5,
+              "mean_steps": 259.85
+            }
+          }
+        },
+        {
+          "step": 500,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_existing/evals/00000500.json",
+          "macro_success_rate": 0.55,
+          "tasks": {
+            "2": {
+              "success_rate": 0.85,
+              "mean_steps": 235.5
+            },
+            "28": {
+              "success_rate": 1.0,
+              "mean_steps": 52.25
+            },
+            "29": {
+              "success_rate": 0.1,
+              "mean_steps": 370.9
+            },
+            "60": {
+              "success_rate": 0.25,
+              "mean_steps": 335.35
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 14,
+              "lost_successes": 1,
+              "gained_successes": 3,
+              "still_failed": 2
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 11,
+              "still_failed": 0
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 12,
+              "gained_successes": 0,
+              "still_failed": 6
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 5,
+              "lost_successes": 5,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        },
+        {
+          "step": 1000,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_existing/evals/00001000.json",
+          "macro_success_rate": 0.48750000000000004,
+          "tasks": {
+            "2": {
+              "success_rate": 0.8,
+              "mean_steps": 266.85
+            },
+            "28": {
+              "success_rate": 1.0,
+              "mean_steps": 26.15
+            },
+            "29": {
+              "success_rate": 0.1,
+              "mean_steps": 380.05
+            },
+            "60": {
+              "success_rate": 0.05,
+              "mean_steps": 385.55
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 13,
+              "lost_successes": 2,
+              "gained_successes": 3,
+              "still_failed": 2
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 11,
+              "still_failed": 0
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 1,
+              "lost_successes": 13,
+              "gained_successes": 1,
+              "still_failed": 5
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 1,
+              "lost_successes": 9,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        },
+        {
+          "step": 1500,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_existing/evals/00001500.json",
+          "macro_success_rate": 0.4375,
+          "tasks": {
+            "2": {
+              "success_rate": 0.7,
+              "mean_steps": 262.85
+            },
+            "28": {
+              "success_rate": 1.0,
+              "mean_steps": 24.55
+            },
+            "29": {
+              "success_rate": 0.0,
+              "mean_steps": 400.0
+            },
+            "60": {
+              "success_rate": 0.05,
+              "mean_steps": 390.05
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 12,
+              "lost_successes": 3,
+              "gained_successes": 2,
+              "still_failed": 3
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 11,
+              "still_failed": 0
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 0,
+              "lost_successes": 14,
+              "gained_successes": 0,
+              "still_failed": 6
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 1,
+              "lost_successes": 9,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        }
+      ]
+    },
+    "lora_only": {
+      "status": "ok",
+      "evals": [
+        {
+          "step": 0,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/evals/00000000.json",
+          "macro_success_rate": 0.6,
+          "tasks": {
+            "2": {
+              "success_rate": 0.75,
+              "mean_steps": 274.05
+            },
+            "28": {
+              "success_rate": 0.45,
+              "mean_steps": 327.4
+            },
+            "29": {
+              "success_rate": 0.7,
+              "mean_steps": 227.95
+            },
+            "60": {
+              "success_rate": 0.5,
+              "mean_steps": 259.85
+            }
+          }
+        },
+        {
+          "step": 500,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/evals/00000500.json",
+          "macro_success_rate": 0.575,
+          "tasks": {
+            "2": {
+              "success_rate": 0.75,
+              "mean_steps": 261.6
+            },
+            "28": {
+              "success_rate": 0.7,
+              "mean_steps": 210.75
+            },
+            "29": {
+              "success_rate": 0.45,
+              "mean_steps": 288.5
+            },
+            "60": {
+              "success_rate": 0.4,
+              "mean_steps": 285.3
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 13,
+              "lost_successes": 2,
+              "gained_successes": 2,
+              "still_failed": 3
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 8,
+              "lost_successes": 1,
+              "gained_successes": 6,
+              "still_failed": 5
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 7,
+              "lost_successes": 7,
+              "gained_successes": 2,
+              "still_failed": 4
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 8,
+              "lost_successes": 2,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        },
+        {
+          "step": 1000,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/evals/00001000.json",
+          "macro_success_rate": 0.5625,
+          "tasks": {
+            "2": {
+              "success_rate": 0.9,
+              "mean_steps": 200.55
+            },
+            "28": {
+              "success_rate": 0.95,
+              "mean_steps": 57.95
+            },
+            "29": {
+              "success_rate": 0.1,
+              "mean_steps": 371.55
+            },
+            "60": {
+              "success_rate": 0.3,
+              "mean_steps": 314.2
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 15,
+              "lost_successes": 0,
+              "gained_successes": 3,
+              "still_failed": 2
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 10,
+              "still_failed": 1
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 12,
+              "gained_successes": 0,
+              "still_failed": 6
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 6,
+              "lost_successes": 4,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        },
+        {
+          "step": 1500,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/evals/00001500.json",
+          "macro_success_rate": 0.4875,
+          "tasks": {
+            "2": {
+              "success_rate": 0.7,
+              "mean_steps": 231.35
+            },
+            "28": {
+              "success_rate": 1.0,
+              "mean_steps": 26.3
+            },
+            "29": {
+              "success_rate": 0.15,
+              "mean_steps": 369.5
+            },
+            "60": {
+              "success_rate": 0.1,
+              "mean_steps": 370.2
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 12,
+              "lost_successes": 3,
+              "gained_successes": 2,
+              "still_failed": 3
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 11,
+              "still_failed": 0
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 12,
+              "gained_successes": 1,
+              "still_failed": 5
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 8,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        },
+        {
+          "step": 2000,
+          "path": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/evals/00002000.json",
+          "macro_success_rate": 0.475,
+          "tasks": {
+            "2": {
+              "success_rate": 0.65,
+              "mean_steps": 247.65
+            },
+            "28": {
+              "success_rate": 1.0,
+              "mean_steps": 26.25
+            },
+            "29": {
+              "success_rate": 0.15,
+              "mean_steps": 366.6
+            },
+            "60": {
+              "success_rate": 0.1,
+              "mean_steps": 370.65
+            }
+          },
+          "paired_to_step0": {
+            "2": {
+              "common_cases": 20,
+              "retained_successes": 10,
+              "lost_successes": 5,
+              "gained_successes": 3,
+              "still_failed": 2
+            },
+            "28": {
+              "common_cases": 20,
+              "retained_successes": 9,
+              "lost_successes": 0,
+              "gained_successes": 11,
+              "still_failed": 0
+            },
+            "29": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 12,
+              "gained_successes": 1,
+              "still_failed": 5
+            },
+            "60": {
+              "common_cases": 20,
+              "retained_successes": 2,
+              "lost_successes": 8,
+              "gained_successes": 0,
+              "still_failed": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}

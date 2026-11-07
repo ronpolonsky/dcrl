@@ -1,0 +1,9 @@
+# Task 2 / Task 60 Small EXPO only SFT
+
+- Use two already-running A100 allocations, one GPU for each independent trainer: allocation `23416001_2` on `gpua082` (Task 2) and `23416001_3` on `gpua070` (Task 60).
+- Stop only the actor-only Full EXPO evaluation tmux processes on those GPUs. Keep both Slurm allocations running. Leave the other three allocation elements and tmux sessions untouched.
+- Start a separate tmux session for each trainer. The trainers use the official Pi0.5 LIBERO initialization, LoRA-only training, the original 10-action/5-replan interface, batch size 16, and 5,000 update maximum.
+- Data is restricted to the matching Small EXPO teacher targets: Task 2 teacher step 375398 (150 successful episodes) and Task 60 teacher step 450223 (150 successful episodes). No official demonstrations/replay data are loaded (`official_demo_ratio=0`, no demo root); the trainer logs the actual `len(dataset.indices)` before training and must report `official_demo_chunks=0`.
+- Evaluate only the source task at step 0 and every 500 updates, with 20 episodes per evaluation. Save a single best full learner/optimizer checkpoint whenever source-task success improves. At the first 100% evaluation, evaluate the other three tasks, write all four task results in that checkpoint-step JSON, then stop. If 100% is not reached, training stops at 5,000 with the best-so-far checkpoint and source-task evaluation JSONs.
+- New output root: `/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_task02_60_bestcheckpoint_20261103/`. The earlier `sft_task02_60_earlystop_20261103/` outputs are preserved as the first attempt, with metrics and evaluations but no model checkpoints.
+- The interrupted actor-only Task 29 full-suite evaluation resumes later using `resume_full_expo_task29_actor_only90_20261103.sh {0|1}` in its original shard allocation. It resumes only missing/invalid task JSONs; completed outputs are preserved.

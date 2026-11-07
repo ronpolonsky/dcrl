@@ -1,0 +1,44 @@
+{
+  "status": "running",
+  "question": "Does training on raw Small EXPO motion targets that the LIBERO OSC controller later saturates harm SFT retention or target behavior?",
+  "task": 28,
+  "source_teacher_step": 275001,
+  "source_data": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_28_teacher_275001_success150_sft200k/pi_base_data",
+  "student": "official pi05_libero",
+  "paired_invariants": {
+    "seed": 42,
+    "eval_seed": 7,
+    "trainable_scope": "lora_only",
+    "lora_initialization": "zero lora_b",
+    "updates": 1500,
+    "batch_size": 16,
+    "learning_rate": 0.00005,
+    "warmup_steps": 10000,
+    "official_demo_ratio": 0,
+    "target_mode": "full_proposal",
+    "eval_tasks": [2, 28, 29, 60],
+    "eval_episodes_per_task": 20,
+    "eval_every": 500,
+    "checkpoint_every": 500
+  },
+  "single_factor": "clipped arm clamps raw action dimensions 0 through 5 to [-1,1] before unchanged Pi0.5 quantile normalization; raw arm preserves targets. Gripper and action-chunk horizon are unchanged.",
+  "outputs": {
+    "raw": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_task28_actionbounds_20261103/raw",
+    "clipped": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_task28_actionbounds_20261103/clipped"
+  },
+  "launches": {
+    "raw": {
+      "allocation": "23416001_2",
+      "node": "gpua082",
+      "tmux_session": "sft-task28-actionbounds-raw",
+      "wandb_run": "gldy6x8w"
+    },
+    "clipped": {
+      "allocation": "23416001_3",
+      "node": "gpua070",
+      "tmux_session": "sft-task28-actionbounds-clipped",
+      "wandb_run": "ccbvqtrv"
+    }
+  },
+  "launcher": "run_task28_actionbounds_pair.sh"
+}

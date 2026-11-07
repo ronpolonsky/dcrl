@@ -1,0 +1,1336 @@
+{
+  "all": {
+    "total": 3403421456,
+    "by_module": {
+      "PaliGemma/img": 414803696,
+      "PaliGemma/llm": 2986451968,
+      "action_in_proj/bias": 1024,
+      "action_in_proj/kernel": 32768,
+      "action_out_proj/bias": 32,
+      "action_out_proj/kernel": 32768,
+      "time_mlp_in/bias": 1024,
+      "time_mlp_in/kernel": 1048576,
+      "time_mlp_out/bias": 1024,
+      "time_mlp_out/kernel": 1048576
+    },
+    "leaves": [
+      {
+        "name": "PaliGemma/img/Transformer/encoder_norm/bias",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoder_norm/scale",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/scale",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/scale",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/bias",
+        "shape": [
+          27,
+          4304
+        ],
+        "parameters": 116208
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/kernel",
+        "shape": [
+          27,
+          1152,
+          4304
+        ],
+        "parameters": 133871616
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/kernel",
+        "shape": [
+          27,
+          4304,
+          1152
+        ],
+        "parameters": 133871616
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/kernel",
+        "shape": [
+          27,
+          16,
+          72,
+          1152
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/embedding/bias",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/embedding/kernel",
+        "shape": [
+          14,
+          14,
+          3,
+          1152
+        ],
+        "parameters": 677376
+      },
+      {
+        "name": "PaliGemma/img/head/bias",
+        "shape": [
+          2048
+        ],
+        "parameters": 2048
+      },
+      {
+        "name": "PaliGemma/img/head/kernel",
+        "shape": [
+          1152,
+          2048
+        ],
+        "parameters": 2359296
+      },
+      {
+        "name": "PaliGemma/img/pos_embedding",
+        "shape": [
+          1,
+          256,
+          1152
+        ],
+        "parameters": 294912
+      },
+      {
+        "name": "PaliGemma/llm/embedder/input_embedding",
+        "shape": [
+          257152,
+          2048
+        ],
+        "parameters": 526647296
+      },
+      {
+        "name": "PaliGemma/llm/final_norm/scale",
+        "shape": [
+          2048
+        ],
+        "parameters": 2048
+      },
+      {
+        "name": "PaliGemma/llm/final_norm_1/Dense_0/bias",
+        "shape": [
+          3072
+        ],
+        "parameters": 3072
+      },
+      {
+        "name": "PaliGemma/llm/final_norm_1/Dense_0/kernel",
+        "shape": [
+          1024,
+          3072
+        ],
+        "parameters": 3145728
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          16
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          2048
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/w",
+        "shape": [
+          18,
+          8,
+          256,
+          2048
+        ],
+        "parameters": 75497472
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          1024
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/w",
+        "shape": [
+          18,
+          8,
+          256,
+          1024
+        ],
+        "parameters": 37748736
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          16,
+          256
+        ],
+        "parameters": 147456
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/w",
+        "shape": [
+          18,
+          2,
+          1,
+          2048,
+          256
+        ],
+        "parameters": 18874368
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          32,
+          256
+        ],
+        "parameters": 294912
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/w",
+        "shape": [
+          18,
+          2,
+          1,
+          1024,
+          256
+        ],
+        "parameters": 9437184
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          2048,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          256
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/w",
+        "shape": [
+          18,
+          8,
+          2048,
+          256
+        ],
+        "parameters": 75497472
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          1024,
+          32
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          256
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/w",
+        "shape": [
+          18,
+          8,
+          1024,
+          256
+        ],
+        "parameters": 37748736
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum",
+        "shape": [
+          18,
+          2,
+          2048,
+          16384
+        ],
+        "parameters": 1207959552
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          16,
+          16384
+        ],
+        "parameters": 9437184
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear",
+        "shape": [
+          18,
+          16384,
+          2048
+        ],
+        "parameters": 603979776
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_a",
+        "shape": [
+          18,
+          16384,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_b",
+        "shape": [
+          18,
+          16,
+          2048
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum",
+        "shape": [
+          18,
+          2,
+          1024,
+          4096
+        ],
+        "parameters": 150994944
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          32,
+          4096
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear",
+        "shape": [
+          18,
+          4096,
+          1024
+        ],
+        "parameters": 75497472
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_a",
+        "shape": [
+          18,
+          4096,
+          32
+        ],
+        "parameters": 2359296
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_b",
+        "shape": [
+          18,
+          32,
+          1024
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_attention_norm/scale",
+        "shape": [
+          18,
+          2048
+        ],
+        "parameters": 36864
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/bias",
+        "shape": [
+          18,
+          3072
+        ],
+        "parameters": 55296
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/kernel",
+        "shape": [
+          18,
+          1024,
+          3072
+        ],
+        "parameters": 56623104
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_ffw_norm/scale",
+        "shape": [
+          18,
+          2048
+        ],
+        "parameters": 36864
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/bias",
+        "shape": [
+          18,
+          3072
+        ],
+        "parameters": 55296
+      },
+      {
+        "name": "PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/kernel",
+        "shape": [
+          18,
+          1024,
+          3072
+        ],
+        "parameters": 56623104
+      },
+      {
+        "name": "action_in_proj/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "action_in_proj/kernel",
+        "shape": [
+          32,
+          1024
+        ],
+        "parameters": 32768
+      },
+      {
+        "name": "action_out_proj/bias",
+        "shape": [
+          32
+        ],
+        "parameters": 32
+      },
+      {
+        "name": "action_out_proj/kernel",
+        "shape": [
+          1024,
+          32
+        ],
+        "parameters": 32768
+      },
+      {
+        "name": "time_mlp_in/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "time_mlp_in/kernel",
+        "shape": [
+          1024,
+          1024
+        ],
+        "parameters": 1048576
+      },
+      {
+        "name": "time_mlp_out/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "time_mlp_out/kernel",
+        "shape": [
+          1024,
+          1024
+        ],
+        "parameters": 1048576
+      }
+    ]
+  },
+  "current_trainable": {
+    "total": 466957072,
+    "by_module": {
+      "PaliGemma/img": 414803696,
+      "PaliGemma/llm": 49987584,
+      "action_in_proj/bias": 1024,
+      "action_in_proj/kernel": 32768,
+      "action_out_proj/bias": 32,
+      "action_out_proj/kernel": 32768,
+      "time_mlp_in/bias": 1024,
+      "time_mlp_in/kernel": 1048576,
+      "time_mlp_out/bias": 1024,
+      "time_mlp_out/kernel": 1048576
+    },
+    "leaves": [
+      {
+        "name": "PaliGemma/img/Transformer/encoder_norm/bias",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoder_norm/scale",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/scale",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/scale",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/bias",
+        "shape": [
+          27,
+          4304
+        ],
+        "parameters": 116208
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/kernel",
+        "shape": [
+          27,
+          1152,
+          4304
+        ],
+        "parameters": 133871616
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/kernel",
+        "shape": [
+          27,
+          4304,
+          1152
+        ],
+        "parameters": 133871616
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/bias",
+        "shape": [
+          27,
+          1152
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/kernel",
+        "shape": [
+          27,
+          16,
+          72,
+          1152
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/bias",
+        "shape": [
+          27,
+          16,
+          72
+        ],
+        "parameters": 31104
+      },
+      {
+        "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/kernel",
+        "shape": [
+          27,
+          1152,
+          16,
+          72
+        ],
+        "parameters": 35831808
+      },
+      {
+        "name": "PaliGemma/img/embedding/bias",
+        "shape": [
+          1152
+        ],
+        "parameters": 1152
+      },
+      {
+        "name": "PaliGemma/img/embedding/kernel",
+        "shape": [
+          14,
+          14,
+          3,
+          1152
+        ],
+        "parameters": 677376
+      },
+      {
+        "name": "PaliGemma/img/head/bias",
+        "shape": [
+          2048
+        ],
+        "parameters": 2048
+      },
+      {
+        "name": "PaliGemma/img/head/kernel",
+        "shape": [
+          1152,
+          2048
+        ],
+        "parameters": 2359296
+      },
+      {
+        "name": "PaliGemma/img/pos_embedding",
+        "shape": [
+          1,
+          256,
+          1152
+        ],
+        "parameters": 294912
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          16
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          2048
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          1024
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          16,
+          256
+        ],
+        "parameters": 147456
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          32,
+          256
+        ],
+        "parameters": 294912
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          2048,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          256
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          1024,
+          32
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          256
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          16,
+          16384
+        ],
+        "parameters": 9437184
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_a",
+        "shape": [
+          18,
+          16384,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_b",
+        "shape": [
+          18,
+          16,
+          2048
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          32,
+          4096
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_a",
+        "shape": [
+          18,
+          4096,
+          32
+        ],
+        "parameters": 2359296
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_b",
+        "shape": [
+          18,
+          32,
+          1024
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "action_in_proj/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "action_in_proj/kernel",
+        "shape": [
+          32,
+          1024
+        ],
+        "parameters": 32768
+      },
+      {
+        "name": "action_out_proj/bias",
+        "shape": [
+          32
+        ],
+        "parameters": 32
+      },
+      {
+        "name": "action_out_proj/kernel",
+        "shape": [
+          1024,
+          32
+        ],
+        "parameters": 32768
+      },
+      {
+        "name": "time_mlp_in/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "time_mlp_in/kernel",
+        "shape": [
+          1024,
+          1024
+        ],
+        "parameters": 1048576
+      },
+      {
+        "name": "time_mlp_out/bias",
+        "shape": [
+          1024
+        ],
+        "parameters": 1024
+      },
+      {
+        "name": "time_mlp_out/kernel",
+        "shape": [
+          1024,
+          1024
+        ],
+        "parameters": 1048576
+      }
+    ]
+  },
+  "strict_lora": {
+    "total": 49987584,
+    "by_module": {
+      "PaliGemma/llm": 49987584
+    },
+    "leaves": [
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          16
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          2048
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          256,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          1024
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          16,
+          256
+        ],
+        "parameters": 147456
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_a",
+        "shape": [
+          18,
+          2,
+          1,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/kv_einsum_1/lora_b",
+        "shape": [
+          18,
+          2,
+          1,
+          32,
+          256
+        ],
+        "parameters": 294912
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_a",
+        "shape": [
+          18,
+          8,
+          2048,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum/lora_b",
+        "shape": [
+          18,
+          8,
+          16,
+          256
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_a",
+        "shape": [
+          18,
+          8,
+          1024,
+          32
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/attn/q_einsum_1/lora_b",
+        "shape": [
+          18,
+          8,
+          32,
+          256
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          2048,
+          16
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          16,
+          16384
+        ],
+        "parameters": 9437184
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_a",
+        "shape": [
+          18,
+          16384,
+          16
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp/linear_lora_b",
+        "shape": [
+          18,
+          16,
+          2048
+        ],
+        "parameters": 589824
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_a",
+        "shape": [
+          18,
+          2,
+          1024,
+          32
+        ],
+        "parameters": 1179648
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/gating_einsum_lora_b",
+        "shape": [
+          18,
+          2,
+          32,
+          4096
+        ],
+        "parameters": 4718592
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_a",
+        "shape": [
+          18,
+          4096,
+          32
+        ],
+        "parameters": 2359296
+      },
+      {
+        "name": "PaliGemma/llm/layers/mlp_1/linear_lora_b",
+        "shape": [
+          18,
+          32,
+          1024
+        ],
+        "parameters": 589824
+      }
+    ]
+  }
+}

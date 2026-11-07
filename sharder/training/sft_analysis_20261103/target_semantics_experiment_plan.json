@@ -1,0 +1,22 @@
+{
+  "status": "prepared_not_launched",
+  "purpose": "isolate stale full-proposal targets from executed-prefix/backfilled targets",
+  "invariants": {
+    "student_checkpoint": "gs://openpi-assets/checkpoints/pi05_libero",
+    "teacher_checkpoint_step": 275001,
+    "source_task": 28,
+    "collection_successes": 150,
+    "batch_size": 16,
+    "trainable_scope": "lora_only",
+    "official_demo_ratio": 0,
+    "seed": 42,
+    "eval_seed": 7,
+    "retention_tasks": [2, 28, 29, 60]
+  },
+  "arms": [
+    {"target_mode": "full_proposal", "updates": 500, "eval_every": 100},
+    {"target_mode": "executed_backfill", "updates": 500, "eval_every": 100}
+  ],
+  "outputs": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_target_semantics_20261103",
+  "interpretation_gate": "require paired retention and target-task results; do not select on target success alone"
+}

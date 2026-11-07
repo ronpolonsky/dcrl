@@ -1,0 +1,12 @@
+{
+  "status": "prepared_not_launched",
+  "purpose": "Test whether Small EXPO SFT loses performance because its raw OSC motion-command targets exceed the [-1,1] bounds that LIBERO's OSC controller clips before execution.",
+  "single_factor_change": "Clip dimensions 0 through 5 of sampled Small EXPO raw action chunks to [-1,1] before the unchanged Pi0.5 LIBERO quantile normalization. Leave gripper dimension, full 10-step proposal horizon, dataset, trainable scope, optimizer, seeds, eval tasks, and eval cadence unchanged.",
+  "comparison_run": "sft_task29_replay_ablation_20261103/no_replay_1500",
+  "target_dataset": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_agnostic_small_expo/task_29_teacher_375380_success150_sft200k/pi_base_data/success/teacher_chunks.hdf5",
+  "initialization": "official pi05_libero with zero-B LoRA, same task-29 teacher checkpoint and seed 42",
+  "updates": 1500,
+  "eval_every": 500,
+  "eval_tasks": [2, 28, 29, 60],
+  "launch_script": "run_task29_actionbounds_1500.sh"
+}

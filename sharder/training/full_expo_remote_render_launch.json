@@ -1,0 +1,74 @@
+{
+  "created": "2026-11-01T08:41:41.083692",
+  "runs": [
+    {
+      "task": 29,
+      "learner_job": "23324737",
+      "renderer_job": "23380729",
+      "tmux": "pi05-unsharded-b16-task29-h200",
+      "log": "/work/hdd/bgqe/rpolonsky/sharder/training/logs/full_expo_task29.log",
+      "argv": [
+        "srun",
+        "--jobid=23324737",
+        "--overlap",
+        "--nodes=1",
+        "--ntasks=1",
+        "--cpus-per-task=12",
+        "--exact",
+        "--chdir=/projects/bgqe/rpolonsky/dcrl",
+        "env",
+        "RENDER_JOB_ID=23380729",
+        "RENDER_RPC_HOST=gpue05.delta.ncsa.illinois.edu",
+        "bash",
+        "/work/hdd/bgqe/rpolonsky/sharder/training/launch_full_expo_remote_render.sh",
+        "29"
+      ]
+    },
+    {
+      "task": 60,
+      "learner_job": "23392680",
+      "renderer_job": "23380729",
+      "tmux": "pi05-unsharded-b16-task60-h200",
+      "log": "/work/hdd/bgqe/rpolonsky/sharder/training/logs/full_expo_task60.log",
+      "argv": [
+        "srun",
+        "--jobid=23392680",
+        "--overlap",
+        "--nodes=1",
+        "--ntasks=1",
+        "--cpus-per-task=12",
+        "--exact",
+        "--chdir=/projects/bgqe/rpolonsky/dcrl",
+        "env",
+        "RENDER_JOB_ID=23380729",
+        "RENDER_RPC_HOST=gpue05.delta.ncsa.illinois.edu",
+        "bash",
+        "/work/hdd/bgqe/rpolonsky/sharder/training/launch_full_expo_remote_render.sh",
+        "60"
+      ]
+    },
+    {
+      "task": 79,
+      "learner_job": "23392681",
+      "renderer_job": "23380729",
+      "tmux": "pi05-unsharded-b16-task79-h200",
+      "log": "/work/hdd/bgqe/rpolonsky/sharder/training/logs/full_expo_task79.log",
+      "argv": [
+        "srun",
+        "--jobid=23392681",
+        "--overlap",
+        "--nodes=1",
+        "--ntasks=1",
+        "--cpus-per-task=12",
+        "--exact",
+        "--chdir=/projects/bgqe/rpolonsky/dcrl",
+        "env",
+        "RENDER_JOB_ID=23380729",
+        "RENDER_RPC_HOST=gpue05.delta.ncsa.illinois.edu",
+        "bash",
+        "/work/hdd/bgqe/rpolonsky/sharder/training/launch_full_expo_remote_render.sh",
+        "79"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6143 @@
+{
+  "base_successes": 512,
+  "models": {
+    "expo_2": {
+      "coverage": 90,
+      "training_task": 2,
+      "successes": 447,
+      "status": "complete",
+      "suite_rate": 0.24833333333333332,
+      "own_task_rate": 0.95,
+      "off_task_rate": 0.24044943820224718,
+      "paired_lost": 161,
+      "paired_gained": 96,
+      "paired_both_success": 351,
+      "paired_both_failure": 1192,
+      "zero_success_tasks": 52,
+      "tasks_improved": 12,
+      "tasks_worsened": 28,
+      "successful_tasks": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 19,
+          "delta_successes": 5
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 11,
+          "delta_successes": -8
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 18,
+          "delta_successes": 8
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 12,
+          "delta_successes": -8
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 12,
+          "delta_successes": -8
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 12,
+          "delta_successes": 10
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 7,
+          "delta_successes": -3
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 4,
+          "delta_successes": -15
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 14,
+          "delta_successes": -3
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 6,
+          "delta_successes": -3
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 7,
+          "delta_successes": 7
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 19,
+          "delta_successes": 19
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 13,
+          "delta_successes": -7
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 14,
+          "delta_successes": -5
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 12,
+          "delta_successes": 9
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 2,
+          "delta_successes": -6
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 18,
+          "delta_successes": -1
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 11,
+          "delta_successes": -3
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 20,
+          "delta_successes": 2
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 1,
+          "delta_successes": -6
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 8,
+          "delta_successes": 3
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 19,
+          "delta_successes": 5
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 11,
+          "delta_successes": -8
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 18,
+          "delta_successes": 8
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 12,
+          "delta_successes": -8
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 12,
+          "delta_successes": -8
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 12,
+          "delta_successes": 10
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 7,
+          "delta_successes": -3
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 4,
+          "delta_successes": -15
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 14,
+          "delta_successes": -3
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 6,
+          "delta_successes": -3
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 7,
+          "delta_successes": 7
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 19,
+          "delta_successes": 19
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 13,
+          "delta_successes": -7
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 14,
+          "delta_successes": -5
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 12,
+          "delta_successes": 9
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 2,
+          "delta_successes": -6
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 18,
+          "delta_successes": -1
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 11,
+          "delta_successes": -3
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 20,
+          "delta_successes": 2
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 1,
+          "delta_successes": -6
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 8,
+          "delta_successes": 3
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 0,
+          "delta_successes": -4
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "expo_28": {
+      "coverage": 90,
+      "training_task": 28,
+      "successes": 451,
+      "status": "complete",
+      "suite_rate": 0.25055555555555553,
+      "own_task_rate": 1.0,
+      "off_task_rate": 0.24213483146067416,
+      "paired_lost": 162,
+      "paired_gained": 101,
+      "paired_both_success": 350,
+      "paired_both_failure": 1187,
+      "zero_success_tasks": 48,
+      "tasks_improved": 18,
+      "tasks_worsened": 27,
+      "successful_tasks": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 12,
+          "delta_successes": -2
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 20,
+          "delta_successes": 1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 2,
+          "delta_successes": -8
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 4,
+          "delta_successes": 3
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 11,
+          "delta_successes": 4
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 4,
+          "delta_successes": 4
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 5,
+          "delta_successes": -15
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 12,
+          "delta_successes": 10
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 20,
+          "delta_successes": 10
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 9,
+          "delta_successes": -8
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 2,
+          "delta_successes": -7
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 3,
+          "delta_successes": 3
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 18,
+          "delta_successes": 18
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 13,
+          "delta_successes": -4
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 9,
+          "delta_successes": -10
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 10,
+          "delta_successes": 7
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 2,
+          "delta_successes": -7
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 2,
+          "delta_successes": -6
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 19,
+          "delta_successes": 0
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 12,
+          "delta_successes": -2
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 19,
+          "delta_successes": 1
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 11,
+          "delta_successes": 4
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 10,
+          "delta_successes": 6
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 12,
+          "delta_successes": -2
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 20,
+          "delta_successes": 1
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 2,
+          "delta_successes": -8
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 4,
+          "delta_successes": 3
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 11,
+          "delta_successes": 4
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 4,
+          "delta_successes": 4
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 5,
+          "delta_successes": -15
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 12,
+          "delta_successes": 10
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 20,
+          "delta_successes": 10
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 9,
+          "delta_successes": -8
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 2,
+          "delta_successes": -7
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 3,
+          "delta_successes": 3
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 18,
+          "delta_successes": 18
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 13,
+          "delta_successes": -4
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 9,
+          "delta_successes": -10
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 10,
+          "delta_successes": 7
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 2,
+          "delta_successes": -7
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 2,
+          "delta_successes": -6
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 19,
+          "delta_successes": 0
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 12,
+          "delta_successes": -2
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 19,
+          "delta_successes": 1
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 11,
+          "delta_successes": 4
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 0,
+          "delta_successes": -5
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 10,
+          "delta_successes": 6
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "expo_29": {
+      "coverage": 90,
+      "training_task": 29,
+      "successes": 441,
+      "status": "complete",
+      "suite_rate": 0.245,
+      "own_task_rate": 0.8,
+      "off_task_rate": 0.23876404494382023,
+      "paired_lost": 165,
+      "paired_gained": 94,
+      "paired_both_success": 347,
+      "paired_both_failure": 1194,
+      "zero_success_tasks": 47,
+      "tasks_improved": 14,
+      "tasks_worsened": 29,
+      "successful_tasks": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 2,
+          "delta_successes": 1
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 3,
+          "delta_successes": 3
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 13,
+          "delta_successes": 13
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 15,
+          "delta_successes": -4
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 7,
+          "delta_successes": -3
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 6,
+          "delta_successes": 5
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 2,
+          "delta_successes": -5
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 10,
+          "delta_successes": -10
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 2,
+          "delta_successes": -8
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 16,
+          "delta_successes": 2
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 9,
+          "delta_successes": -10
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 11,
+          "delta_successes": -6
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 7,
+          "delta_successes": -2
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 8,
+          "delta_successes": 8
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 15,
+          "delta_successes": -2
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 15,
+          "delta_successes": -5
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 4,
+          "delta_successes": 1
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 11,
+          "delta_successes": 2
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 8,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 16,
+          "delta_successes": -3
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 18,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 3,
+          "delta_successes": -4
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 13,
+          "delta_successes": 8
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 14,
+          "delta_successes": 10
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 2,
+          "delta_successes": 1
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 3,
+          "delta_successes": 3
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 13,
+          "delta_successes": 13
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 15,
+          "delta_successes": -4
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 7,
+          "delta_successes": -3
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 6,
+          "delta_successes": 5
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 2,
+          "delta_successes": -5
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 10,
+          "delta_successes": -10
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 2,
+          "delta_successes": -8
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 16,
+          "delta_successes": 2
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 9,
+          "delta_successes": -10
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 11,
+          "delta_successes": -6
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 7,
+          "delta_successes": -2
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 8,
+          "delta_successes": 8
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 15,
+          "delta_successes": -2
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 15,
+          "delta_successes": -5
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 4,
+          "delta_successes": 1
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 11,
+          "delta_successes": 2
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 18,
+          "delta_successes": -2
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 8,
+          "delta_successes": 0
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 16,
+          "delta_successes": -3
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 18,
+          "delta_successes": 0
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 3,
+          "delta_successes": -4
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 13,
+          "delta_successes": 8
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 14,
+          "delta_successes": 10
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "expo_60": {
+      "coverage": 90,
+      "training_task": 60,
+      "successes": 368,
+      "status": "complete",
+      "suite_rate": 0.20444444444444446,
+      "own_task_rate": 1.0,
+      "off_task_rate": 0.19550561797752808,
+      "paired_lost": 236,
+      "paired_gained": 92,
+      "paired_both_success": 276,
+      "paired_both_failure": 1196,
+      "zero_success_tasks": 55,
+      "tasks_improved": 10,
+      "tasks_worsened": 31,
+      "successful_tasks": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 2,
+          "delta_successes": 1
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 4,
+          "delta_successes": -10
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 9,
+          "delta_successes": 9
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 11,
+          "delta_successes": -8
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 4,
+          "delta_successes": -6
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 4,
+          "delta_successes": -3
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 13,
+          "delta_successes": -7
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 9,
+          "delta_successes": -11
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 14,
+          "delta_successes": 4
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 1,
+          "delta_successes": -13
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 6,
+          "delta_successes": -13
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 2,
+          "delta_successes": -15
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 2,
+          "delta_successes": 0
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 20,
+          "delta_successes": 20
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 15,
+          "delta_successes": -5
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 19,
+          "delta_successes": 2
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 5,
+          "delta_successes": 4
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 13,
+          "delta_successes": -6
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 20,
+          "delta_successes": 11
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 3,
+          "delta_successes": -17
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 16,
+          "delta_successes": -3
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 6,
+          "delta_successes": -8
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 12,
+          "delta_successes": -6
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 3,
+          "delta_successes": -4
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 12,
+          "delta_successes": 7
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 12,
+          "delta_successes": 8
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 2,
+          "delta_successes": 1
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 4,
+          "delta_successes": -10
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 9,
+          "delta_successes": 9
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 11,
+          "delta_successes": -8
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 4,
+          "delta_successes": -6
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 4,
+          "delta_successes": -3
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 13,
+          "delta_successes": -7
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 9,
+          "delta_successes": -11
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 14,
+          "delta_successes": 4
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 1,
+          "delta_successes": -13
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 6,
+          "delta_successes": -13
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 2,
+          "delta_successes": -15
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 2,
+          "delta_successes": 0
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 20,
+          "delta_successes": 20
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 15,
+          "delta_successes": -5
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 19,
+          "delta_successes": 2
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 6,
+          "delta_successes": -14
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 5,
+          "delta_successes": 4
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 13,
+          "delta_successes": -6
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 0,
+          "delta_successes": -3
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 20,
+          "delta_successes": 11
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 3,
+          "delta_successes": -17
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 0,
+          "delta_successes": -8
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 16,
+          "delta_successes": -3
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 14,
+          "delta_successes": -6
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 6,
+          "delta_successes": -8
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 12,
+          "delta_successes": -6
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 3,
+          "delta_successes": -4
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 12,
+          "delta_successes": 7
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 12,
+          "delta_successes": 8
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "expo_79": {
+      "coverage": 90,
+      "training_task": 79,
+      "successes": 483,
+      "status": "complete",
+      "suite_rate": 0.2683333333333333,
+      "own_task_rate": 1.0,
+      "off_task_rate": 0.2601123595505618,
+      "paired_lost": 139,
+      "paired_gained": 110,
+      "paired_both_success": 373,
+      "paired_both_failure": 1178,
+      "zero_success_tasks": 45,
+      "tasks_improved": 14,
+      "tasks_worsened": 27,
+      "successful_tasks": [
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 6,
+          "delta_successes": -8
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 6,
+          "delta_successes": 6
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 19,
+          "delta_successes": 0
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 10,
+          "delta_successes": 9
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 10,
+          "delta_successes": 0
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 4,
+          "delta_successes": 3
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 4,
+          "delta_successes": -3
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 6,
+          "delta_successes": -4
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 14,
+          "delta_successes": 0
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 14,
+          "delta_successes": -5
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 4,
+          "delta_successes": -13
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 8,
+          "delta_successes": -1
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 17,
+          "delta_successes": 17
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 17,
+          "delta_successes": 0
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 5,
+          "delta_successes": -14
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 5,
+          "delta_successes": -15
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 7,
+          "delta_successes": 4
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 5,
+          "delta_successes": -4
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 17,
+          "delta_successes": -2
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 18,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 16,
+          "delta_successes": 15
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 20,
+          "delta_successes": 15
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 13,
+          "delta_successes": 9
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 6,
+          "delta_successes": -8
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 6,
+          "delta_successes": 6
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 19,
+          "delta_successes": 0
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 10,
+          "delta_successes": 9
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 10,
+          "delta_successes": 0
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 4,
+          "delta_successes": 3
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 4,
+          "delta_successes": -3
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 2,
+          "delta_successes": 2
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 6,
+          "delta_successes": -4
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 14,
+          "delta_successes": 0
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 14,
+          "delta_successes": -5
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 4,
+          "delta_successes": -13
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 8,
+          "delta_successes": -1
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 17,
+          "delta_successes": 17
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 3,
+          "delta_successes": 2
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 17,
+          "delta_successes": 0
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 17,
+          "delta_successes": -3
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 5,
+          "delta_successes": -14
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 5,
+          "delta_successes": -15
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 20,
+          "delta_successes": 0
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 7,
+          "delta_successes": 4
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 5,
+          "delta_successes": -4
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 16,
+          "delta_successes": -4
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 0,
+          "delta_successes": -8
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 17,
+          "delta_successes": -2
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 19,
+          "delta_successes": -1
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 1,
+          "delta_successes": 0
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 9,
+          "delta_successes": -5
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 18,
+          "delta_successes": 0
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 16,
+          "delta_successes": 15
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 20,
+          "delta_successes": 15
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 13,
+          "delta_successes": 9
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "sft_2": {
+      "coverage": 90,
+      "training_task": 2,
+      "successes": 112,
+      "status": "complete",
+      "suite_rate": 0.06222222222222222,
+      "own_task_rate": 0.95,
+      "off_task_rate": 0.052247191011235955,
+      "paired_lost": 431,
+      "paired_gained": 31,
+      "paired_both_success": 81,
+      "paired_both_failure": 1257,
+      "zero_success_tasks": 73,
+      "tasks_improved": 4,
+      "tasks_worsened": 40,
+      "successful_tasks": [
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 19,
+          "delta_successes": 5
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 8,
+          "delta_successes": -2
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 8,
+          "delta_successes": -2
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 8,
+          "delta_successes": -9
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 4,
+          "delta_successes": 4
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 4,
+          "delta_successes": -16
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 4,
+          "delta_successes": -16
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 2,
+          "delta_successes": -18
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 11,
+          "delta_successes": 8
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 2,
+          "delta_successes": -12
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 1,
+          "delta_successes": -4
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 19,
+          "delta_successes": 5
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 8,
+          "delta_successes": -2
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 20,
+          "delta_successes": 3
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 8,
+          "delta_successes": -2
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 8,
+          "delta_successes": -9
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 1,
+          "delta_successes": -1
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 4,
+          "delta_successes": 4
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 4,
+          "delta_successes": -16
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 4,
+          "delta_successes": -16
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 0,
+          "delta_successes": -17
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 2,
+          "delta_successes": -18
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 2,
+          "delta_successes": -17
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 11,
+          "delta_successes": 8
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 0,
+          "delta_successes": -8
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 8,
+          "delta_successes": -12
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 2,
+          "delta_successes": -12
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 0,
+          "delta_successes": -18
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 1,
+          "delta_successes": -4
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 0,
+          "delta_successes": -4
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "sft_28": {
+      "coverage": 90,
+      "training_task": 28,
+      "successes": 46,
+      "status": "complete",
+      "suite_rate": 0.025555555555555557,
+      "own_task_rate": 1.0,
+      "off_task_rate": 0.014606741573033709,
+      "paired_lost": 496,
+      "paired_gained": 30,
+      "paired_both_success": 16,
+      "paired_both_failure": 1258,
+      "zero_success_tasks": 84,
+      "tasks_improved": 3,
+      "tasks_worsened": 41,
+      "successful_tasks": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 19,
+          "delta_successes": 18
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 20,
+          "delta_successes": 10
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 3,
+          "delta_successes": -14
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 2,
+          "delta_successes": -18
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 1,
+          "delta_successes": -19
+        }
+      ],
+      "per_task": [
+        {
+          "task": 0,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 19,
+          "delta_successes": 18
+        },
+        {
+          "task": 1,
+          "instruction": "close the top drawer of the cabinet and put the black bowl on top of it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 2,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 3,
+          "instruction": "put the butter at the back in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 4,
+          "instruction": "put the butter at the front in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 5,
+          "instruction": "put the chocolate pudding in the top drawer of the cabinet and close it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 6,
+          "instruction": "open the bottom drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 7,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 8,
+          "instruction": "open the top drawer of the cabinet and put the bowl in it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 9,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 10,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 11,
+          "instruction": "open the top drawer of the cabinet",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 12,
+          "instruction": "put the black bowl at the back on the plate",
+          "base_successes": 10,
+          "successes": 0,
+          "delta_successes": -10
+        },
+        {
+          "task": 13,
+          "instruction": "put the black bowl at the front on the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 14,
+          "instruction": "put the middle black bowl on the plate",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 15,
+          "instruction": "put the middle black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 16,
+          "instruction": "stack the black bowl at the front on the black bowl in the middle",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 17,
+          "instruction": "stack the middle black bowl on the back black bowl",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 18,
+          "instruction": "put the frying pan on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 19,
+          "instruction": "put the moka pot on the stove",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 20,
+          "instruction": "turn on the stove",
+          "base_successes": 17,
+          "successes": 0,
+          "delta_successes": -17
+        },
+        {
+          "task": 21,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 22,
+          "instruction": "close the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 23,
+          "instruction": "close the bottom drawer of the cabinet and open the top drawer",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 24,
+          "instruction": "put the black bowl in the bottom drawer of the cabinet",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 25,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 26,
+          "instruction": "put the wine bottle in the bottom drawer of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 27,
+          "instruction": "put the wine bottle on the wine rack",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 28,
+          "instruction": "close the top drawer of the cabinet",
+          "base_successes": 10,
+          "successes": 20,
+          "delta_successes": 10
+        },
+        {
+          "task": 29,
+          "instruction": "put the black bowl in the top drawer of the cabinet",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 30,
+          "instruction": "put the black bowl on the plate",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 31,
+          "instruction": "put the black bowl on top of the cabinet",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 32,
+          "instruction": "put the ketchup in the top drawer of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 33,
+          "instruction": "close the microwave",
+          "base_successes": 17,
+          "successes": 3,
+          "delta_successes": -14
+        },
+        {
+          "task": 34,
+          "instruction": "put the yellow and white mug to the front of the white mug",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 35,
+          "instruction": "open the microwave",
+          "base_successes": 2,
+          "successes": 0,
+          "delta_successes": -2
+        },
+        {
+          "task": 36,
+          "instruction": "put the white bowl on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 37,
+          "instruction": "put the white bowl to the right of the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 38,
+          "instruction": "put the right moka pot on the stove",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 39,
+          "instruction": "turn off the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 40,
+          "instruction": "put the frying pan on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 41,
+          "instruction": "put the frying pan on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 42,
+          "instruction": "put the frying pan under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 1,
+          "delta_successes": 1
+        },
+        {
+          "task": 43,
+          "instruction": "put the white bowl on top of the cabinet",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 44,
+          "instruction": "turn on the stove",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 45,
+          "instruction": "turn on the stove and put the frying pan on it",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 46,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 47,
+          "instruction": "pick up the cream cheese box and put it in the basket",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 48,
+          "instruction": "pick up the ketchup and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 49,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 50,
+          "instruction": "pick up the alphabet soup and put it in the basket",
+          "base_successes": 17,
+          "successes": 0,
+          "delta_successes": -17
+        },
+        {
+          "task": 51,
+          "instruction": "pick up the butter and put it in the basket",
+          "base_successes": 20,
+          "successes": 2,
+          "delta_successes": -18
+        },
+        {
+          "task": 52,
+          "instruction": "pick up the milk and put it in the basket",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 53,
+          "instruction": "pick up the orange juice and put it in the basket",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 54,
+          "instruction": "pick up the tomato sauce and put it in the basket",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 55,
+          "instruction": "pick up the alphabet soup and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 56,
+          "instruction": "pick up the butter and put it in the tray",
+          "base_successes": 20,
+          "successes": 1,
+          "delta_successes": -19
+        },
+        {
+          "task": 57,
+          "instruction": "pick up the cream cheese and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 58,
+          "instruction": "pick up the ketchup and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 59,
+          "instruction": "pick up the tomato sauce and put it in the tray",
+          "base_successes": 3,
+          "successes": 0,
+          "delta_successes": -3
+        },
+        {
+          "task": 60,
+          "instruction": "pick up the black bowl on the left and put it in the tray",
+          "base_successes": 9,
+          "successes": 0,
+          "delta_successes": -9
+        },
+        {
+          "task": 61,
+          "instruction": "pick up the chocolate pudding and put it in the tray",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 62,
+          "instruction": "pick up the salad dressing and put it in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 63,
+          "instruction": "stack the left bowl on the right bowl and place them in the tray",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 64,
+          "instruction": "stack the right bowl on the left bowl and place them in the tray",
+          "base_successes": 8,
+          "successes": 0,
+          "delta_successes": -8
+        },
+        {
+          "task": 65,
+          "instruction": "put the red mug on the left plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 66,
+          "instruction": "put the red mug on the right plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 67,
+          "instruction": "put the white mug on the left plate",
+          "base_successes": 19,
+          "successes": 0,
+          "delta_successes": -19
+        },
+        {
+          "task": 68,
+          "instruction": "put the yellow and white mug on the right plate",
+          "base_successes": 20,
+          "successes": 0,
+          "delta_successes": -20
+        },
+        {
+          "task": 69,
+          "instruction": "put the chocolate pudding to the left of the plate",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 70,
+          "instruction": "put the chocolate pudding to the right of the plate",
+          "base_successes": 14,
+          "successes": 0,
+          "delta_successes": -14
+        },
+        {
+          "task": 71,
+          "instruction": "put the red mug on the plate",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 72,
+          "instruction": "put the white mug on the plate",
+          "base_successes": 18,
+          "successes": 0,
+          "delta_successes": -18
+        },
+        {
+          "task": 73,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 74,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 1,
+          "successes": 0,
+          "delta_successes": -1
+        },
+        {
+          "task": 75,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 76,
+          "instruction": "pick up the yellow and white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 77,
+          "instruction": "pick up the book and place it in the back compartment of the caddy",
+          "base_successes": 7,
+          "successes": 0,
+          "delta_successes": -7
+        },
+        {
+          "task": 78,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 79,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 5,
+          "successes": 0,
+          "delta_successes": -5
+        },
+        {
+          "task": 80,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 81,
+          "instruction": "pick up the book and place it in the front compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 82,
+          "instruction": "pick up the book and place it in the left compartment of the caddy",
+          "base_successes": 4,
+          "successes": 0,
+          "delta_successes": -4
+        },
+        {
+          "task": 83,
+          "instruction": "pick up the book and place it in the right compartment of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 84,
+          "instruction": "pick up the red mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 85,
+          "instruction": "pick up the white mug and place it to the right of the caddy",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 86,
+          "instruction": "pick up the book in the middle and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 87,
+          "instruction": "pick up the book on the left and place it on top of the shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 88,
+          "instruction": "pick up the book on the right and place it on the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        },
+        {
+          "task": 89,
+          "instruction": "pick up the book on the right and place it under the cabinet shelf",
+          "base_successes": 0,
+          "successes": 0,
+          "delta_successes": 0
+        }
+      ]
+    },
+    "sft_29": {
+      "coverage": 40,
+      "training_task": 29,
+      "successes": 125,
+      "status": "partial; excluded from full-suite aggregates"
+    }
+  }
+}

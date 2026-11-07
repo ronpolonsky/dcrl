@@ -1,0 +1,27 @@
+{
+  "mode": "sft_pi",
+  "suite": "libero_90",
+  "checkpoint": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/latest_checkpoints/2000",
+  "assets_dir": "/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/sft_retention_scope_20261103/task_28_lora_only/student_assets",
+  "task_ids": [
+    28
+  ],
+  "episodes_per_task": 20,
+  "max_steps": 400,
+  "eval_seed": 7,
+  "action_horizon": 10,
+  "replan_steps": 5,
+  "completed_tasks": 1,
+  "failed_tasks": [],
+  "mean_task_success_rate": 1.0,
+  "results": [
+    {
+      "task_id": 28,
+      "instruction": "close the top drawer of the cabinet",
+      "successes": 20,
+      "episodes": 20,
+      "eval/success_rate": 1.0,
+      "eval/mean_steps": 26.25
+    }
+  ]
+}
