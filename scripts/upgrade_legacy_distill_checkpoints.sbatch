@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
-#SBATCH --partition=iris-hi
+#SBATCH --partition=gpuA100x4
 #SBATCH --time=02:00:00
 #SBATCH --nodes=1
 # Compact model migration needs only a small CPU/RAM footprint.
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-# Use an available A40 slot for the migration when the H100/H200 tiers are busy.
-#SBATCH --gres=gpu:a40:1
-#SBATCH --account=iris
-# Use the next available healthy Iris-hi tier; do not pin a host.
+# Use an available Delta A100 slot for the migration when the H100/H200 tiers are busy.
+#SBATCH --gres=gpu:nvidia_a100:1
+#SBATCH --account=bgqe-delta-gpu
+# Use the next available healthy Delta A100 node; do not pin a host.
 # H100/H200 are allowed when available, while known bad nodes are excluded.
-#SBATCH --exclude=iris[1-4,9-10],iris-hgx-[1-2],iris-hp-z8
 #SBATCH --job-name=upgrade-small-expo
-#SBATCH --output=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.out
-#SBATCH --error=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.err
+#SBATCH --output=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.out
+#SBATCH --error=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.err
 
 set -euo pipefail
-PROJECT=/nlp/scr/ronpo/projects/dcrl
+PROJECT=/work/hdd/bgqe/rpolonsky/dcrl
 EXPO="$PROJECT/third_party/expo-ft"
 PYTHON="$EXPO/.venv/bin/python"
 LIBERO_ROOT="$PROJECT/.deps/LIBERO/libero/libero"
-SOURCE_ROOT=/nlp/scr/ronpo/dcrlcheckpoints/small_expo_3phase_10_5_sharedstats
-TARGET_ROOT=/nlp/scr/ronpo/dcrlcheckpoints/small_expo_3phase_dualopt_10_5_sharedstats
+SOURCE_ROOT=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_3phase_10_5_sharedstats
+TARGET_ROOT=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_3phase_dualopt_10_5_sharedstats
 export PYTHONPATH="$PROJECT:$EXPO/expo_ft/agents/vla/openpi/src:$EXPO/expo_ft/agents/vla/openpi/packages/openpi-client/src:$PROJECT/.deps/LIBERO${PYTHONPATH:+:$PYTHONPATH}"
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl

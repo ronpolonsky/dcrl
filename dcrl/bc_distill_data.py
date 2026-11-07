@@ -98,6 +98,7 @@ def collect_teacher_chunks(
     target_successes: int | None = None,
     target_failures: int | None = None,
     max_attempts_override: int | None = None,
+    progress_callback=None,
 ) -> None:
     """Collect 10/5 chunks from a frozen SmallExpo checkpoint.
 
@@ -250,6 +251,13 @@ def collect_teacher_chunks(
                 saved_rng = file[last].attrs.get("teacher_rng_after")
                 if saved_rng is not None:
                     teacher = teacher.replace(rng=jax.numpy.asarray(saved_rng, dtype=jax.numpy.uint32))
+                if progress_callback is not None:
+                    success_count = sum(bool(file[n].attrs.get("success", False)) for n in complete)
+                    progress_callback({
+                        "episode": max(int(n.rsplit("_", 1)[1]) for n in complete) + 1,
+                        "successes": success_count,
+                        "failures": len(complete) - success_count,
+                    })
 
             for episode in tqdm(range(max_attempts), desc="Collect 10/5 teacher episodes"):
                 if target_successes is not None:
@@ -358,6 +366,14 @@ def collect_teacher_chunks(
                 group.create_dataset("actions", data=np.stack([row[1] for row in rows]))
                 group.create_dataset("executed_prefix", data=[row[2] for row in rows])
                 file.flush()
+                if progress_callback is not None:
+                    complete_groups = [n for n in file if bool(file[n].attrs.get("complete", False))]
+                    success_count = sum(bool(file[n].attrs.get("success", False)) for n in complete_groups)
+                    progress_callback({
+                        "episode": episode + 1,
+                        "successes": success_count,
+                        "failures": len(complete_groups) - success_count,
+                    })
             if target_successes is not None:
                 success_count = sum(
                     bool(file[name].attrs.get("success", False))

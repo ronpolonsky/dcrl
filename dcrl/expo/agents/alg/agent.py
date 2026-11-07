@@ -14,7 +14,8 @@ from dcrl.expo.types import PRNGKey
 
 
 def initialize_checkpoint_dir(
-    checkpoint_dir: epath.Path | str, *, keep_period: int | None, overwrite: bool, resume: bool
+    checkpoint_dir: epath.Path | str, *, keep_period: int | None, overwrite: bool,
+    resume: bool, max_to_keep: int = 1
 ) -> tuple[ocp.CheckpointManager, bool]:
     checkpoint_dir = epath.Path(checkpoint_dir).resolve()
     resuming = False
@@ -40,7 +41,7 @@ def initialize_checkpoint_dir(
         checkpoint_dir,
         item_handlers=item_handlers,
         options=ocp.CheckpointManagerOptions(
-            max_to_keep=100,
+            max_to_keep=max_to_keep,
             keep_period=keep_period,
             create=False,
             async_options=ocp.AsyncOptions(timeout_secs=7200),

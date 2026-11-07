@@ -2,26 +2,26 @@
 # Launch one fresh Pi0.5 EXPO-F/T LIBERO RL run from its latest finalized checkpoint.
 # Submit with: sbatch --export=ALL,TASK_ID=<2|28|29|60|79> this_file
 # Checkpoint retention is deliberately one and no keep_period is used.
-#SBATCH --account=nlp
+#SBATCH --account=bgqe-delta-gpu
 #SBATCH --job-name=pi-robo-libero-resume
-#SBATCH --partition=sphinx
+#SBATCH --partition=gpuA100x4
 # Sphinx8 exhausted its GPU during task-60 batch prefetch (job 18009807).
 # Keep it out of subsequent Pi0.5 retries.
-#SBATCH --exclude=sphinx[1-3,8]
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:nvidia_a100:1
 #SBATCH --cpus-per-task=12
-#SBATCH --mem=256G
+# A Delta A100 node has about 252 GiB usable memory.
+#SBATCH --mem=240G
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/nlp/scr/ronpo/projects/dcrl/slurm/pi-robo-libero-resume-%j.out
-#SBATCH --error=/nlp/scr/ronpo/projects/dcrl/slurm/pi-robo-libero-resume-%j.err
+#SBATCH --output=/work/hdd/bgqe/rpolonsky/dcrl/slurm/pi-robo-libero-resume-%j.out
+#SBATCH --error=/work/hdd/bgqe/rpolonsky/dcrl/slurm/pi-robo-libero-resume-%j.err
 
 set -euo pipefail
 
 : "${TASK_ID:?Submit with TASK_ID=2,28,29,60,or79}"
 
-PROJECT=/nlp/scr/ronpo/projects/dcrl
+PROJECT=/work/hdd/bgqe/rpolonsky/dcrl
 EXPO="$PROJECT/third_party/expo-ft"
-OUTPUT_ROOT="${OUTPUT_ROOT:-/nlp/scr/ronpo/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx}"
 RUN_NAME="${RUN_NAME:-pi_robo_libero_prod_200k_sphinx_task${TASK_ID}}"
 BATCH_SIZE="${BATCH_SIZE:-16}"
 RUNTIME_ROOT="$OUTPUT_ROOT/runtime"
@@ -44,6 +44,7 @@ export WANDB_DIR="$OUTPUT_ROOT/wandb"
 # Route all model, JAX, W&B, XDG, and temporary caches to project storage.
 # Home caches on AFS/Sailhome are quota limited and abort Pi initialization.
 export OPENPI_DATA_HOME="$OUTPUT_ROOT/openpi_cache"
+export PI05_ASSETS_DIR="${PI05_ASSETS_DIR:-$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_libero/assets}"
 export DCRL_JAX_CACHE_ROOT="$CACHE_ROOT/jax"
 export WANDB_CACHE_DIR="$CACHE_ROOT/wandb"
 export WANDB_CONFIG_DIR="$CACHE_ROOT/wandb/config"
@@ -62,6 +63,7 @@ cd "$PROJECT"
 
 exec "$EXPO/.venv/bin/python" "$PROJECT/train_pi_robo_libero.py" \
   --config=configs/model/expo_ft_pi_libero_config.py \
+  --config.pi05_assets_dir="$PI05_ASSETS_DIR" \
   --project_name=dcrl \
   --run_name="$RUN_NAME" \
   --output_dir="$OUTPUT_ROOT/task${TASK_ID}" \

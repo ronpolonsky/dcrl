@@ -10,6 +10,7 @@ import logging
 import os
 import threading
 import json
+import pickle
 from pathlib import Path
 import time
 from collections import deque
@@ -26,6 +27,7 @@ import etils.epath as epath
 
 import wandb
 from expo_ft.agents import initialize_checkpoint_dir
+from dcrl.best_checkpoint import evaluation_checkpoint_metrics
 from expo_ft.agents.alg.batch_utils import CRITIC_CAMERA_KEYS
 from expo_ft.data.replay_buffer import create_replay_buffer, _critic_key_to_storage
 from expo_ft.data.batch_processor import BatchProcessor
@@ -266,6 +268,9 @@ def main(_):
     os.makedirs(checkpoint_dir, exist_ok=True)
 
     checkpoint_dir_path = epath.Path(checkpoint_dir)
+    best_eval_checkpointing = (
+        FLAGS.checkpoint_model and FLAGS.eval_interval > 0 and FLAGS.eval_episodes > 0
+    )
     checkpoint_manager, resuming = initialize_checkpoint_dir(
         checkpoint_dir_path,
         keep_period=FLAGS.keep_period,
@@ -273,6 +278,7 @@ def main(_):
         resume=FLAGS.resume,
         max_to_keep=FLAGS.checkpoint_max_to_keep,
         keep_checkpoints_without_metrics=FLAGS.checkpoint_keep_without_metrics,
+        best_metric="eval/success_rate" if best_eval_checkpointing else None,
     )
 
     init_wandb(checkpoint_dir_path, resuming, FLAGS.project_name, FLAGS.run_name)
@@ -378,6 +384,12 @@ def main(_):
     )
 
     start_step = 0
+    latest_step = None
+    resume_state = None
+    resume_state_path = None
+    episodes_since_update = 0
+    transitions_since_update = 0
+    combine_rng = jax.random.PRNGKey(FLAGS.seed + 100)
     if resuming:
         agent = restore_checkpoint(checkpoint_manager, agent)
         if hasattr(agent, "cache_infer_params"):
@@ -391,6 +403,27 @@ def main(_):
             start_step = latest_step + 1
             logging.info("Resuming from step %d", start_step)
         batch_processor.restore(checkpoint_dir_path, up_to_step=latest_step)
+        if latest_step is not None:
+            resume_state_path = Path(checkpoint_dir) / f"resume_state_{latest_step:012d}.pkl"
+        if resume_state_path is not None and resume_state_path.exists():
+            with resume_state_path.open("rb") as file:
+                candidate_state = pickle.load(file)
+            if int(candidate_state.get("step", -1)) == latest_step:
+                resume_state = candidate_state
+                combine_rng = jax.device_put(resume_state["combine_rng"], replicated_sharding)
+                replay_buffer.rng = jax.device_put(resume_state["replay_rng"], replicated_sharding)
+                offline_replay_buffer.rng = jax.device_put(
+                    resume_state["offline_rng"], replicated_sharding
+                )
+                episodes_since_update = int(resume_state["episodes_since_update"])
+                transitions_since_update = int(resume_state["transitions_since_update"])
+            else:
+                logging.warning("Resume sidecar does not match checkpoint step %s", latest_step)
+        elif latest_step is not None:
+            logging.warning(
+                "Checkpoint %s has no driver-state sidecar; replay RNG/update counters use defaults",
+                latest_step,
+            )
 
     # The environment is created only now, after the slow Pi0.5 build.
     logging.info("Creating LIBERO environment...")
@@ -398,6 +431,11 @@ def main(_):
         FLAGS.suite, FLAGS.task_id, seed=FLAGS.seed, image_size=FLAGS.image_size,
         max_episode_steps=FLAGS.max_episode_steps,
     )
+    completed_episodes = (
+        int(resume_state["completed_episodes"]) if resume_state is not None
+        else replay_buffer.count_episodes_chronological() if resuming else 0
+    )
+    env._env.episode_index = completed_episodes
     env.reset()
     logging.info("Created training environment %s (%s)", env.env_id, task_description)
     eval_env = None
@@ -417,6 +455,76 @@ def main(_):
                 scalar[key] = float(array.reshape(()))
         with metrics_path.open("a") as file:
             file.write(json.dumps({"step": int(step), **scalar}) + "\n")
+
+    sink = None
+
+    def save_resumable_checkpoint(manager, checkpoint_agent, step, *, metrics=None):
+        """Save learner plus replay and driver state for this exact step."""
+        if sink is not None:
+            sink.flush_transitions()
+            sink._flush_disk_saves()
+        sidecar = Path(checkpoint_dir) / f"resume_state_{step:012d}.pkl"
+        state = {
+            "step": int(step),
+            "combine_rng": np.asarray(jax.device_get(combine_rng)),
+            "replay_rng": np.asarray(jax.device_get(replay_buffer.rng)),
+            "offline_rng": np.asarray(jax.device_get(offline_replay_buffer.rng)),
+            "episodes_since_update": int(episodes_since_update),
+            "transitions_since_update": int(transitions_since_update),
+            "completed_episodes": int(training_log.ep_count),
+            "training_stats": {
+                "sample_time": list(training_log.sample_time),
+                "update_time": list(training_log.update_time),
+                "sample_count": training_log.sample_count,
+                "update_count": training_log.update_count,
+                "ep_successes": list(training_log.ep_successes),
+                "intervention_count": training_log.intervention_count,
+                "total_intervention_transitions": training_log.total_intervention_transitions,
+            },
+        }
+        temp_sidecar = Path(str(sidecar) + ".tmp")
+        with temp_sidecar.open("wb") as file:
+            pickle.dump(state, file, protocol=pickle.HIGHEST_PROTOCOL)
+        temp_sidecar.replace(sidecar)
+        save_checkpoint(manager, checkpoint_agent, step, metrics=metrics)
+        manager.wait_until_finished()
+        retained_steps = set(manager.all_steps())
+        if step in retained_steps:
+            for old_sidecar in Path(checkpoint_dir).glob("resume_state_*.pkl"):
+                old_step = int(old_sidecar.stem.rsplit("_", 1)[-1])
+                if old_step not in retained_steps:
+                    old_sidecar.unlink(missing_ok=True)
+            if sink is not None:
+                sink.last_ckpt_step = step
+            return True
+        sidecar.unlink(missing_ok=True)
+        return False
+
+    best_eval_score = float("-inf")
+    if latest_step is not None:
+        previous_eval = eval_dir / f"{latest_step:08d}.json"
+        if previous_eval.exists():
+            try:
+                best_eval_score = float(json.loads(previous_eval.read_text())["eval/success_rate"])
+            except (KeyError, ValueError, json.JSONDecodeError):
+                pass
+
+    def save_best_eval_checkpoint(step, evaluation):
+        nonlocal best_eval_score
+        if not best_eval_checkpointing or "eval/success_rate" not in evaluation:
+            return
+        score = float(evaluation["eval/success_rate"])
+        if score < best_eval_score:
+            logging.info("Keeping best checkpoint at success=%.3f; eval at %d was %.3f",
+                         best_eval_score, step, score)
+            return
+        saved = save_resumable_checkpoint(
+            checkpoint_manager, agent, step,
+            metrics=evaluation_checkpoint_metrics(evaluation["eval/success_rate"], step),
+        )
+        if saved:
+            best_eval_score = score
+            logging.info("Updated best-eval checkpoint at step %d (success=%.3f)", step, score)
 
     if FLAGS.eval_interval > 0 and FLAGS.eval_episodes > 0:
         eval_env = _LiberoEnvClient(
@@ -438,9 +546,18 @@ def main(_):
     )
 
     episode_log = EpisodeState()
-    training_log = TrainingStats(
-        ep_count=replay_buffer.count_episodes_chronological() if resuming else 0,
-    )
+    training_log = TrainingStats(ep_count=completed_episodes)
+    if resume_state is not None:
+        saved_stats = resume_state.get("training_stats", {})
+        training_log.sample_time.extend(saved_stats.get("sample_time", ()))
+        training_log.update_time.extend(saved_stats.get("update_time", ()))
+        training_log.sample_count = int(saved_stats.get("sample_count", 0))
+        training_log.update_count = int(saved_stats.get("update_count", 0))
+        training_log.ep_successes.extend(saved_stats.get("ep_successes", ()))
+        training_log.intervention_count = int(saved_stats.get("intervention_count", 0))
+        training_log.total_intervention_transitions = int(
+            saved_stats.get("total_intervention_transitions", 0)
+        )
     if resuming:
         logging.info("Resuming: ep_count set to %d (episodes in replay buffer).", training_log.ep_count)
 
@@ -460,8 +577,10 @@ def main(_):
     # not shift interval checkpoints by one environment step.
     checkpoint_anchor = max(0, start_step - 1) if resuming else start_step
     sink = EpisodeSink(
-        batch_processor, buffer_lock, checkpoint_manager, checkpoint_dir_path, save_checkpoint,
-        save_buffer=FLAGS.checkpoint_buffer, checkpoint_model=FLAGS.checkpoint_model,
+        batch_processor, buffer_lock, checkpoint_manager, checkpoint_dir_path,
+        save_resumable_checkpoint,
+        save_buffer=(FLAGS.checkpoint_buffer or FLAGS.checkpoint_model),
+        checkpoint_model=(FLAGS.checkpoint_model and not best_eval_checkpointing),
         checkpoint_interval=FLAGS.checkpoint_interval, start_step=checkpoint_anchor,
     )
     if eval_env is not None and not resuming:
@@ -473,6 +592,7 @@ def main(_):
         (eval_dir / "00000000.json").write_text(
             json.dumps({"step": 0, **initial_eval}, indent=2) + "\n"
         )
+        save_best_eval_checkpoint(0, initial_eval)
         sink.record_log(0, {
             key: value for key, value in initial_eval.items()
             if key != "trials"
@@ -520,9 +640,6 @@ def main(_):
     # upstream robot warm-up action is intentionally omitted.
     action_plan = deque()
     action_type = "policy"
-    episodes_since_update = 0
-    transitions_since_update = 0
-    combine_rng = jax.random.PRNGKey(FLAGS.seed + 100)
     first_step_of_episode = True
 
     def finish_episode(step, episode_success, metrics):
@@ -559,6 +676,7 @@ def main(_):
             (eval_dir / f"{step:08d}.json").write_text(
                 json.dumps({"step": step, **eval_result}, indent=2) + "\n"
             )
+            save_best_eval_checkpoint(step, eval_result)
             next_eval_step = (step // FLAGS.eval_interval + 1) * FLAGS.eval_interval
 
         episode_log.reset()
@@ -682,15 +800,14 @@ def main(_):
 
     sink.flush_all()
 
-    if FLAGS.checkpoint_model:
+    if FLAGS.checkpoint_model and not best_eval_checkpointing:
         try:
-            save_checkpoint(checkpoint_manager, agent, FLAGS.max_steps)
+            save_resumable_checkpoint(checkpoint_manager, agent, FLAGS.max_steps)
             logging.info(f"Saved final agent checkpoint at step {FLAGS.max_steps}")
         except Exception as e:
             logging.error(f"Could not save final checkpoint: {e}")
         logging.info("Waiting for checkpoint manager to finish")
         checkpoint_manager.wait_until_finished()
-
     sampler.close()
     prefetch_pool.shutdown(wait=False)
     env.close()

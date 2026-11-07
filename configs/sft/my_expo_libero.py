@@ -25,7 +25,8 @@ def _resolve_class(path: str):
 
 
 def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
-                  mesh, data_sharding, replicated_sharding):
+                  mesh, data_sharding, replicated_sharding,
+                  restore_only: bool = False, assets_dir: Path | None = None):
     """Build the configured learner and its shared Pi0.5 data transforms."""
     import jax
     import jax.numpy as jnp
@@ -54,7 +55,7 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
         data=dataclasses.replace(
             base.data,
             assets=openpi_configs.AssetsConfig(
-                assets_dir=str(output_dir / "student_assets"),
+                assets_dir=str(assets_dir or output_dir / "student_assets"),
                 asset_id="physical-intelligence/libero",
             ),
         ),
@@ -75,7 +76,7 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
         train_config,
         mesh,
         jax.random.PRNGKey(args.seed),
-        resume=False,
+        resume=restore_only,
         data_sharding=data_sharding,
         replicated_sharding=replicated_sharding,
         default_prompt=instruction,

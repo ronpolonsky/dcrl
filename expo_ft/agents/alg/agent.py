@@ -17,6 +17,7 @@ def initialize_checkpoint_dir(
     checkpoint_dir: epath.Path | str, *, keep_period: int | None, overwrite: bool, resume: bool,
     max_to_keep: int = 100,
     keep_checkpoints_without_metrics: bool = True,
+    best_metric: str | None = None,
 ) -> tuple[ocp.CheckpointManager, bool]:
     checkpoint_dir = epath.Path(checkpoint_dir).resolve()
     resuming = False
@@ -42,15 +43,23 @@ def initialize_checkpoint_dir(
         checkpoint_dir,
         item_handlers=item_handlers,
         options=ocp.CheckpointManagerOptions(
-            max_to_keep=max_to_keep,
-            keep_period=keep_period,
-            keep_checkpoints_without_metrics=keep_checkpoints_without_metrics,
+            max_to_keep=1 if best_metric else max_to_keep,
+            keep_period=None if best_metric else keep_period,
+            keep_checkpoints_without_metrics=(
+                False if best_metric else keep_checkpoints_without_metrics
+            ),
+            best_fn=(
+                lambda metrics: float(metrics[best_metric])
+                + int(metrics.get("global_step", 0)) * 1e-12
+                if best_metric else None
+            ),
+            best_mode="max",
             create=False,
             async_options=ocp.AsyncOptions(timeout_secs=7200),
         ),
     )
 
-    if resuming and tuple(mngr.all_steps()) in [(), (0,)]:
+    if resuming and not mngr.all_steps():
         logging.info("Checkpoint directory exists, but does not contain any checkpoints. Aborting resume.")
         resuming = False
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate an SFT actor, compact local EXPO agent, or full Pi EXPO agent over LIBERO-90.
+"""Evaluate official Pi0.5, an SFT actor, compact EXPO, or full Pi EXPO over LIBERO-90.
 
 The evaluator deliberately uses the same rollout boundary as the training
 evaluators: the policy predicts a ten-action chunk and LIBERO executes the
@@ -7,20 +7,31 @@ first five actions before replanning. A process can evaluate the complete
 suite, an explicit task list, or one modulo shard. The latter is intended for
 Slurm arrays, for example ``--shard-index 2 --num-shards 7``.
 
-``--mode actor`` expects an SFT checkpoint. It loads the actor (including its
-LoRA leaves) through the Pi0.5 weight loader and evaluates it without creating
-or using an EXPO critic/editor.
+``--mode sft_pi`` expects a MyEXPOLearner checkpoint from
+train_pi_sft_agnostic.py, with its sft_config.json and student_assets.
+It restores the learner and calls eval_actor_only(): one base-actor chunk
+without editor or critic selection.
 
-``--mode full`` expects a checkpoint written by the full Pi EXPO trainer. It
+``--mode sft_plus_editor`` restores that SFT actor checkpoint and combines it
+with the encoder, editor, critic, and candidate-selection settings from a
+compact SmallExpo checkpoint. It evaluates through MyEXPOLearner's EXPO
+candidate-sampling and critic-selection path.
+
+``--mode direct_rl_pi`` expects a checkpoint written by the full Pi EXPO trainer. It
 constructs the EXPO learner, restores the actor, editor, critic, temperature,
 target networks, and optimizer state, and evaluates the normal candidate
 sampling/critic-selection path.
+
+``--mode official_pi05`` loads a local OpenPI Pi0.5 checkpoint directory
+(for example ``/u/rpolonsky/dcrl_openpi_cache/openpi-assets/checkpoints/pi05_libero``)
+and evaluates only that actor. No MyEXPOLearner, editor, or critic is created.
 """
 
 from __future__ import annotations
 
 import argparse
 import copy
+import dataclasses
 import json
 import logging
 from collections import deque
@@ -71,30 +82,6 @@ def _numeric_steps(root: Path) -> list[int]:
         for child in root.iterdir()
         if child.is_dir() and child.name.isdigit()
     )
-
-
-def _resolve_sft_state(path: Path) -> Path:
-    """Resolve an SFT output/checkpoint path to an Orbax ``state`` item."""
-    path = path.expanduser().resolve()
-    if path.name in {"state", "params"}:
-        return path
-
-    if path.is_dir() and path.name.isdigit():
-        for item in ("state", "params"):
-            if (path / item).exists():
-                return path / item
-
-    checkpoints = path / "checkpoints" if (path / "checkpoints").is_dir() else path
-    steps = _numeric_steps(checkpoints) if checkpoints.is_dir() else []
-    if not steps:
-        raise FileNotFoundError(
-            f"Could not find numeric SFT checkpoints below {path}"
-        )
-    step_dir = checkpoints / str(max(steps))
-    for item in ("state", "params"):
-        if (step_dir / item).exists():
-            return step_dir / item
-    raise FileNotFoundError(f"SFT checkpoint {step_dir} has no state or params item")
 
 
 def _find_sft_assets(path: Path) -> Path | None:
@@ -166,22 +153,319 @@ def _find_compact_stats(path: Path) -> Path:
     raise FileNotFoundError(f"Could not find compact norm_stats.json; searched: {searched}")
 
 
-def _build_config(mode: str, checkpoint: Path, assets_dir: Path | None):
+def _compact_run_config(path: Path, action_horizon: int, replan_steps: int,
+                        image_size: int) -> tuple[int, int, int]:
+    """Read the compact checkpoint's construction dimensions when available."""
+    root, _ = _resolve_compact_root(path)
+    run_root = root.parent if root.name == "checkpoints" else root
+    candidates = [run_root / "run_config.json", path.expanduser().resolve() / "run_config.json"]
+    if path.expanduser().resolve().name.isdigit():
+        candidates.append(path.expanduser().resolve().parent.parent / "run_config.json")
+    config = {}
+    for config_path in candidates:
+        if config_path.is_file():
+            try:
+                config = json.loads(config_path.read_text())
+                break
+            except json.JSONDecodeError:
+                LOGGER.warning("Ignoring invalid compact run config %s", config_path)
+    return (
+        int(config.get("action_horizon", action_horizon)),
+        int(config.get("replan_steps", replan_steps)),
+        int(config.get("image_size", image_size)),
+    )
+
+
+def _build_sft_plus_editor_agent(
+    *,
+    sft_checkpoint: Path,
+    editor_checkpoint: Path,
+    editor_step: int | None,
+    editor_norm_stats_dir: Path | None,
+    assets_dir: Path | None,
+    instruction: str,
+    compact_example_observation: dict,
+    mesh: Any,
+    data_sharding: Any,
+    replicated_sharding: Any,
+    seed: int,
+    replan_steps: int,
+    image_size: int,
+):
+    """Use the SFT Pi0.5 actor with SmallExpo encoder/editor/critic state."""
+    import dataclasses as stdlib_dataclasses
+
+    import numpy as np
+    from openpi.shared import normalize
+    from dcrl.agents.pi_expo_learner import restore_checkpoint
+    from dcrl.agents.small_expo_learner import SmallExpoLearner
+    from dcrl.expo.agents.alg.agent import initialize_checkpoint_dir
+
+    sft_agent, sft_manager = _build_sft_agent(
+        sft_checkpoint, assets_dir, instruction, mesh, data_sharding,
+        replicated_sharding, replan_steps, image_size,
+    )
+    editor_manager = None
+    try:
+        editor_root, step_hint = _resolve_compact_root(editor_checkpoint)
+        editor_action_horizon, editor_replan_steps, editor_image_size = _compact_run_config(
+            editor_checkpoint, 10, replan_steps, image_size
+        )
+        actor_horizon = int(getattr(
+            sft_agent.actor.model_config, "action_horizon", sft_agent.action_horizon
+        ))
+        if not 1 <= editor_replan_steps <= actor_horizon:
+            raise ValueError(
+                "The SmallExpo editor requires a candidate prefix of "
+                f"{editor_replan_steps}, but the SFT Pi0.5 actor emits "
+                f"{actor_horizon} actions."
+            )
+
+        stats_path = (editor_norm_stats_dir.expanduser().resolve()
+                      if editor_norm_stats_dir is not None
+                      else _find_compact_stats(editor_checkpoint))
+        editor = SmallExpoLearner.from_examples(
+            seed=seed + 100003,
+            example_observation=compact_example_observation,
+            example_action=np.zeros(7, dtype=np.float32),
+            example_state=np.asarray(compact_example_observation["state"], dtype=np.float32),
+            mesh=mesh,
+            data_sharding=data_sharding,
+            replicated_sharding=replicated_sharding,
+            image_size=editor_image_size,
+            action_horizon=editor_action_horizon,
+            replan_steps=editor_replan_steps,
+            actor_success_only=True,
+            norm_stats=normalize.load(stats_path),
+        )
+        editor_manager, _ = initialize_checkpoint_dir(
+            editor_root, keep_period=None, overwrite=False, resume=True
+        )
+        available_steps = tuple(int(step) for step in editor_manager.all_steps())
+        if not available_steps:
+            raise FileNotFoundError(f"No SmallExpo editor checkpoints found below {editor_root}")
+        selected_step = (editor_step if editor_step is not None
+                         else step_hint if step_hint is not None
+                         else max(available_steps))
+        if selected_step not in available_steps:
+            raise ValueError(
+                f"Editor checkpoint step {selected_step} is not present below {editor_root}; "
+                f"steps={available_steps}"
+            )
+        editor = restore_checkpoint(editor_manager, editor, selected_step)
+
+        compact_fields = (
+            "batch_encoder", "edit_actor", "critic", "target_critic", "temp",
+            "N", "n_edit_samples", "edit_scale", "edit_action_xyzg", "batch_split",
+            "encode_batch_split", "actor_tau", "tau", "discount", "target_entropy",
+            "entropy_scale", "num_qs", "num_min_qs", "full_action_dim",
+            "replan_steps", "resize_size", "default_prompt",
+            "batch_encoder_sharding", "freeze_encoder", "freeze_critic_encoder",
+            "actor_success_only", "critic_camera_keys",
+        )
+        hybrid = stdlib_dataclasses.replace(
+            sft_agent,
+            **{name: getattr(editor, name) for name in compact_fields},
+            action_horizon=actor_horizon,
+            _infer_cache=None,
+        )
+        if hybrid.action_dim != editor.action_dim or hybrid.state_dim != editor.state_dim:
+            raise ValueError("SFT actor and SmallExpo action/state dimensions do not match")
+        hybrid = hybrid.cache_infer_params()
+        LOGGER.info(
+            "Restored SFT Pi0.5 actor with SmallExpo editor step %d from %s",
+            selected_step, editor_root,
+        )
+        return hybrid, (sft_manager, editor_manager)
+    except Exception:
+        sft_manager.close()
+        if editor_manager is not None:
+            editor_manager.close()
+        raise
+
+
+def _build_config(assets_dir: Path | None):
     from configs.model import expo_ft_pi_libero_config
 
     config = copy.deepcopy(expo_ft_pi_libero_config.get_config())
     if assets_dir is not None:
         config.pi05_assets_dir = str(assets_dir)
         config.pi05_asset_id = "physical-intelligence/libero"
-    if mode == "actor":
-        config.pi05_weight_loader_path = str(_resolve_sft_state(checkpoint))
     return config
+
+
+def _sft_checkpoint_config(checkpoint: Path, assets_dir: Path | None,
+                           replan_steps: int, image_size: int):
+    root, step_hint = _resolve_full_root(checkpoint)
+    manifest_path = root.parent / "sft_config.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"sft_pi requires {manifest_path} from train_pi_sft_agnostic.py")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("learner_config") != "configs.sft.my_expo_libero":
+        raise ValueError("sft_pi currently supports configs.sft.my_expo_libero (MyEXPOLearner)")
+    for key, expected in (("action_horizon", 10), ("replan_steps", replan_steps),
+                          ("image_size", image_size)):
+        if manifest.get(key) != expected:
+            raise ValueError(f"Saved {key}={manifest.get(key)} differs from evaluation {expected}")
+    assets = assets_dir or root.parent / "student_assets"
+    if not (assets / "physical-intelligence/libero/norm_stats.json").is_file():
+        raise FileNotFoundError(f"Missing SFT normalization statistics below {assets}")
+    # Training omits the update budget from its manifest. This placeholder
+    # affects neither checkpoint shapes nor inference; no updates are run.
+    args = argparse.Namespace(**{**manifest, "resume": True, "num_sft_steps": 1})
+    return root, step_hint, args, assets
+
+
+def _build_sft_agent(checkpoint, assets_dir, instruction, mesh,
+                     data_sharding, replicated_sharding, replan_steps, image_size):
+    root, step_hint, args, assets = _sft_checkpoint_config(
+        checkpoint, assets_dir, replan_steps, image_size
+    )
+    from configs.sft.my_expo_libero import build_learner
+    from dcrl.agents.my_expo_learner import restore_checkpoint
+    from dcrl.expo.agents.alg.agent import initialize_checkpoint_dir
+
+    manager, _ = initialize_checkpoint_dir(
+        root, keep_period=None, overwrite=False, resume=True
+    )
+    try:
+        steps = tuple(int(step) for step in manager.all_steps())
+        if not steps:
+            raise FileNotFoundError(f"No SFT learner checkpoints found below {root}")
+        step = step_hint if step_hint is not None else max(steps)
+        if step not in steps:
+            raise ValueError(f"Checkpoint step {step} is not present below {root}")
+        agent, _, _ = build_learner(
+            args=args, output_dir=root.parent, instruction=instruction,
+            stats_dir=assets / "physical-intelligence/libero", assets_dir=assets,
+            restore_only=True, mesh=mesh, data_sharding=data_sharding,
+            replicated_sharding=replicated_sharding,
+        )
+        agent = restore_checkpoint(manager, agent, step)
+        LOGGER.info("Restored MyEXPOLearner SFT checkpoint step %d from %s", step, root)
+        return agent, manager
+    except Exception:
+        manager.close()
+        raise
+
+
+@dataclasses.dataclass(frozen=True)
+class _OfficialPi05Actor:
+    """Actor-only adapter for an official OpenPI Pi0.5 checkpoint."""
+
+    actor: Any
+    train_state: Any
+    resize_size: int
+    rng: Any
+
+    def replace(self, **changes):
+        return dataclasses.replace(self, **changes)
+
+    def eval_actor_only(self, observations):
+        import jax
+
+        # This is intentionally the same actor-only path used by
+        # MyEXPOLearner.eval_actor_only: canonicalize the live observation,
+        # let Pi05Agent own preprocessing/normalization, sample one chunk,
+        # then let Pi05Agent unnormalize/postprocess it.
+        raw = {
+            "image": observations["image"],
+            "wrist_image": observations["wrist_image"],
+            "state": observations["state"],
+            "prompt": observations["prompt"],
+        }
+        transformed = self.actor.process_raw_inputs(
+            raw, action_dim=7, resize_size=self.resize_size
+        )
+        rng = jax.device_put(self.rng, self.actor.infer_sharding)
+        key, rng = jax.random.split(rng)
+        actions, _ = self.actor.sample_actions(
+            transformed, self.train_state, key, train=False, num_samples=1
+        )
+        actions = self.actor.process_transformed_outputs(actions)
+        actions = np.asarray(jax.device_get(actions))[0].astype(np.float32)
+        if actions.shape != (10, 7) or not np.isfinite(actions).all():
+            raise ValueError(f"invalid official Pi0.5 action chunk shape={actions.shape}")
+        return actions, self.replace(rng=rng), {
+            "selected_action_type": "official_pi05_actor",
+        }
+
+
+def _build_official_pi05(checkpoint: str, assets_dir: Path | None,
+                         instruction: str, mesh: Any, data_sharding: Any,
+                         replicated_sharding: Any, seed: int,
+                         resize_size: int):
+    import dataclasses as stdlib_dataclasses
+    import jax
+    from openpi.training import config as openpi_configs, optimizer, weight_loaders
+    from flax import nnx
+    from dcrl.expo.agents.vla.pi05 import Pi05Agent
+
+    checkpoint = Path(checkpoint).expanduser().resolve()
+    params_path = checkpoint / "params"
+    if not params_path.is_dir():
+        raise FileNotFoundError(
+            f"official_pi05 requires a local checkpoint directory containing params/: {checkpoint}"
+        )
+    if assets_dir is None:
+        raise ValueError("official_pi05 requires an assets directory")
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    stats_dir = assets_dir / "physical-intelligence" / "libero"
+    stats_dir.mkdir(parents=True, exist_ok=True)
+    stats_path = stats_dir / "norm_stats.json"
+    if not stats_path.exists():
+        raise FileNotFoundError(
+            "official_pi05 requires local LIBERO norm stats at "
+            f"{stats_path}; pass --assets-dir <checkpoint>/assets"
+        )
+
+    config = openpi_configs.get_config("pi05_libero")
+    # Point Pi05Agent's normalizer at the official LIBERO assets downloaded
+    # above, so its preprocessing is exactly the same one used by
+    # MyEXPOLearner's actor-only path.
+    data_assets = stdlib_dataclasses.replace(
+        config.data.assets,
+        assets_dir=str(assets_dir),
+        asset_id="physical-intelligence/libero",
+    )
+    config = stdlib_dataclasses.replace(
+        config,
+        data=stdlib_dataclasses.replace(config.data, assets=data_assets),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            str(params_path)
+        ),
+        # Actor-only official eval must not allocate learner AdamW/EMA state.
+        optimizer=optimizer.SGD(momentum=0.0),
+        freeze_filter=nnx.All(nnx.Param),
+        ema_decay=None,
+    )
+    actor, train_state, _ = Pi05Agent.initialize(
+        config,
+        mesh,
+        jax.random.PRNGKey(seed),
+        resume=False,
+        data_sharding=data_sharding,
+        replicated_sharding=replicated_sharding,
+        default_prompt=instruction,
+        freeze_pi05_encoder=False,
+    )
+    actor.action_dim, actor.state_dim = 7, 8
+    LOGGER.info("Loaded official Pi0.5 checkpoint %s", checkpoint)
+    return _OfficialPi05Actor(
+        actor=actor,
+        train_state=train_state,
+        resize_size=resize_size,
+        rng=jax.random.PRNGKey(seed),
+    ), None
 
 
 def _build_agent(
     *,
     mode: str,
     checkpoint: Path,
+    editor_checkpoint: Path | None,
+    editor_step: int | None,
+    editor_norm_stats_dir: Path | None,
     assets_dir: Path | None,
     task_description: str,
     example_observation: dict,
@@ -190,8 +474,37 @@ def _build_agent(
     replicated_sharding: Any,
     seed: int,
     replan_steps: int,
+    resize_size: int,
 ):
-    """Build actor-only, compact local EXPO, or full Pi EXPO agent."""
+    """Build actor-only, hybrid, compact local EXPO, or full Pi EXPO agent."""
+    if mode == "official_pi05":
+        return _build_official_pi05(
+            checkpoint, assets_dir, task_description, mesh,
+            data_sharding, replicated_sharding, seed, resize_size,
+        )
+    if mode == "sft_pi":
+        return _build_sft_agent(
+            checkpoint, assets_dir, task_description, mesh, data_sharding,
+            replicated_sharding, replan_steps, int(example_observation["image"].shape[0]),
+        )
+    if mode == "sft_plus_editor":
+        if editor_checkpoint is None:
+            raise ValueError("sft_plus_editor requires --editor-checkpoint")
+        return _build_sft_plus_editor_agent(
+            sft_checkpoint=checkpoint,
+            editor_checkpoint=editor_checkpoint,
+            editor_step=editor_step,
+            editor_norm_stats_dir=editor_norm_stats_dir,
+            assets_dir=assets_dir,
+            instruction=task_description,
+            compact_example_observation=example_observation,
+            mesh=mesh,
+            data_sharding=data_sharding,
+            replicated_sharding=replicated_sharding,
+            seed=seed,
+            replan_steps=replan_steps,
+            image_size=resize_size,
+        )
     if mode == "compact":
         from openpi.shared import normalize
         from dcrl.agents.pi_expo_learner import restore_checkpoint
@@ -233,7 +546,7 @@ def _build_agent(
 
     from expo_ft.agents.vla.pi05 import build_pi05
 
-    config = _build_config(mode, checkpoint, assets_dir)
+    config = _build_config(assets_dir)
     actor, actor_train_state, target_actor_params, agent_kwargs, metadata = build_pi05(
         config,
         seed,
@@ -248,13 +561,9 @@ def _build_agent(
     raw_state = np.asarray(example_observation["state"], dtype=np.float32).reshape(-1)
     # The Pi replay buffer initializes EXPO with the model's padded state width
     # (32 for Pi0.5), while the live LIBERO observation contains only 8 values.
-    # Match that convention for full-agent checkpoint restoration. BCLearner
-    # actor-only checkpoints retain the raw state width used by their loader.
-    if mode == "full":
-        padded_state_dim = int(getattr(actor.model_config, "action_dim", raw_state.shape[-1]))
-        state = np.pad(raw_state, (0, max(0, padded_state_dim - raw_state.shape[-1])))[:padded_state_dim]
-    else:
-        state = raw_state
+    # Match that convention for full-agent checkpoint restoration.
+    padded_state_dim = int(getattr(actor.model_config, "action_dim", raw_state.shape[-1]))
+    state = np.pad(raw_state, (0, max(0, padded_state_dim - raw_state.shape[-1])))[:padded_state_dim]
     actor.action_dim = action_dim
     actor.state_dim = int(state.shape[-1])
     example_action = np.zeros((action_dim,), dtype=np.float32)
@@ -265,28 +574,6 @@ def _build_agent(
         ],
         axis=-1,
     )
-
-    if mode == "actor":
-        from expo_ft.agents.alg.bc import load_agent
-
-        agent = load_agent(
-            seed=seed,
-            example_observation=critic_observation,
-            example_action=example_action,
-            example_state=state,
-            actor=actor,
-            actor_train_state=actor_train_state,
-            target_actor_params=target_actor_params,
-            agent_kwargs=agent_kwargs,
-            metadata=metadata,
-            mesh=mesh,
-            data_sharding=data_sharding,
-            replicated_sharding=replicated_sharding,
-            resume=False,
-            replan_steps=replan_steps,
-            default_prompt=task_description,
-        )
-        return agent, None
 
     from expo_ft.agents.alg.agent import initialize_checkpoint_dir
     from expo_ft.agents.alg.expo_ft import load_agent, restore_checkpoint
@@ -373,10 +660,8 @@ def _evaluate_task(
             action_plan: deque[np.ndarray] = deque()
             for step in range(max_steps):
                 if not action_plan:
-                    if mode == "actor":
-                        chunk, eval_agent, _ = eval_agent.sample_actions(
-                            observation, only_base_actions=True
-                        )
+                    if mode in ("sft_pi", "official_pi05"):
+                        chunk, eval_agent, _ = eval_agent.eval_actor_only(observation)
                     else:
                         chunk, eval_agent, _ = eval_agent.sample_actions(
                             observation, only_base_actions=False
@@ -452,15 +737,21 @@ def _task_ids(args, count: int) -> list[int]:
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("actor", "compact", "full"), required=True)
+    parser.add_argument("--mode", choices=("official_pi05", "sft_pi", "sft_plus_editor", "compact", "direct_rl_pi"), required=True)
     parser.add_argument(
         "--checkpoint",
         type=Path,
         required=True,
-        help="SFT checkpoint for actor mode, compact SmallExpo checkpoint for compact mode, or full EXPO checkpoint for full mode",
+        help="Local checkpoint directory (official_pi05 must contain params/ and assets/)",
     )
     parser.add_argument("--assets-dir", type=Path, default=None,
-                        help="Optional OpenPI assets directory; actor mode auto-detects student_assets")
+                        help="Optional OpenPI assets directory; official_pi05 uses it for LIBERO norm stats")
+    parser.add_argument("--editor-checkpoint", type=Path, default=None,
+                        help="SmallExpo checkpoint for sft_plus_editor (task/checkpoints/step accepted)")
+    parser.add_argument("--editor-step", type=int, default=None,
+                        help="SmallExpo checkpoint step; default selects latest")
+    parser.add_argument("--editor-norm-stats-dir", type=Path, default=None,
+                        help="Optional directory containing the SmallExpo norm_stats.json")
     parser.add_argument("--suite", default="libero_90")
     parser.add_argument("--task-id", type=int, default=None)
     parser.add_argument("--task-ids", default=None,
@@ -507,10 +798,12 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     checkpoint = args.checkpoint.expanduser().resolve()
     assets_dir = args.assets_dir.expanduser().resolve() if args.assets_dir else None
-    if args.mode == "actor" and assets_dir is None:
+    if args.mode in ("sft_pi", "sft_plus_editor") and assets_dir is None:
         assets_dir = _find_sft_assets(checkpoint)
         if assets_dir:
             LOGGER.info("Using SFT checkpoint assets and norm stats from %s", assets_dir)
+    if args.mode == "official_pi05" and assets_dir is None:
+        assets_dir = checkpoint / "assets"
 
     # Build once per shard. Prompts are supplied in each observation, so the
     # same actor/EXPO parameters can be evaluated on all tasks in that shard.
@@ -524,7 +817,9 @@ def main(argv: Iterable[str] | None = None) -> int:
         benchmark_eval=True,
     )
     first_local_observation = first_env.reset()
-    first_observation = (first_local_observation if args.mode == "compact"
+    first_observation = (first_local_observation if args.mode in (
+                             "compact", "sft_plus_editor"
+                         )
                          else _flat_observation(first_local_observation, first_env.instruction))
     first_instruction = first_env.instruction
     first_env.close()
@@ -533,6 +828,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     agent, manager = _build_agent(
         mode=args.mode,
         checkpoint=checkpoint,
+        editor_checkpoint=(args.editor_checkpoint.expanduser().resolve()
+                           if args.editor_checkpoint is not None else None),
+        editor_step=args.editor_step,
+        editor_norm_stats_dir=args.editor_norm_stats_dir,
         assets_dir=assets_dir,
         task_description=first_instruction,
         example_observation=first_observation,
@@ -541,6 +840,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         replicated_sharding=replicated_sharding,
         seed=args.seed,
         replan_steps=args.replan_steps,
+        resize_size=args.image_size,
     )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -566,6 +866,12 @@ def main(argv: Iterable[str] | None = None) -> int:
                     "checkpoint": str(checkpoint),
                     "assets_dir": None if assets_dir is None else str(assets_dir),
                 })
+                if args.mode == "sft_plus_editor":
+                    result["editor_checkpoint"] = str(args.editor_checkpoint.expanduser().resolve())
+                    result["editor_step"] = (
+                        args.editor_step if args.editor_step is not None
+                        else manager[1].latest_step()
+                    )
                 _atomic_json(task_output, result)
                 results.append(result)
                 LOGGER.info(
@@ -614,12 +920,20 @@ def main(argv: Iterable[str] | None = None) -> int:
                 for r in results
             ],
         }
+        if args.mode == "sft_plus_editor":
+            aggregate["editor_checkpoint"] = str(args.editor_checkpoint.expanduser().resolve())
+            aggregate["editor_step"] = (
+                args.editor_step if args.editor_step is not None
+                else manager[1].latest_step()
+            )
         _atomic_json(args.output_dir / shard_name, aggregate)
         if failed:
             raise RuntimeError(f"{len(failed)} task evaluations failed; see {args.output_dir}")
     finally:
         if manager is not None:
-            manager.close()
+            for checkpoint_manager in (manager if isinstance(manager, (tuple, list)) else (manager,)):
+                if checkpoint_manager is not None:
+                    checkpoint_manager.close()
     return 0
 
 

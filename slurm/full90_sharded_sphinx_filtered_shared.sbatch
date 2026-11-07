@@ -1,14 +1,13 @@
 #!/bin/bash
-#SBATCH --account=nlp
-#SBATCH --partition=sphinx
+#SBATCH --account=bgqe-delta-gpu
+#SBATCH --partition=gpuA100x4
 #SBATCH --array=2,4,6,7,8,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62%4
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:nvidia_a100:1
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=64G
-#SBATCH --time=7-00:00:00
-#SBATCH --exclude=sphinx[1-3]
-#SBATCH --output=/nlp/scr/ronpo/projects/dcrl/slurm/full90-filtered-%A_%a.out
-#SBATCH --error=/nlp/scr/ronpo/projects/dcrl/slurm/full90-filtered-%A_%a.err
+#SBATCH --time=2-00:00:00
+#SBATCH --output=/work/hdd/bgqe/rpolonsky/dcrl/slurm/full90-filtered-%A_%a.out
+#SBATCH --error=/work/hdd/bgqe/rpolonsky/dcrl/slurm/full90-filtered-%A_%a.err
 
 set -euo pipefail
 
@@ -56,22 +55,22 @@ case "$TASK_INDEX" in
   *) echo "unexpected shard index: $TASK_INDEX" >&2; exit 2 ;;
 esac
 
-PROJECT=/nlp/scr2/ronpo/projects/dcrl
+PROJECT=/work/hdd/bgqe/rpolonsky/dcrl
 EXPO="$PROJECT/third_party/expo-ft"
-ROOT=/nlp/scr2/ronpo/dcrlcheckpoints/full90_eval_sharded_20261023
+ROOT=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/full90_eval_sharded_20261023
 NUM_SHARDS=7
 checkpoints=(
-  /nlp/scr2/ronpo/dcrlcheckpoints/bc_distill_small_to_pi05base/task2_rlstep285184_500k/checkpoints/75000
-  /nlp/scr2/ronpo/dcrlcheckpoints/bc_distill_small_to_pi05base/task28_rlstep260029_500k/checkpoints/50000
-  /nlp/scr2/ronpo/dcrlcheckpoints/bc_distill_small_to_pi05base/task29_500k/checkpoints/100000
-  /nlp/scr2/ronpo/dcrlcheckpoints/bc_distill_small_to_pi05base/task60_rlstep235055_500k/checkpoints/50000
-  /nlp/scr2/ronpo/dcrlcheckpoints/bc_distill_small_to_pi05base/task79_rlstep410016_500k/checkpoints/75000
-  /nlp/scr2/ronpo/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task2/pi_robo_libero_prod_200k_sphinx_task2/checkpoints/161045
-  /nlp/scr2/ronpo/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task28/pi_robo_libero_prod_200k_sphinx_task28/checkpoints/60163
-  /nlp/scr2/ronpo/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task29/pi_robo_libero_prod_200k_sphinx_task29/checkpoints/80269
-  /nlp/scr2/ronpo/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx_retry_after_space/task60/pi_robo_libero_prod_200k_sphinx_task60_restart/checkpoints/40089
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/bc_distill_small_to_pi05base/task2_rlstep285184_500k/checkpoints/75000
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/bc_distill_small_to_pi05base/task28_rlstep260029_500k/checkpoints/50000
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/bc_distill_small_to_pi05base/task29_500k/checkpoints/100000
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/bc_distill_small_to_pi05base/task60_rlstep235055_500k/checkpoints/50000
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/bc_distill_small_to_pi05base/task79_rlstep410016_500k/checkpoints/75000
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task2/pi_robo_libero_prod_200k_sphinx_task2/checkpoints/161045
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task28/pi_robo_libero_prod_200k_sphinx_task28/checkpoints/60163
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx/task29/pi_robo_libero_prod_200k_sphinx_task29/checkpoints/80269
+  /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_robo_libero_prod_200k_sphinx_retry_after_space/task60/pi_robo_libero_prod_200k_sphinx_task60_restart/checkpoints/40089
 )
-modes=(actor actor actor actor actor full full full full)
+modes=(actor actor actor actor actor direct_rl_pi direct_rl_pi direct_rl_pi direct_rl_pi)
 names=(sft_task02_75k sft_task28_50k sft_task29_100k sft_task60_50k sft_task79_75k full_task02_161045 full_task28_60163 full_task29_80269 full_task60_40089)
 
 checkpoint_index=$((TASK_INDEX / NUM_SHARDS))
@@ -89,9 +88,9 @@ from pathlib import Path
 checkpoint_name = sys.argv[1]
 requested = [int(value) for value in sys.argv[2].split(",") if value]
 roots = [
-    Path("/nlp/scr2/ronpo/dcrlcheckpoints/full90_eval_sharded_20261023"),
-    Path("/nlp/scr2/ronpo/dcrlcheckpoints/full90_eval_iris_hi_parallel_20261023"),
-    Path("/nlp/scr2/ronpo/dcrlcheckpoints/full90_eval_twojob_20261023"),
+    Path("/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/full90_eval_sharded_20261023"),
+    Path("/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/full90_eval_iris_hi_parallel_20261023"),
+    Path("/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/full90_eval_twojob_20261023"),
 ]
 complete = set()
 for root in roots:
@@ -124,7 +123,7 @@ export MUJOCO_GL=osmesa
 export PYOPENGL_PLATFORM=osmesa
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export PYTHONPATH="$PROJECT:$EXPO/expo_ft/agents/vla/openpi/src:$EXPO/expo_ft/agents/vla/openpi/packages/openpi-client/src:$PROJECT/.deps/LIBERO${PYTHONPATH:+:$PYTHONPATH}"
-export OPENPI_DATA_HOME=/nlp/scr2/ronpo/dcrlcheckpoints/openpi_cache
+export OPENPI_DATA_HOME=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache
 export TOKENIZERS_PARALLELISM=false
 export PYTHONUNBUFFERED=1
 export XDG_CACHE_HOME="$out/cache/xdg"

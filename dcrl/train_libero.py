@@ -54,17 +54,18 @@ def _load_pickle(file):
     return _ReplayUnpickler(file).load()
 
 
-def _save_replay_state(task_dir: Path, step: int, state: dict) -> None:
+def _save_replay_state(task_dir: Path, step: int, state: dict, *, slot: str | None = None) -> None:
+    stem = f"replay_{slot}" if slot is not None else f"replay_{step}"
     if _ZSTD is None:
-        path = task_dir / f"replay_{step}.pkl"
-        temp = task_dir / f"replay_{step}.pkl.tmp"
+        path = task_dir / f"{stem}.pkl"
+        temp = task_dir / f"{stem}.pkl.tmp"
         with temp.open("wb") as file:
             pickle.dump(state, file, protocol=pickle.HIGHEST_PROTOCOL)
         temp.replace(path)
         return
 
-    path = task_dir / f"replay_{step}.pkl.zst"
-    temp = task_dir / f"replay_{step}.pkl.zst.tmp"
+    path = task_dir / f"{stem}.pkl.zst"
+    temp = task_dir / f"{stem}.pkl.zst.tmp"
     with temp.open("wb") as output:
         process = subprocess.Popen(
             [_ZSTD, "-1", "-T0", "-q", "-c"],
@@ -85,8 +86,9 @@ def _save_replay_state(task_dir: Path, step: int, state: dict) -> None:
     temp.replace(path)
 
 
-def _load_replay_state(task_dir: Path, step: int) -> dict:
-    compressed = task_dir / f"replay_{step}.pkl.zst"
+def _load_replay_state(task_dir: Path, step: int, *, slot: str | None = None) -> dict:
+    stem = f"replay_{slot}" if slot is not None else f"replay_{step}"
+    compressed = task_dir / f"{stem}.pkl.zst"
     if compressed.exists():
         if _ZSTD is None:
             raise RuntimeError(f"Cannot read compressed replay without zstd: {compressed}")
@@ -103,7 +105,7 @@ def _load_replay_state(task_dir: Path, step: int) -> dict:
             raise RuntimeError(f"zstd replay decompression failed with exit code {return_code}")
         return state
 
-    path = task_dir / f"replay_{step}.pkl"
+    path = task_dir / f"{stem}.pkl"
     with path.open("rb") as file:
         return _load_pickle(file)
 
@@ -125,6 +127,10 @@ def parse_args(argv=None):
                         help='Explicit completed Pi0.5 mixed HDF5 collection')
     parser.add_argument('--distill-success-only', action='store_true',
                         help='Diagnostic option: use only successful Pi0.5 chunks')
+    parser.add_argument(
+        '--norm-stats-dir',
+        default='/scratch/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero',
+        help='Local directory containing the official Pi0.5 LIBERO norm_stats.json; never recomputed from demos')
     parser.add_argument('--pi-distill-eval-interval', type=int, default=None,
                         help='Pi0.5-to-compact distillation eval cadence; defaults to offline-rl-eval-interval')
     parser.add_argument('--pi-distill-chckpt-interval', type=int, default=None,
@@ -144,6 +150,11 @@ def parse_args(argv=None):
     parser.add_argument('--num-demos', type=int, default=0, help='0 loads all task demonstrations')
     parser.add_argument('--demos-root')
     parser.add_argument('--replay-capacity', type=int, default=10000)
+    parser.add_argument('--actor-lr', type=float, default=3e-4)
+    parser.add_argument('--critic-lr', type=float, default=3e-4)
+    parser.add_argument('--temp-lr', type=float, default=3e-4)
+    parser.add_argument('--edit-scale', type=float, default=0.2)
+    parser.add_argument('--adjust-target-entropy', action='store_true')
     parser.add_argument('--offline-rl-eval-interval', type=int, default=500,
                         help='Evaluate every N offline updates and at phase end; 0 disables')
     parser.add_argument('--offline-rl-checkpoint-interval', type=int, default=5000,
@@ -156,7 +167,7 @@ def parse_args(argv=None):
     parser.add_argument('--eval-seed', type=int, default=7)
     parser.add_argument('--online-rl-checkpot-interval', type=int, default=5000)
     parser.add_argument('--wandb-entity', default='distill_rl')
-    parser.add_argument('--wandb-project', default='dcrl')
+    parser.add_argument('--wandb-project', default='small_learner')
     parser.add_argument('--wandb-name', default=None)
     parser.add_argument('--wandb-mode', choices=('online', 'offline', 'disabled'), default='online')
     parser.add_argument('--output-dir', type=Path, default=Path('runs/small_expo_libero'))
@@ -214,6 +225,40 @@ def _pi05_norm_stats(task_dir: Path, paths: list[Path], *, state_dim: int,
             raise ValueError(f'Missing Pi0.5 quantile stats for {name}: {path}')
         if np.asarray(stats[name].q01).shape != (width,) or np.asarray(stats[name].q99).shape != (width,):
             raise ValueError(f'Wrong {name} stats dimension in {path}')
+    return stats
+
+
+def _official_norm_stats(task_dir: Path, source_dir: Path, *, state_dim: int):
+    """Load and record the same fixed stats used by sft_agnostic.
+
+    The SFT trainer uses the official ``pi05_libero`` stats, downloaded from
+    the checkpoint assets.  RL must use that exact file too: estimating stats
+    from task demonstrations changes the action/state coordinate system.
+    """
+    from openpi.shared import normalize
+
+    source_dir = Path(source_dir)
+    source_file = source_dir / 'norm_stats.json'
+    if not source_file.is_file():
+        raise FileNotFoundError(
+            f'Official Pi0.5 normalization file is missing: {source_file}. '
+            'Populate the local checkpoint cache before starting training.')
+    stats = normalize.load(source_dir)
+    # Store an exact local copy alongside the run for resumption/audit.  This
+    # is a copy of the official file, not a recomputation from demonstrations.
+    destination = task_dir / 'norm_stats.json'
+    destination.write_bytes(source_file.read_bytes())
+    for name, width in (('state', state_dim), ('actions', 7)):
+        if name not in stats or stats[name].q01 is None or stats[name].q99 is None:
+            raise ValueError(f'Missing official quantile stats for {name}: {source_file}')
+        if np.asarray(stats[name].q01).shape != (width,) or np.asarray(stats[name].q99).shape != (width,):
+            raise ValueError(f'Wrong official {name} stats dimension in {source_file}')
+    logging.info(
+        'Using official Pi0.5 LIBERO normalization from %s; '
+        'state.q01=%s state.q99=%s actions.q01=%s actions.q99=%s',
+        source_file,
+        np.asarray(stats['state'].q01).tolist(), np.asarray(stats['state'].q99).tolist(),
+        np.asarray(stats['actions'].q01).tolist(), np.asarray(stats['actions'].q99).tolist())
     return stats
 
 
@@ -333,7 +378,7 @@ def _evaluate_actor(agent, env, *, episodes: int, max_steps: int, replan_steps: 
 def _save(checkpoint_manager, agent, online, offline, *, task_dir: Path, step: int,
           offline_steps_done: int, online_steps_done: int,
           completed_episodes: int, episode_id: int, episodes_since_update: int, rng,
-          distill_steps_done: int = 0, distill_rng=None):
+          distill_steps_done: int = 0, distill_rng=None, slot: str | None = None):
     from dcrl.agents.pi_expo_learner import save_checkpoint
     state = dict(rows=online.rows, replay_rng=online.rng.bit_generator.state,
                  offline_rng=offline.rng.bit_generator.state,
@@ -343,10 +388,29 @@ def _save(checkpoint_manager, agent, online, offline, *, task_dir: Path, step: i
                  episodes_since_update=episodes_since_update,
                  distill_steps_done=distill_steps_done,
                  offline_steps_done=offline_steps_done, online_steps_done=online_steps_done)
-    _save_replay_state(task_dir, step, state)
+    _save_replay_state(task_dir, step, state, slot=slot)
     # Publish the model checkpoint last: a visible checkpoint always has replay.
     save_checkpoint(checkpoint_manager, agent, step)
     checkpoint_manager.wait_until_finished()
+
+
+def _load_best_record(task_dir: Path) -> dict:
+    path = task_dir / 'best_record.json'
+    if not path.exists():
+        return {'score': None, 'step': None}
+    try:
+        record = json.loads(path.read_text())
+        return {'score': record.get('score'), 'step': record.get('step')}
+    except (OSError, json.JSONDecodeError):
+        logging.warning('Could not read best record %s; treating best as unset', path)
+        return {'score': None, 'step': None}
+
+
+def _save_best_record(task_dir: Path, *, score: float, step: int) -> None:
+    path = task_dir / 'best_record.json'
+    temp = task_dir / 'best_record.json.tmp'
+    temp.write_text(json.dumps({'score': float(score), 'step': int(step)}, indent=2) + '\n')
+    temp.replace(path)
 
 
 def train_task(args, suite: str, task_id: int, wandb_run=None):
@@ -360,17 +424,20 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
     train_max_steps = args.max_episode_steps or official_max_steps
     task_dir = args.output_dir / suite / f'task_{task_id:02d}'
     task_dir.mkdir(parents=True, exist_ok=True)
-    if (task_dir / 'checkpoints').exists() and not (args.resume or args.overwrite):
-        raise FileExistsError(f'Checkpoint directory exists: {task_dir / "checkpoints"}')
+    last_checkpoint_dir = task_dir / 'checkpoints_last'
+    best_checkpoint_dir = task_dir / 'checkpoints_best'
+    if (last_checkpoint_dir.exists() or best_checkpoint_dir.exists()) and not (args.resume or args.overwrite):
+        raise FileExistsError(f'Checkpoint slots already exist under {task_dir}')
     config_path = task_dir / 'run_config.json'
     fixed = {key: getattr(args, key) for key in (
         'seed', 'image_size', 'action_horizon', 'replan_steps', 'batch_size',
         'utd_ratio', 'offline_ratio', 'num_demos', 'replay_capacity',
         'max_episode_steps', 'demos_root', 'update_type', 'num_updates', 'num_batch',
         'warmup_episodes', 'init_distill_steps', 'distill_data_root',
-        'distill_data_path', 'distill_success_only', 'pi_distill_eval_interval',
+        'distill_data_path', 'distill_success_only', 'norm_stats_dir', 'pi_distill_eval_interval',
         'pi_distill_chckpt_interval', 'offline_rl_steps', 'offline_rl_eval_interval',
-        'online_rl_eval_interval', 'eval_episodes', 'eval_seed', 'online_rl_checkpot_interval', 'offline_rl_checkpoint_interval', 'online_rl_steps')}
+        'online_rl_eval_interval', 'eval_episodes', 'eval_seed', 'online_rl_checkpot_interval', 'offline_rl_checkpoint_interval', 'online_rl_steps',
+        'actor_lr', 'critic_lr', 'temp_lr', 'edit_scale', 'adjust_target_entropy')}
     fixed.update(suite=suite, task_id=task_id)
     if args.resume:
         if not config_path.exists():
@@ -379,7 +446,10 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         # A checkpoint can be used as a warm start for any later phase.
         # The phase budgets may be changed (including set to zero), while all
         # model, data, and optimization settings must remain compatible.
-        phase_keys = {'init_distill_steps', 'offline_rl_steps', 'online_rl_steps'}
+        phase_keys = {
+            'init_distill_steps', 'offline_rl_steps', 'online_rl_steps',
+            'offline_rl_checkpoint_interval', 'online_rl_checkpot_interval',
+        }
         phase_transition = (
             {k: v for k, v in existing_config.items() if k not in phase_keys}
                 == {k: v for k, v in fixed.items() if k not in phase_keys}
@@ -409,6 +479,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                               image_size=args.image_size, benchmark_eval=True)
                 if eval_enabled and args.eval_episodes else None)
     manager = None
+    best_manager = None
     try:
         if eval_env is not None and args.eval_episodes > len(eval_env.init_states):
             raise ValueError(f'Official evaluation has only {len(eval_env.init_states)} initial states')
@@ -417,13 +488,8 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         distill_paths = (
             _resolve_distill_paths(args, task_id) if args.init_distill_steps else None
         )
-        stats = (
-            _pi05_norm_stats(task_dir, distill_paths, state_dim=len(obs['state']),
-                             overwrite=args.overwrite)
-            if distill_paths is not None else
-            _norm_stats(task_dir, demo_path, state_dim=len(obs['state']),
-                        overwrite=args.overwrite)
-        )
+        stats = _official_norm_stats(
+            task_dir, Path(args.norm_stats_dir), state_dim=len(obs['state']))
         demos = load_demonstrations(
             demo_path, instruction=env.instruction, image_size=args.image_size,
             max_episodes=args.num_demos or None)
@@ -441,6 +507,9 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             replicated_sharding=replicated_sharding,
             image_size=args.image_size, action_horizon=args.action_horizon,
             replan_steps=args.replan_steps, actor_success_only=True,
+            actor_lr=args.actor_lr, critic_lr=args.critic_lr, temp_lr=args.temp_lr,
+            edit_scale=args.edit_scale,
+            adjust_target_entropy=args.adjust_target_entropy,
             norm_stats=stats)
         replay_kwargs = dict(
             capacity=args.replay_capacity, action_horizon=args.action_horizon,
@@ -466,8 +535,12 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             )
 
         manager, resuming = initialize_checkpoint_dir(
-            task_dir / 'checkpoints', keep_period=None,
-            overwrite=args.overwrite, resume=args.resume)
+            last_checkpoint_dir, keep_period=None,
+            overwrite=args.overwrite, resume=args.resume, max_to_keep=1)
+        best_manager, _ = initialize_checkpoint_dir(
+            best_checkpoint_dir, keep_period=None,
+            overwrite=args.overwrite, resume=args.resume, max_to_keep=1)
+        best_record = _load_best_record(task_dir) if args.resume else {'score': None, 'step': None}
         checkpoint_step = 0
         distill_steps_done = 0
         offline_steps_done = 0
@@ -482,7 +555,10 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                 raise ValueError('Resume requested but no model checkpoint exists')
             checkpoint_step = max(steps)
             agent = restore_checkpoint(manager, agent, checkpoint_step).cache_infer_params()
-            state = _load_replay_state(task_dir, checkpoint_step)
+            try:
+                state = _load_replay_state(task_dir, checkpoint_step, slot='last')
+            except FileNotFoundError:
+                state = _load_replay_state(task_dir, checkpoint_step)
             online.rows = state['rows']
             online.rng.bit_generator.state = state['replay_rng']
             offline.rng.bit_generator.state = state['offline_rng']
@@ -539,6 +615,33 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             'distill' if distill_steps_done < init_target else 'rl'
         )
 
+        def maybe_save_best(metrics, step):
+            """Save the full best slot whenever eval score is not lower."""
+            nonlocal best_record
+            score = metrics.get('eval/success_rate')
+            if score is None:
+                return
+            score = float(score)
+            previous = best_record.get('score')
+            # Ties intentionally move best to the most recent step.
+            if previous is not None and score < float(previous):
+                return
+            _save(
+                best_manager, agent, online, offline, task_dir=task_dir,
+                step=step,
+                distill_steps_done=distill_steps_done,
+                offline_steps_done=offline_steps_done,
+                online_steps_done=online_steps_done,
+                completed_episodes=completed_episodes,
+                episode_id=episode_id,
+                episodes_since_update=episodes_since_update,
+                rng=combine_rng,
+                distill_rng=(None if distill_replay is None else distill_replay.rng),
+                slot='best')
+            _save_best_record(task_dir, score=score, step=step)
+            best_record = {'score': score, 'step': int(step)}
+            logging.info('Updated best eval score %.4f at global step %d', score, step)
+
         plan = deque()
         episode_steps = 0
         last_saved_step = checkpoint_step
@@ -589,6 +692,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                         episodes_since_update=episodes_since_update,
                         rng=combine_rng,
                         distill_rng=distill_replay.rng,
+                        slot='last',
                     )
                     last_saved_step = global_step
 
@@ -604,6 +708,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                     episodes_since_update=episodes_since_update,
                     rng=combine_rng,
                     distill_rng=distill_replay.rng,
+                    slot='last',
                 )
                 last_saved_step = distill_steps_done
 
@@ -638,6 +743,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                         agent, eval_env, episodes=args.eval_episodes,
                         max_steps=official_max_steps, replan_steps=args.replan_steps,
                         seed=args.eval_seed))
+                maybe_save_best(metrics, global_step)
                 log_file.write(json.dumps(metrics) + '\n')
                 log_file.flush()
                 if wandb_run is not None:
@@ -651,7 +757,8 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                           completed_episodes=completed_episodes, episode_id=episode_id,
                           episodes_since_update=episodes_since_update,
                           rng=combine_rng,
-                          distill_rng=(None if distill_replay is None else distill_replay.rng))
+                          distill_rng=(None if distill_replay is None else distill_replay.rng),
+                          slot='last')
                     last_saved_step = global_step
 
             if offline_target and last_saved_step < distill_steps_done + offline_target:
@@ -663,7 +770,8 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                       completed_episodes=completed_episodes, episode_id=episode_id,
                       episodes_since_update=episodes_since_update,
                       rng=combine_rng,
-                      distill_rng=(None if distill_replay is None else distill_replay.rng))
+                      distill_rng=(None if distill_replay is None else distill_replay.rng),
+                      slot='last')
                 last_saved_step = distill_steps_done + offline_target
 
             # Keep both schedules on the online-step counter. With episode
@@ -741,6 +849,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                         agent, eval_env, episodes=args.eval_episodes,
                         max_steps=official_max_steps, replan_steps=args.replan_steps,
                         seed=args.eval_seed))
+                    maybe_save_best(metrics, global_step)
                     next_eval_online = (step // args.online_rl_eval_interval + 1) * args.online_rl_eval_interval
 
                 if done and next_checkpoint_online is not None and step >= next_checkpoint_online:
@@ -752,7 +861,8 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                           completed_episodes=completed_episodes, episode_id=episode_id,
                           episodes_since_update=episodes_since_update,
                           rng=combine_rng,
-                          distill_rng=(None if distill_replay is None else distill_replay.rng))
+                          distill_rng=(None if distill_replay is None else distill_replay.rng),
+                          slot='last')
                     last_saved_step = global_step
                     next_checkpoint_online = (
                         (step // args.online_rl_checkpot_interval + 1) * args.online_rl_checkpot_interval)
@@ -772,11 +882,15 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                       completed_episodes=completed_episodes, episode_id=episode_id,
                       episodes_since_update=episodes_since_update,
                       rng=combine_rng,
-                      distill_rng=(None if distill_replay is None else distill_replay.rng))
+                      distill_rng=(None if distill_replay is None else distill_replay.rng),
+                      slot='last')
     finally:
         if manager is not None:
             manager.wait_until_finished()
             manager.close()
+        if best_manager is not None:
+            best_manager.wait_until_finished()
+            best_manager.close()
         env.close()
         if eval_env is not None:
             eval_env.close()
@@ -795,6 +909,8 @@ def main(argv=None):
         raise ValueError('replan-steps must be in [1, action-horizon]')
     if not 0 <= args.offline_ratio <= 1:
         raise ValueError('offline-ratio must be in [0, 1]')
+    if args.actor_lr <= 0 or args.critic_lr <= 0 or args.temp_lr <= 0 or args.edit_scale <= 0:
+        raise ValueError('actor-lr, critic-lr, temp-lr, and edit-scale must be positive')
     if (args.init_distill_steps < 0 or args.offline_rl_steps < 0 or args.offline_rl_eval_interval < 0
             or args.pi_distill_eval_interval is not None and args.pi_distill_eval_interval < 0
             or args.pi_distill_chckpt_interval is not None and args.pi_distill_chckpt_interval < 0

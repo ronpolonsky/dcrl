@@ -119,13 +119,15 @@ def save_checkpoint(
     checkpoint_manager: ocp.CheckpointManager,
     agent: Any,
     step: int,
+    *,
+    metrics: dict | None = None,
 ):
     agent, params = _split_params(agent)
     items = {
         "agent": agent,
         "params": params,
     }
-    checkpoint_manager.save(step, items)
+    checkpoint_manager.save(step, items, metrics=metrics)
 
 def load_agent(seed, example_observation, example_action, example_state,
                actor, actor_train_state, target_actor_params, agent_kwargs, metadata,

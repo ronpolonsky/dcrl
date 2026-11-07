@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
-#SBATCH --partition=iris-hi
-#SBATCH --time=21-00:00:00
+#SBATCH --partition=gpuA100x4
+#SBATCH --time=2-00:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=96G
-#SBATCH --gres=gpu:h100:1
-#SBATCH --account=iris
-#SBATCH --exclude=iris[1-4],iris9,iris10,iris-hp-z8
+#SBATCH --gres=gpu:nvidia_a100:1
+#SBATCH --account=bgqe-delta-gpu
 #SBATCH --job-name=small-expo-l60
-#SBATCH --output=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.out
-#SBATCH --error=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.err
+#SBATCH --output=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.out
+#SBATCH --error=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.err
 
 set -euo pipefail
 
-PROJECT=/nlp/scr/ronpo/projects/dcrl
+PROJECT=/work/hdd/bgqe/rpolonsky/dcrl
 EXPO="$PROJECT/third_party/expo-ft"
 PYTHON="$EXPO/.venv/bin/python"
 LIBERO_ROOT="$PROJECT/.deps/LIBERO/libero/libero"
@@ -21,14 +20,14 @@ export PYTHONPATH="$PROJECT:$EXPO/expo_ft/agents/vla/openpi/src:$EXPO/expo_ft/ag
 export WANDB_BASE_URL=https://forge.coreweave.com/wandb
 export WANDB_PROJECT=dcrl
 export WANDB_ENTITY=distill_rl
-export WANDB_DIR=/nlp/scr/ronpo/dcrlcheckpoints/small_expo_learner/wandb
+export WANDB_DIR=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_learner/wandb
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export TOKENIZERS_PARALLELISM=false
 
 mkdir -p "$PROJECT/slurm" "$PROJECT/.deps/libero_config"
-mkdir -p /nlp/scr/ronpo/dcrlcheckpoints/small_expo_learner "$WANDB_DIR"
+mkdir -p /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_learner "$WANDB_DIR"
 
 cat > "$PROJECT/.deps/libero_config/config.yaml" <<EOF
 benchmark_root: $LIBERO_ROOT
@@ -79,7 +78,7 @@ fi
   --eval-episodes 20 \
   --offline-rl-checkpoint-interval 25000 \
   --online-rl-checkpot-interval 25000 \
-  --output-dir /nlp/scr/ronpo/dcrlcheckpoints/small_expo_learner \
+  --output-dir /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_learner \
   --wandb-entity distill_rl \
   --wandb-project dcrl \
   --wandb-name small_expo_libero90_task60_seed42 \

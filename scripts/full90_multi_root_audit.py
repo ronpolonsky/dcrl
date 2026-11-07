@@ -57,7 +57,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", action="append", required=True, type=Path,
                         help="Result root, in descending canonical priority")
-    parser.add_argument("--mode", choices=("actor", "compact", "full"), required=True)
+    parser.add_argument("--mode", choices=("sft_pi", "direct_rl_pi", "compact", "eval_sft", "actor", "full"), required=True,
+                        help="Evaluation mode; old mode names are retained for historical result directories")
     parser.add_argument("--name", required=True,
                         help="Checkpoint result directory name below MODE")
     parser.add_argument("--episodes", type=int, default=20)

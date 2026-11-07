@@ -39,9 +39,12 @@ def get_config():
     config.freeze_pi05_encoder = True
     config.freeze_critic_encoder = False  # if True, encoder is frozen for Q (only extract embeddings)
 
-    config.pi05_weight_loader_path = "" # pi05 sft checkpoint path
+    # Use the already-collected official Pi0.5 LIBERO base tree on the project
+    # filesystem. This avoids a GCS download and keeps the single-GPU test off
+    # the slow /work filesystem.
+    config.pi05_weight_loader_path = "/projects/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero/params"
     # assets_dir is the base path; norm stats are loaded from assets_dir/asset_id.
-    config.pi05_assets_dir = "/nlp/scr/ronpo/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero/assets"
+    config.pi05_assets_dir = "/projects/bgqe/rpolonsky/dcrlcheckpoints/openpi_cache/openpi-assets/checkpoints/pi05_libero/assets"
     config.pi05_asset_id = "physical-intelligence/libero"
     config.actor_success_only = True
     config.use_full_augmentation = True  # False = only crop (no rotate/color jitter)

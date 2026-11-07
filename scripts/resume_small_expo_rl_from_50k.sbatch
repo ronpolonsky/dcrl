@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
-#SBATCH --partition=iris-hi
-#SBATCH --time=21-00:00:00
+#SBATCH --partition=gpuA100x4
+#SBATCH --time=2-00:00:00
 #SBATCH --nodes=1
 # A compact learner plus 10k-row replay fits the available A40 host slots.
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=24G
-#SBATCH --gres=gpu:1
-#SBATCH --account=iris
-# Use the next available healthy Iris-hi tier; do not pin a host.
-# iris7/8 allocations 17961871/72/70 hung in nvidia-smi; exclude them for retry.
-#SBATCH --exclude=iris[1-4,7-10],iris-hp-z8
+#SBATCH --gres=gpu:nvidia_a100:1
+#SBATCH --account=bgqe-delta-gpu
+# Use the next available healthy Delta A100 node; do not pin a host.
 #SBATCH --job-name=small-expo-rl
-#SBATCH --output=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.out
-#SBATCH --error=/nlp/scr/ronpo/projects/dcrl/slurm/%x-%j.err
+#SBATCH --output=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.out
+#SBATCH --error=/work/hdd/bgqe/rpolonsky/dcrl/slurm/%x-%j.err
 
 set -euo pipefail
 : "${TASK_ID:?submit with --export=ALL,TASK_ID=<2|28|29|60|79>}"
-: "${OUTPUT_ROOT:=/nlp/scr/ronpo/dcrlcheckpoints/small_expo_3phase_dualopt_10_5_sharedstats}"
+: "${OUTPUT_ROOT:=/work/hdd/bgqe/rpolonsky/dcrlcheckpoints/small_expo_3phase_dualopt_10_5_sharedstats}"
 : "${BATCH_SIZE:=32}"
 
-PROJECT=/nlp/scr/ronpo/projects/dcrl
+PROJECT=/work/hdd/bgqe/rpolonsky/dcrl
 EXPO="$PROJECT/third_party/expo-ft"
 PYTHON="$EXPO/.venv/bin/python"
 LIBERO_ROOT="$PROJECT/.deps/LIBERO/libero/libero"
@@ -39,17 +37,9 @@ export WANDB_CONFIG_DIR="$WANDB_CACHE_ROOT/config"
 export WANDB_DATA_DIR="$WANDB_CACHE_ROOT/data"
 export XDG_CACHE_HOME="$XDG_CACHE_ROOT"
 export TMPDIR="$TMP_ROOT"
-# The HGX EGL stack has reproducibly aborted in MuJoCo read_pixels().
-# Use OSMesa only on those hosts; healthy nodes retain the faster EGL path.
-if [[ "${SLURMD_NODENAME:-}" == iris-hgx-* ]]; then
-  export MUJOCO_GL=osmesa
-  export PYOPENGL_PLATFORM=osmesa
-  RENDER_BACKEND=osmesa
-else
-  export MUJOCO_GL=egl
-  export PYOPENGL_PLATFORM=egl
-  RENDER_BACKEND=egl
-fi
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+export PYOPENGL_PLATFORM="${PYOPENGL_PLATFORM:-$MUJOCO_GL}"
+RENDER_BACKEND="$MUJOCO_GL"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export TOKENIZERS_PARALLELISM=false
 export PYTHONUNBUFFERED=1
@@ -82,7 +72,7 @@ cd "$PROJECT"
   --offline-rl-checkpoint-interval 50000 \
   --online-rl-eval-interval 25000 \
   --online-rl-checkpot-interval 25000 \
-  --distill-data-root /nlp/scr/ronpo/dcrlcheckpoints/pi_base_data/fixed125 \
+  --distill-data-root /work/hdd/bgqe/rpolonsky/dcrlcheckpoints/pi_base_data/fixed125 \
   --demos-root datasets \
   --update-type episode \
   --num-updates 3 \
