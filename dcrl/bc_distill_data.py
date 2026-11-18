@@ -405,6 +405,317 @@ def collect_teacher_chunks(
             bootstrap.close()
 
 
+def _resolve_small_expo_checkpoint(path: Path):
+    """Resolve a Small EXPO task/checkpoint path to (task, root, step).
+
+    The project has both ``checkpoints_best`` and ``checkpoints_last`` trees.
+    A numeric path is preferred for reproducibility; a tree path is accepted
+    for convenience and resolves to its latest numeric step.
+    """
+    path = Path(path).expanduser().resolve()
+    if path.name.isdigit() and path.parent.name.startswith("checkpoints"):
+        root = path.parent
+        step = int(path.name)
+    else:
+        if path.name.startswith("checkpoints"):
+            root = path
+        elif (path / "checkpoints_best").is_dir():
+            root = path / "checkpoints_best"
+        elif (path / "checkpoints_last").is_dir():
+            root = path / "checkpoints_last"
+        elif (path / "checkpoints").is_dir():
+            root = path / "checkpoints"
+        else:
+            root = path
+        numeric_steps = [int(child.name) for child in root.iterdir()
+                         if child.is_dir() and child.name.isdigit()]
+        if not numeric_steps:
+            raise FileNotFoundError(f"No numeric checkpoints found below {root}")
+        step = max(numeric_steps)
+    if not root.exists():
+        raise FileNotFoundError(f"Small EXPO checkpoint directory does not exist: {root}")
+    if not (root / str(step)).is_dir():
+        raise FileNotFoundError(f"Small EXPO checkpoint step {step} is not present in {root}")
+    return root.parent, root, step
+
+
+def collect_hybrid_teacher_chunks(
+    small_expo_checkpoint: Path,
+    pi05_checkpoint: str,
+    output: Path,
+    episodes: int,
+    seed: int,
+    *,
+    suite: str = "libero_90",
+    task_id: int,
+    image_size: int = 224,
+    target_action_horizon: int = 10,
+    target_replan_steps: int = 5,
+    target_successes: int | None = None,
+    target_failures: int | None = None,
+    max_attempts_override: int | None = None,
+    progress_callback=None,
+) -> None:
+    """Collect Pi0.5 targets selected by a frozen Small EXPO editor/critic.
+
+    The large official Pi0.5 actor proposes ten-action chunks.  The compact
+    Small EXPO checkpoint supplies only the editor, critic, and their sampling
+    settings.  The resulting hybrid is used for rollout and target collection;
+    the SFT trainer later trains/evaluates the large Pi0.5 actor alone.
+    """
+    import dataclasses
+    import types
+
+    import jax
+    import orbax.checkpoint as ocp
+    from openpi.shared import normalize
+    from openpi.training import sharding
+
+    from dcrl.agents.pi_expo_learner import restore_checkpoint
+    from dcrl.eval_pi_expo_with_editor import (
+        _build_compact_agent,
+        _build_large_agent,
+        _checkpoint_manager,
+        _editor_rollout_config,
+        _hybrid_agent,
+        _load_stats,
+    )
+    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+
+    if (target_successes is None) != (target_failures is None):
+        raise ValueError("provide both target_successes and target_failures, or neither")
+    if target_successes is not None and (target_successes <= 0 or target_failures < 0):
+        raise ValueError("target_successes must be positive and target_failures non-negative")
+    if target_successes == 0 and target_failures == 0:
+        raise ValueError("at least one collection target must be positive")
+    if not 1 <= target_replan_steps <= target_action_horizon:
+        raise ValueError("require 1 <= target_replan_steps <= target_action_horizon")
+
+    max_attempts = int(episodes)
+    if target_successes is not None:
+        max_attempts = max(max_attempts, 4 * (int(target_successes) + int(target_failures)))
+    if max_attempts_override is not None:
+        if int(max_attempts_override) < max_attempts:
+            raise ValueError("max_attempts_override cannot be smaller than the quota attempt budget")
+        max_attempts = int(max_attempts_override)
+
+    task_dir, checkpoint_root, checkpoint_step = _resolve_small_expo_checkpoint(
+        small_expo_checkpoint
+    )
+    run_config_path = task_dir / "run_config.json"
+    norm_stats_path = task_dir / "norm_stats.json"
+    if not run_config_path.exists() or not norm_stats_path.exists():
+        raise FileNotFoundError(
+            f"Small EXPO task directory must contain run_config.json and norm_stats.json: {task_dir}"
+        )
+    small_config = json.loads(run_config_path.read_text())
+    if small_config.get("suite", suite) != suite or int(small_config.get("task_id", task_id)) != int(task_id):
+        raise ValueError(
+            "Small EXPO checkpoint task does not match the requested collection task: "
+            f"checkpoint=({small_config.get('suite')},{small_config.get('task_id')}), "
+            f"requested=({suite},{task_id})"
+        )
+    small_horizon = int(small_config["action_horizon"])
+    small_replan = int(small_config["replan_steps"])
+    if target_action_horizon > small_horizon:
+        raise ValueError(
+            f"target horizon {target_action_horizon} exceeds compact checkpoint horizon {small_horizon}"
+        )
+
+    output = Path(output)
+    metadata = {
+        "source": "pi05_small_expo_editor",
+        "small_expo_checkpoint": str((checkpoint_root / str(checkpoint_step)).resolve()),
+        "small_expo_task_dir": str(task_dir.resolve()),
+        "small_expo_checkpoint_step": int(checkpoint_step),
+        "pi05_checkpoint": str(pi05_checkpoint),
+        "suite": suite,
+        "task_id": int(task_id),
+        "seed": int(seed),
+        "episodes": int(episodes),
+        "target_successes": None if target_successes is None else int(target_successes),
+        "target_failures": None if target_failures is None else int(target_failures),
+        "max_attempts": int(max_attempts),
+        "image_size": int(image_size),
+        "render_resolution": 256,
+        "action_horizon": int(target_action_horizon),
+        "replan_steps": int(target_replan_steps),
+        "small_expo_action_horizon": small_horizon,
+        "small_expo_replan_steps": small_replan,
+        "official_pi05_libero": True,
+        "norm_sha256": hashlib.sha256(norm_stats_path.read_bytes()).hexdigest(),
+        "format_version": 1,
+    }
+    success_path = output.parent / "success" / output.name
+    failure_path = output.parent / "failures" / output.name
+    if output.exists():
+        with h5py.File(output, "r") as existing:
+            if json.loads(existing.attrs["metadata"]) != metadata or not bool(existing.attrs.get("complete", False)):
+                raise ValueError("existing hybrid collection does not match this request")
+        partition_collection(output, success_path, failure_path)
+        return
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    partial = output.with_suffix(".partial.hdf5")
+    if partial.exists():
+        try:
+            with h5py.File(partial, "r"):
+                pass
+        except OSError:
+            partial.unlink()
+
+    env = None
+    try:
+        env = LiberoTaskEnv(suite, task_id, seed=seed, image_size=image_size)
+        observation = env.reset()
+        mesh = sharding.make_mesh(1)
+        data_sharding = jax.sharding.NamedSharding(
+            mesh, jax.sharding.PartitionSpec(sharding.DATA_AXIS)
+        )
+        replicated_sharding = jax.sharding.NamedSharding(
+            mesh, jax.sharding.PartitionSpec()
+        )
+
+        # Use the official LIBERO EXPO wiring, but point its Pi0.5 loader at
+        # the requested official base checkpoint. No large EXPO checkpoint is
+        # restored here: only the compact editor/critic is restored.
+        pi05_params = str(pi05_checkpoint).rstrip("/")
+        if not pi05_params.endswith("/params"):
+            pi05_params += "/params"
+        large_args = types.SimpleNamespace(
+            seed=int(seed),
+            replan_steps=int(target_replan_steps),
+            pi05_weight_loader_path=pi05_params,
+            pi05_config_module="configs.model.expo_ft_pi_libero_config",
+        )
+        large = _build_large_agent(
+            large_args, observation, env.instruction, mesh,
+            data_sharding, replicated_sharding,
+        )
+
+        stats, _ = _load_stats(checkpoint_root, None)
+        compact_args = types.SimpleNamespace(
+            seed=int(small_config.get("seed", seed)),
+            image_size=int(small_config.get("image_size", image_size)),
+        )
+        compact = _build_compact_agent(
+            compact_args, observation, stats, mesh,
+            data_sharding, replicated_sharding,
+            action_horizon=small_horizon, replan_steps=small_replan,
+        )
+        manager, _, root = _checkpoint_manager(checkpoint_root)
+        try:
+            compact = restore_checkpoint(manager, compact, checkpoint_step)
+        finally:
+            manager.close()
+        print(
+            f"Restored Small EXPO editor/critic checkpoint {checkpoint_step} from {root}",
+            flush=True,
+        )
+        hybrid = dataclasses.replace(
+            _hybrid_agent(large, compact),
+            eval_candidate_steps=target_replan_steps,
+        ).cache_infer_params()
+        print(
+            f"Initialized official Pi0.5 base + Small EXPO editor/critic; "
+            f"targets={target_action_horizon}/{target_replan_steps}",
+            flush=True,
+        )
+
+        initial_state_count = len(env.init_states)
+        instruction = env.instruction
+        limit = LIBERO_SUITE_MAX_STEPS[suite]
+        norm_bytes = norm_stats_path.read_bytes()
+        with h5py.File(partial, "a") as file:
+            if "metadata" in file.attrs:
+                old = json.loads(file.attrs["metadata"])
+                if old != metadata:
+                    raise ValueError("partial hybrid collection does not match this request")
+            file.attrs["metadata"] = json.dumps(metadata, sort_keys=True)
+            file.attrs["instruction"] = instruction
+            file.attrs["normalization_stats"] = norm_bytes.decode()
+            for episode in tqdm(range(max_attempts), desc="Collect hybrid 10/5 episodes"):
+                complete = [name for name in file if bool(file[name].attrs.get("complete", False))]
+                success_count = sum(bool(file[name].attrs.get("success", False)) for name in complete)
+                failure_count = len(complete) - success_count
+                if target_successes is not None and success_count >= target_successes and failure_count >= target_failures:
+                    break
+                name = f"episode_{episode:06d}"
+                if name in file and bool(file[name].attrs.get("complete", False)):
+                    continue
+                if name in file:
+                    del file[name]
+                env.seed = seed + episode
+                env.init_state_offset = episode % initial_state_count
+                env.episode_index = 0
+                observation = env.reset()
+                rows, success, elapsed = [], False, 0
+                while elapsed < limit and not success:
+                    start = observation
+                    chunk, hybrid, sample_info = hybrid.sample_actions(observation)
+                    chunk = np.asarray(jax.device_get(chunk), np.float32)
+                    if chunk.shape != (target_action_horizon, 7) or not np.isfinite(chunk).all():
+                        raise ValueError(f"hybrid teacher returned invalid action chunk shape={chunk.shape}")
+                    executed = 0
+                    for action in chunk[:min(target_replan_steps, limit - elapsed)]:
+                        observation, _, success, _ = env.step(action)
+                        elapsed += 1
+                        executed += 1
+                        if success or elapsed >= limit:
+                            break
+                    rows.append((start, chunk, executed, sample_info))
+                if target_successes is not None:
+                    complete = [name for name in file if bool(file[name].attrs.get("complete", False))]
+                    success_count = sum(bool(file[name].attrs.get("success", False)) for name in complete)
+                    failure_count = len(complete) - success_count
+                    if ((success and success_count >= target_successes)
+                            or (not success and failure_count >= target_failures)):
+                        continue
+                group = file.create_group(name)
+                group.attrs.update(
+                    success=bool(success), steps=int(elapsed),
+                    initial_state_index=episode % initial_state_count,
+                    selected_action_types=json.dumps([
+                        str(row[3].get("selected_action_type", "unknown")) for row in rows
+                    ]),
+                    selected_candidate_indices=json.dumps([
+                        int(row[3].get("selected_candidate_index", -1)) for row in rows
+                    ]),
+                    complete=True,
+                )
+                for key in CAMERA_DATASETS:
+                    group.create_dataset(
+                        key, data=np.stack([row[0]["image"][key] for row in rows]),
+                        compression="gzip",
+                    )
+                group.create_dataset("state", data=np.stack([row[0]["state"] for row in rows]))
+                group.create_dataset("actions", data=np.stack([row[1] for row in rows]))
+                group.create_dataset("executed_prefix", data=[row[2] for row in rows])
+                file.flush()
+                if progress_callback is not None:
+                    complete = [name for name in file if bool(file[name].attrs.get("complete", False))]
+                    success_count = sum(bool(file[name].attrs.get("success", False)) for name in complete)
+                    progress_callback({
+                        "episode": episode + 1,
+                        "successes": success_count,
+                        "failures": len(complete) - success_count,
+                    })
+            complete = [name for name in file if bool(file[name].attrs.get("complete", False))]
+            success_count = sum(bool(file[name].attrs.get("success", False)) for name in complete)
+            failure_count = len(complete) - success_count
+            if target_successes is not None and (success_count < target_successes or failure_count < target_failures):
+                raise RuntimeError(
+                    f"reached collection attempt limit with {success_count} successes and "
+                    f"{failure_count} failures; requested {target_successes}/{target_failures}"
+                )
+            file.attrs["complete"] = True
+        partial.replace(output)
+        partition_collection(output, success_path, failure_path)
+    finally:
+        if env is not None:
+            env.close()
+
+
 class ChunkDataset:
     """Disk-backed replanning rows with full action chunks as targets."""
 

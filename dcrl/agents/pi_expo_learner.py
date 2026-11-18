@@ -634,6 +634,27 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
             return jnp.concatenate(q_list)
         return compute_q(critic_fn, critic_params, obs, actions, states, self.num_min_qs)
 
+    def _prepare_actor_observations(self, observations):
+        """Flatten the live nested LIBERO observation for Pi05 transforms."""
+        if not isinstance(observations, dict):
+            return observations
+        image = observations.get("image")
+        if isinstance(image, dict):
+            return {
+                "image": image["base_0_rgb"],
+                "wrist_image": image["left_wrist_0_rgb"],
+                "state": observations["state"],
+                "prompt": observations.get("prompt", self.default_prompt),
+            }
+        if "observation/image" in observations:
+            return {
+                "image": observations["observation/image"],
+                "wrist_image": observations["observation/wrist_image"],
+                "state": observations["observation/state"],
+                "prompt": observations.get("prompt", self.default_prompt),
+            }
+        return observations
+
     def sample_actions(self, observations, only_base_actions=False):
         # Keep inference-time randomness on the same single device as inference params
         # to avoid cross-device gather/indexing mismatches.
@@ -645,6 +666,7 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
         _edit_actor_params = c.get("edit_actor_params") or jax.device_put(self.edit_actor.params, infer_sharding)
         _target_critic_params = c.get("target_critic_params") or jax.device_put(self.target_critic.params, infer_sharding)
 
+        observations = self._prepare_actor_observations(observations)
         transformed_inputs = self.actor.process_raw_inputs(observations, self.action_dim, self.resize_size)
         transformed_inputs = extract_critic_fields(transformed_inputs, self.actor.model_config.action_dim, self.state_dim, self.critic_camera_keys)
 
@@ -660,7 +682,11 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
         
         if only_base_actions:
             action = raw_actions[0].reshape(self.action_horizon, self.action_dim)
-            sample_info = {"sample_time": sample_time, "selected_action_type": "main"}
+            sample_info = {
+                "sample_time": sample_time,
+                "selected_candidate_index": 0,
+                "selected_action_type": "base",
+            }
             return jnp.array(action), self.replace(rng=rng), sample_info
 
         transformed_full = transformed_actions  # (N, action_horizon, action_dim)
@@ -724,7 +750,12 @@ class PiExpoLearner(AgentLearner, struct.PyTreeNode):
 
         action = action.reshape(self.action_horizon, self.action_dim)
         rng, _ = jax.random.split(rng, 2)
-        sample_info = {"sample_time": sample_time}
+        selected_index = int(np.asarray(jax.device_get(idx)))
+        sample_info = {
+            "sample_time": sample_time,
+            "selected_candidate_index": selected_index,
+            "selected_action_type": "edited" if selected_index >= self.N else "base",
+        }
         return jnp.array(action), self.replace(rng=rng), sample_info
 
     def eval_actor_only(self, observations):

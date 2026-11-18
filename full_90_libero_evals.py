@@ -301,8 +301,11 @@ def _sft_checkpoint_config(checkpoint: Path, assets_dir: Path | None,
     if not manifest_path.is_file():
         raise FileNotFoundError(f"sft_pi requires {manifest_path} from train_pi_sft_agnostic.py")
     manifest = json.loads(manifest_path.read_text())
-    if manifest.get("learner_config") != "configs.sft.my_expo_libero":
-        raise ValueError("sft_pi currently supports configs.sft.my_expo_libero (MyEXPOLearner)")
+    if manifest.get("learner_config") not in (
+        "configs.sft.my_expo_libero",
+        "configs.sft.my_expo_libero_relaunch",
+    ):
+        raise ValueError("sft_pi requires a supported MyEXPOLearner SFT config")
     for key, expected in (("action_horizon", 10), ("replan_steps", replan_steps),
                           ("image_size", image_size)):
         if manifest.get(key) != expected:
@@ -321,7 +324,7 @@ def _build_sft_agent(checkpoint, assets_dir, instruction, mesh,
     root, step_hint, args, assets = _sft_checkpoint_config(
         checkpoint, assets_dir, replan_steps, image_size
     )
-    from configs.sft.my_expo_libero import build_learner
+    from importlib import import_module
     from dcrl.agents.my_expo_learner import restore_checkpoint
     from dcrl.expo.agents.alg.agent import initialize_checkpoint_dir
 
@@ -335,6 +338,7 @@ def _build_sft_agent(checkpoint, assets_dir, instruction, mesh,
         step = step_hint if step_hint is not None else max(steps)
         if step not in steps:
             raise ValueError(f"Checkpoint step {step} is not present below {root}")
+        build_learner = import_module(args.learner_config).build_learner
         agent, _, _ = build_learner(
             args=args, output_dir=root.parent, instruction=instruction,
             stats_dir=assets / "physical-intelligence/libero", assets_dir=assets,

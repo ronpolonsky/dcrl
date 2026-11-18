@@ -53,13 +53,28 @@ def _manifest_openpi_asset_identity(value):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase", choices=("all", "collect", "train"), default="all")
-    parser.add_argument("--collection-source", choices=("small_expo", "pi_base"), default="small_expo")
+    parser.add_argument(
+        "--collection-source",
+        choices=("small_expo", "pi_base", "pi05_small_expo_editor"),
+        default="small_expo",
+    )
     parser.add_argument("--teacher-dir", type=Path, default=None)
     parser.add_argument("--teacher-step", type=int, default=None)
+    parser.add_argument(
+        "--small-expo-checkpoint", type=Path, default=None,
+        help="Numeric Small EXPO checkpoint for the hybrid Pi0.5+editor/critic collector.",
+    )
+    parser.add_argument(
+        "--pi05-checkpoint", default="gs://openpi-assets/checkpoints/pi05_libero",
+        help="Official Pi0.5 LIBERO checkpoint used as the hybrid teacher actor.",
+    )
     parser.add_argument("--source-checkpoint", default="gs://openpi-assets/checkpoints/pi05_base")
     parser.add_argument("--norm-stats", default="gs://openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json")
     parser.add_argument("--source-suite", default="libero_90")
-    parser.add_argument("--source-task-id", type=int, default=29)
+    parser.add_argument(
+        "--source-task-id", type=int, required=True,
+        help="LIBERO task ID used for collection and actor-only evaluation; must match the selected teacher checkpoint.",
+    )
     parser.add_argument("--collection-successes", type=int, default=100)
     parser.add_argument("--collection-failures", type=int, default=25)
     parser.add_argument("--collection-episodes", type=int, default=200)
@@ -85,6 +100,16 @@ def parse_args():
     parser.add_argument("--warmup-steps", type=int, default=PI05_WARMUP)
     parser.add_argument("--lr-decay-steps", type=int, default=PI05_DECAY)
     parser.add_argument("--finetune-mode", choices=("lora", "full"), default="lora")
+    parser.add_argument(
+        "--trainable-scope", choices=("existing", "lora_only"),
+        default="lora_only",
+        help="Gradient scope; lora_only matches the tuned historical SFT runs.",
+    )
+    parser.add_argument(
+        "--zero-lora-b", action="store_true",
+        help=("Zero newly initialized LoRA-B leaves before the first update, "
+              "matching the tuned SFT trainer's initialization."),
+    )
     parser.add_argument("--eval-every", type=int, default=25_000)
     parser.add_argument("--eval-episodes", type=int, default=PI05_EVAL_EPISODES)
     parser.add_argument(
@@ -109,6 +134,8 @@ def parse_args():
         parser.error("this trainer requires the official Pi0.5 LIBERO 10/5 interface")
     if not 0.0 <= args.official_demo_ratio <= 1.0:
         parser.error("official_demo_ratio must be in [0, 1]")
+    if args.trainable_scope == "lora_only" and args.finetune_mode != "lora":
+        parser.error("--trainable-scope lora_only requires --finetune-mode lora")
     return args
 
 
@@ -153,7 +180,12 @@ def _evaluate_actor(learner, env, *, episodes, max_steps, replan_steps, seed):
 
 
 def _paths(args):
-    name = "teacher_chunks.hdf5" if args.collection_source == "small_expo" else "pi05_chunks.hdf5"
+    if args.collection_source == "small_expo":
+        name = "teacher_chunks.hdf5"
+    elif args.collection_source == "pi_base":
+        name = "pi05_chunks.hdf5"
+    else:
+        name = "hybrid_teacher_chunks.hdf5"
     mixed = args.output_dir / "pi_base_data" / name
     return mixed, mixed.parent / "success" / name, mixed.parent / "failures" / name
 
@@ -210,12 +242,39 @@ def _collect(args, wandb_run=None):
             target_failures=args.collection_failures,
             max_attempts_override=args.collection_max_attempts,
             progress_callback=log_collection if wandb_run is not None else None)
-    else:
+    elif args.collection_source == "pi_base":
         from dcrl.collect_pi05_libero import collect
         collect(checkpoint=args.source_checkpoint, suite=args.source_suite,
                 norm_stats=args.norm_stats, task_id=args.source_task_id,
                 episodes=None, seed=args.eval_seed, output=mixed,
                 successes=args.collection_successes, failures=args.collection_failures)
+    else:
+        if args.small_expo_checkpoint is None:
+            raise ValueError(
+                "pi05_small_expo_editor collection requires --small-expo-checkpoint"
+            )
+        from dcrl.bc_distill_data import collect_hybrid_teacher_chunks
+
+        def log_collection(progress):
+            if wandb_run is not None:
+                wandb_run.log({
+                    "collection/episode": progress["episode"],
+                    "collection/successes": progress["successes"],
+                    "collection/failures": progress["failures"],
+                })
+
+        collect_hybrid_teacher_chunks(
+            args.small_expo_checkpoint, args.pi05_checkpoint, mixed,
+            args.collection_episodes, args.eval_seed,
+            suite=args.source_suite, task_id=args.source_task_id,
+            image_size=args.image_size,
+            target_action_horizon=args.action_horizon,
+            target_replan_steps=args.replan_steps,
+            target_successes=args.collection_successes,
+            target_failures=args.collection_failures,
+            max_attempts_override=args.collection_max_attempts,
+            progress_callback=log_collection if wandb_run is not None else None,
+        )
     if wandb_run is not None:
         import h5py
 
@@ -259,10 +318,19 @@ def train(args, wandb_run=None):
             raise ValueError("dataset teacher directory does not match the requested one")
         if int(collection["checkpoint_step"]) != args.teacher_step:
             raise ValueError("dataset teacher checkpoint does not match the requested one")
-    elif collection.get("source") != "pi05_base_actor":
+    elif args.collection_source == "pi_base" and collection.get("source") != "pi05_base_actor":
         raise ValueError("dataset was not collected from the Pi0.5 base actor")
-    elif collection.get("checkpoint") != args.source_checkpoint:
+    elif args.collection_source == "pi_base" and collection.get("checkpoint") != args.source_checkpoint:
         raise ValueError("dataset Pi0.5 checkpoint does not match the requested source checkpoint")
+    elif args.collection_source == "pi05_small_expo_editor":
+        if args.small_expo_checkpoint is None:
+            raise ValueError("hybrid training requires --small-expo-checkpoint")
+        if collection.get("source") != "pi05_small_expo_editor":
+            raise ValueError("dataset was not collected from the Pi0.5+Small EXPO hybrid")
+        if collection.get("small_expo_checkpoint") != str(args.small_expo_checkpoint.resolve()):
+            raise ValueError("dataset Small EXPO checkpoint does not match the requested checkpoint")
+        if collection.get("pi05_checkpoint") != args.pi05_checkpoint:
+            raise ValueError("dataset Pi0.5 checkpoint does not match the requested hybrid source")
     horizon = collection.get("target_action_horizon", collection.get("action_horizon"))
     replan = collection.get("target_replan_steps", collection.get("replan_steps"))
     if horizon != args.action_horizon or replan != args.replan_steps:
@@ -277,7 +345,7 @@ def train(args, wandb_run=None):
     # SFT runs may load these assets directly from the project filesystem or
     # through OpenPI's local cache. Record the same canonical asset identity so
     # changing between those equivalent paths does not invalidate a resume.
-    for key in ("source_checkpoint", "student_checkpoint", "norm_stats"):
+    for key in ("source_checkpoint", "student_checkpoint", "norm_stats", "pi05_checkpoint"):
         if key in manifest:
             manifest[key] = _manifest_openpi_asset_identity(manifest[key])
     manifest.update(collection=collection, loss="full_chunk_flow_matching",
@@ -398,7 +466,9 @@ def train(args, wandb_run=None):
             if "eval/success_rate" not in result:
                 return
             score = float(result["eval/success_rate"])
-            if (score, step) < (best_eval_score, best_eval_step):
+            # Keep the first checkpoint attaining the best score.  Do not
+            # replace it with a later evaluation that merely ties it.
+            if score <= best_eval_score:
                 return
             save_checkpoint(
                 manager, learner, step,
@@ -488,6 +558,13 @@ def main():
     args.output_dir = args.output_dir.resolve()
     if args.teacher_dir is not None:
         args.teacher_dir = args.teacher_dir.resolve()
+    if args.small_expo_checkpoint is not None:
+        from dcrl.bc_distill_data import _resolve_small_expo_checkpoint
+
+        _, checkpoint_root, checkpoint_step = _resolve_small_expo_checkpoint(
+            args.small_expo_checkpoint
+        )
+        args.small_expo_checkpoint = (checkpoint_root / str(checkpoint_step)).resolve()
     if args.official_demo_root is not None:
         args.official_demo_root = args.official_demo_root.resolve()
     args.output_dir.mkdir(parents=True, exist_ok=True)

@@ -38,10 +38,16 @@ LOGGER = logging.getLogger(__name__)
 def _checkpoint_root(path: Path) -> Path:
     """Accept a task directory, checkpoints directory, or numeric step path."""
     path = path.expanduser().resolve()
-    if path.name.isdigit() and path.parent.name == "checkpoints":
+    if path.name.isdigit() and path.parent.name.startswith("checkpoints"):
         return path.parent
+    if path.name.startswith("checkpoints"):
+        return path
     if (path / "checkpoints").is_dir():
         return path / "checkpoints"
+    if (path / "checkpoints_best").is_dir():
+        return path / "checkpoints_best"
+    if (path / "checkpoints_last").is_dir():
+        return path / "checkpoints_last"
     return path
 
 
@@ -98,10 +104,13 @@ def _make_mesh():
     return mesh, data_sharding, replicated_sharding
 
 
-def _large_config(weight_loader_path: str | None):
-    from configs.model import expo_ft_pi_config
+def _large_config(weight_loader_path: str | None, config_module: str = "configs.model.expo_ft_pi_config"):
+    module_name, separator, attribute = config_module.partition(":")
+    if not separator:
+        module_name, attribute = config_module.rsplit(".", 1)
+    module = __import__(module_name, fromlist=[attribute])
 
-    config = copy.deepcopy(expo_ft_pi_config.get_config())
+    config = copy.deepcopy(getattr(module, attribute).get_config())
     if weight_loader_path is not None:
         config.pi05_weight_loader_path = weight_loader_path
     return config
@@ -115,7 +124,10 @@ def _build_large_agent(args, obs, task_description, mesh, data_sharding, replica
     critic_image = np.concatenate(
         [np.asarray(obs["image"][key]) for key in camera_keys], axis=-1
     )
-    config = _large_config(args.pi05_weight_loader_path)
+    config = _large_config(
+        args.pi05_weight_loader_path,
+        getattr(args, "pi05_config_module", "configs.model.expo_ft_pi_config"),
+    )
     agent = PiExpoLearner.from_pi05(
         config=config,
         seed=args.seed,
@@ -188,7 +200,7 @@ def _hybrid_agent(large, compact):
         "N", "n_edit_samples", "edit_scale", "edit_action_xyzg", "batch_split",
         "encode_batch_split", "actor_tau", "tau", "discount", "target_entropy",
         "entropy_scale", "num_qs", "num_min_qs", "full_action_dim",
-        "replan_steps", "resize_size", "default_prompt",
+        "replan_steps", "resize_size",
         "batch_encoder_sharding", "freeze_critic_encoder", "actor_success_only",
         "critic_camera_keys",
     )

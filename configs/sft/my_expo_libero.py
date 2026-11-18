@@ -35,11 +35,30 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
     from openpi.training import config as openpi_configs, optimizer, weight_loaders
     from dcrl.expo.agents.vla.pi05 import Pi05Agent
     from configs.sft import pi05_base_libero
+    from flax import nnx
+    from openpi.shared import nnx_utils
 
     learner_cls = _resolve_class(LEARNER_CLASS)
     stats = normalize.load(stats_dir)
 
     base = pi05_base_libero.get_config()
+    if args.trainable_scope == "lora_only":
+        # This is the explicit adapter-only mask used by the tuned historical
+        # trainer.  Keeping it here avoids depending on an implicit model
+        # default and makes the new trainer's update scope auditable.
+        @dataclasses.dataclass(frozen=True)
+        class LoRAOnlyTrainConfig(openpi_configs.TrainConfig):
+            @property
+            def trainable_filter(self):
+                return nnx.All(nnx.Param, nnx_utils.PathRegex(".*lora.*"))
+
+        base = LoRAOnlyTrainConfig(
+            **{
+                field.name: getattr(base, field.name)
+                for field in dataclasses.fields(base)
+                if field.init
+            }
+        )
     model = dataclasses.replace(base.model, action_horizon=args.action_horizon)
     if args.finetune_mode == "lora":
         model = dataclasses.replace(
@@ -82,6 +101,19 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
         default_prompt=instruction,
         freeze_pi05_encoder=False,
     )
+    # Match the tuned SFT trainer: with a fresh LoRA adapter, zero LoRA-B so
+    # the initial actor is exactly the official Pi0.5 actor.  Do not apply this
+    # while restoring a learner checkpoint; restored LoRA-B leaves are already
+    # part of the checkpoint and must remain unchanged.
+    if getattr(args, "zero_lora_b", False) and not restore_only:
+        import jax.numpy as jnp
+
+        params = nnx_utils.state_map(
+            actor_train_state.params,
+            nnx_utils.PathRegex(".*lora_b.*"),
+            lambda p: p.replace(jnp.zeros_like(p.value)),
+        )
+        actor_train_state = dataclasses.replace(actor_train_state, params=params)
     actor.action_dim = 7
     actor.state_dim = 8
     target_actor_params = actor.get_params(actor_train_state)
