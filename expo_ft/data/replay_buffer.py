@@ -99,6 +99,8 @@ def create_replay_buffer(config, example_action, capacity, task_description, rep
         valids_keep_terminal_windows=config.get("valids_keep_terminal_windows", False),
     )
     buf.seed(seed)
+    # Checkpointing can start at step zero, before the first replay sample.
+    buf.rng = jax.random.PRNGKey(buf._seed or 42)
     return buf
 
 

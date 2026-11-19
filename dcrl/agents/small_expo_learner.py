@@ -22,6 +22,10 @@ class SmallExpoLearner(PiExpoLearner):
     action chunks with independent noise for candidate sampling.
     """
 
+    def _prepare_actor_observations(self, observations):
+        # The compact actor consumes nested camera arrays and pretokenized text.
+        return observations
+
     @classmethod
     def from_examples(
         cls,

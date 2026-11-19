@@ -54,9 +54,9 @@ def _episode_worker(connection, suite, task_id, seed, image_size, init_state_ind
     """Run one MuJoCo episode in a process with its own EGL context."""
     env = None
     try:
-        from dcrl.libero_env import LiberoTaskEnv
+        from dcrl.benchmarks import make_env
 
-        env = LiberoTaskEnv(suite, task_id, seed=seed, image_size=image_size,
+        env = make_env(suite, task_id, seed=seed, image_size=image_size,
                             init_state_offset=init_state_index)
         observation = env.reset()
         elapsed = 0
@@ -69,10 +69,11 @@ def _episode_worker(connection, suite, task_id, seed, image_size, init_state_ind
                 observation, _, success, _ = env.step(action)
                 elapsed += 1
                 executed += 1
-                if success or elapsed >= max_steps:
+                if env.episode_done or success or elapsed >= max_steps:
                     break
-            connection.send(("result", observation, success, executed, elapsed))
-            if success or elapsed >= max_steps:
+            done = env.episode_done or success
+            connection.send(("result", observation, success, done, executed, elapsed))
+            if done or elapsed >= max_steps:
                 break
     except BaseException as exc:
         try:
@@ -115,9 +116,11 @@ def collect_teacher_chunks(
     from openpi.training import sharding
     from dcrl.agents.pi_expo_learner import restore_checkpoint
     from dcrl.agents.small_expo_learner import SmallExpoLearner
-    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+    from dcrl.benchmarks import is_ocbench, make_env, max_episode_steps
 
-    teacher_dir = Path(teacher_dir)
+    teacher_dir, checkpoint_root, checkpoint_step = _resolve_small_expo_checkpoint(
+        teacher_dir, checkpoint_step
+    )
     output = Path(output)
     if (target_successes is None) != (target_failures is None):
         raise ValueError("provide both target_successes and target_failures, or neither")
@@ -155,6 +158,9 @@ def collect_teacher_chunks(
         norm_sha256=hashlib.sha256(norm_bytes).hexdigest(),
         format_version=2,
     )
+    ocbench = is_ocbench(config['suite'])
+    if ocbench:
+        metadata.update(suite=config['suite'], task_id=config['task_id'], image_size=config['image_size'])
 
     if output.exists():
         with h5py.File(output, "r") as existing:
@@ -176,12 +182,12 @@ def collect_teacher_chunks(
                 pass
         except OSError:
             partial.unlink()
-    bootstrap = LiberoTaskEnv(config["suite"], config["task_id"], seed=seed,
+    bootstrap = make_env(config["suite"], config["task_id"], seed=seed,
                               image_size=config["image_size"])
     try:
         example_observation = bootstrap.reset()
         instruction = bootstrap.instruction
-        initial_state_count = len(bootstrap.init_states)
+        initial_state_count = None if ocbench else len(bootstrap.init_states)
         bootstrap.close()
         bootstrap = None
 
@@ -204,7 +210,7 @@ def collect_teacher_chunks(
             norm_stats=normalize.load(teacher_dir),
         )
         with ocp.CheckpointManager(
-            teacher_dir / "checkpoints",
+            checkpoint_root,
             item_handlers={"agent": ocp.PyTreeCheckpointHandler(),
                            "params": ocp.PyTreeCheckpointHandler()},
             options=ocp.CheckpointManagerOptions(create=False, read_only=True),
@@ -222,7 +228,7 @@ def collect_teacher_chunks(
         use_worker = os.environ.get("DCRL_EPISODE_WORKER", "0") == "1"
         direct_env = None
         if not use_worker:
-            direct_env = LiberoTaskEnv(config["suite"], config["task_id"], seed=seed,
+            direct_env = make_env(config["suite"], config["task_id"], seed=seed,
                                        image_size=int(config["image_size"]))
         with h5py.File(partial, "a") as file:
             if "metadata" in file.attrs:
@@ -281,14 +287,16 @@ def collect_teacher_chunks(
                 rows = []
                 success = False
                 elapsed = 0
-                limit = LIBERO_SUITE_MAX_STEPS[config["suite"]]
+                limit = max_episode_steps(config['suite'], int(config['task_id']))
+                episode_seed = seed if ocbench else seed + episode
+                state_index = episode if ocbench else episode % initial_state_count
                 if use_worker:
                     context = mp.get_context("spawn")
                     parent, child = context.Pipe()
                     worker = context.Process(
                         target=_episode_worker,
-                        args=(child, config["suite"], int(config["task_id"]), seed + episode,
-                              int(config["image_size"]), episode % initial_state_count, limit),
+                        args=(child, config["suite"], int(config["task_id"]), episode_seed,
+                              int(config["image_size"]), state_index, limit),
                     )
                     worker.start()
                     child.close()
@@ -308,8 +316,10 @@ def collect_teacher_chunks(
                             reply = parent.recv()
                             if reply[0] == "error":
                                 raise RuntimeError(f"LIBERO worker failed: {reply[1]}")
-                            _, observation, success, executed, elapsed = reply
+                            _, observation, success, done, executed, elapsed = reply
                             rows.append((start, target, executed))
+                            if done:
+                                break
                     finally:
                         parent.close()
                         worker.join()
@@ -318,11 +328,11 @@ def collect_teacher_chunks(
                 else:
                     # Reuse one EGL context in this process. This avoids the
                     # H100 child-process render abort and is faster as well.
-                    direct_env.seed = seed + episode
-                    direct_env.init_state_offset = episode % initial_state_count
+                    direct_env.seed = episode_seed
+                    direct_env.init_state_offset = state_index
                     direct_env.episode_index = 0
                     observation = direct_env.reset()
-                    while elapsed < limit and not success:
+                    while elapsed < limit and not (success or direct_env.episode_done):
                         start = observation
                         chunk, teacher, _ = teacher.sample_actions(observation)
                         chunk = np.asarray(jax.device_get(chunk), np.float32)
@@ -334,7 +344,7 @@ def collect_teacher_chunks(
                             observation, _, success, _ = direct_env.step(action)
                             elapsed += 1
                             executed += 1
-                            if success or elapsed >= limit:
+                            if direct_env.episode_done or success or elapsed >= limit:
                                 break
                         rows.append((start, target, executed))
                 if target_successes is not None:
@@ -356,7 +366,7 @@ def collect_teacher_chunks(
                         continue
                 group = file.create_group(name)
                 group.attrs.update(success=bool(success), steps=int(elapsed),
-                                   initial_state_index=episode % initial_state_count,
+                                   initial_state_index=state_index,
                                    teacher_rng_after=np.asarray(jax.device_get(teacher.rng), np.uint32),
                                    complete=True)
                 for key in CAMERA_DATASETS:
@@ -405,7 +415,7 @@ def collect_teacher_chunks(
             bootstrap.close()
 
 
-def _resolve_small_expo_checkpoint(path: Path):
+def _resolve_small_expo_checkpoint(path: Path, step: int | None = None):
     """Resolve a Small EXPO task/checkpoint path to (task, root, step).
 
     The project has both ``checkpoints_best`` and ``checkpoints_last`` trees.
@@ -413,6 +423,12 @@ def _resolve_small_expo_checkpoint(path: Path):
     for convenience and resolves to its latest numeric step.
     """
     path = Path(path).expanduser().resolve()
+    if step is not None:
+        for slot in ("checkpoints", "checkpoints_best", "checkpoints_last"):
+            root = path / slot
+            if (root / str(step)).is_dir():
+                return path, root, step
+        raise FileNotFoundError(f"Small EXPO checkpoint step {step} is not present below {path}")
     if path.name.isdigit() and path.parent.name.startswith("checkpoints"):
         root = path.parent
         step = int(path.name)
@@ -480,7 +496,7 @@ def collect_hybrid_teacher_chunks(
         _hybrid_agent,
         _load_stats,
     )
-    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+    from dcrl.benchmarks import asset_id, initial_state_index, is_ocbench, make_env, max_episode_steps
 
     if (target_successes is None) != (target_failures is None):
         raise ValueError("provide both target_successes and target_failures, or neither")
@@ -537,12 +553,12 @@ def collect_hybrid_teacher_chunks(
         "target_failures": None if target_failures is None else int(target_failures),
         "max_attempts": int(max_attempts),
         "image_size": int(image_size),
-        "render_resolution": 256,
+        "render_resolution": 224 if is_ocbench(suite) else 256,
         "action_horizon": int(target_action_horizon),
         "replan_steps": int(target_replan_steps),
         "small_expo_action_horizon": small_horizon,
         "small_expo_replan_steps": small_replan,
-        "official_pi05_libero": True,
+        "official_pi05_libero": not is_ocbench(suite),
         "norm_sha256": hashlib.sha256(norm_stats_path.read_bytes()).hexdigest(),
         "format_version": 1,
     }
@@ -566,7 +582,7 @@ def collect_hybrid_teacher_chunks(
 
     env = None
     try:
-        env = LiberoTaskEnv(suite, task_id, seed=seed, image_size=image_size)
+        env = make_env(suite, task_id, seed=seed, image_size=image_size)
         observation = env.reset()
         mesh = sharding.make_mesh(1)
         data_sharding = jax.sharding.NamedSharding(
@@ -588,6 +604,12 @@ def collect_hybrid_teacher_chunks(
             pi05_weight_loader_path=pi05_params,
             pi05_config_module="configs.model.expo_ft_pi_libero_config",
         )
+        if is_ocbench(suite):
+            large_args.pi05_asset_id = asset_id(suite)
+            large_args.pi05_assets_dir = output.parent / 'pi05_assets'
+            actor_stats = large_args.pi05_assets_dir / large_args.pi05_asset_id / 'norm_stats.json'
+            actor_stats.parent.mkdir(parents=True, exist_ok=True)
+            actor_stats.write_bytes(norm_stats_path.read_bytes())
         large = _build_large_agent(
             large_args, observation, env.instruction, mesh,
             data_sharding, replicated_sharding,
@@ -622,9 +644,8 @@ def collect_hybrid_teacher_chunks(
             flush=True,
         )
 
-        initial_state_count = len(env.init_states)
         instruction = env.instruction
-        limit = LIBERO_SUITE_MAX_STEPS[suite]
+        limit = max_episode_steps(suite, task_id)
         norm_bytes = norm_stats_path.read_bytes()
         with h5py.File(partial, "a") as file:
             if "metadata" in file.attrs:
@@ -645,12 +666,12 @@ def collect_hybrid_teacher_chunks(
                     continue
                 if name in file:
                     del file[name]
-                env.seed = seed + episode
-                env.init_state_offset = episode % initial_state_count
+                env.seed = seed if is_ocbench(suite) else seed + episode
+                env.init_state_offset = initial_state_index(env, episode)
                 env.episode_index = 0
                 observation = env.reset()
                 rows, success, elapsed = [], False, 0
-                while elapsed < limit and not success:
+                while elapsed < limit and not (success or env.episode_done):
                     start = observation
                     chunk, hybrid, sample_info = hybrid.sample_actions(observation)
                     chunk = np.asarray(jax.device_get(chunk), np.float32)
@@ -661,7 +682,7 @@ def collect_hybrid_teacher_chunks(
                         observation, _, success, _ = env.step(action)
                         elapsed += 1
                         executed += 1
-                        if success or elapsed >= limit:
+                        if env.episode_done or success or elapsed >= limit:
                             break
                     rows.append((start, chunk, executed, sample_info))
                 if target_successes is not None:
@@ -674,7 +695,7 @@ def collect_hybrid_teacher_chunks(
                 group = file.create_group(name)
                 group.attrs.update(
                     success=bool(success), steps=int(elapsed),
-                    initial_state_index=episode % initial_state_count,
+                    initial_state_index=initial_state_index(env, episode),
                     selected_action_types=json.dumps([
                         str(row[3].get("selected_action_type", "unknown")) for row in rows
                     ]),

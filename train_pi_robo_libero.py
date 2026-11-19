@@ -14,6 +14,7 @@ import pickle
 from pathlib import Path
 import time
 from collections import deque
+from itertools import chain
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
@@ -53,9 +54,11 @@ flags.DEFINE_integer("seed", 42, "Random seed.")
 flags.DEFINE_enum("update_type", "episode", ["episode", "step", "batch"], "When to run gradient updates: per episode, per step, or per batch of episodes.")
 flags.DEFINE_integer("num_batch", 1, "Number of episodes per update batch (only used when update_type=batch).")
 flags.DEFINE_integer("num_updates", 0, "Upstream-style fixed number of gradient updates per trigger (episode/step/batch). 0 = derive the count from --step_interval instead.")
+flags.DEFINE_integer('warmup_episodes', 10, 'Completed online episodes before gradient updates.', lower_bound=0)
 flags.DEFINE_integer("step_interval", 1, "One gradient update per this many collected transitions. update_type=step runs it every step_interval env steps; episode/batch runs the accumulated equivalent at the episode boundary (remainder carries over).")
 flags.DEFINE_integer("batch_size", 64, "Mini batch size.")
 flags.DEFINE_integer("max_steps", 500_000, "Number of training steps.")
+flags.DEFINE_integer('replay_capacity', None, 'Transitions per replay buffer. Defaults to max_steps.', lower_bound=1)
 flags.DEFINE_integer("num_data", 0, "Max number of offline demo episodes to load (0 = all).")
 flags.DEFINE_boolean("tqdm", True, "Use tqdm progress bar.")
 flags.DEFINE_boolean("checkpoint_model", False, "Save agent checkpoint during training.")
@@ -117,36 +120,37 @@ def _flat_libero_observation(obs: dict, instruction: str) -> dict:
     }
 
 
-def _load_libero_dataset(path: Path, instruction: str, image_size: int,
-                         max_episodes: int) -> list[dict]:
-    """Load aligned LIBERO demonstrations in PiReplayBuffer's input schema."""
-    from dcrl.libero_replay import load_demonstrations
+def _load_benchmark_dataset(suite: str, path: Path, instruction: str, image_size: int,
+                            max_episodes: int):
+    """Stream aligned demonstration transitions in PiReplayBuffer's input schema."""
+    from dcrl.benchmarks import is_ocbench, iter_demonstrations
 
-    episodes = load_demonstrations(
-        path, instruction=instruction, image_size=image_size,
+    episodes = iter_demonstrations(
+        suite, path, instruction=instruction, image_size=image_size,
         max_episodes=max_episodes if max_episodes > 0 else None,
     )
-    dataset = []
     for episode in episodes:
         for transition in episode:
-            dataset.append({
+            row = {
                 "observations": _flat_libero_observation(transition.obs, instruction),
                 "actions": np.asarray(transition.action, dtype=np.float32),
                 "rewards": np.float32(transition.reward),
-                "masks": np.float32(not transition.done),
+                "masks": np.float32(not transition.done or transition.truncated),
                 "dones": np.bool_(transition.done),
-            })
-    return dataset
+            }
+            if is_ocbench(suite):
+                row['is_success'] = transition.success
+            yield row
 
 
-class _LiberoEnvClient:
+class _BenchmarkEnvClient:
     """Small local adapter exposing the EnvClientWrapper methods used upstream."""
 
     def __init__(self, suite: str, task_id: int, *, seed: int, image_size: int,
                  max_episode_steps: int, benchmark_eval: bool = False):
-        from dcrl.libero_env import LiberoTaskEnv
+        from dcrl.benchmarks import make_env
 
-        self._env = LiberoTaskEnv(
+        self._env = make_env(
             suite, task_id, seed=seed, image_size=image_size,
             benchmark_eval=benchmark_eval,
         )
@@ -182,8 +186,9 @@ class _LiberoEnvClient:
             raw_observation, self.task_description
         )
         self._episode_steps += 1
-        done = bool(success or self._episode_steps >= self.max_episode_steps)
-        self._last_info = (done, bool(success), float(reward), float(not done))
+        done = bool(self._env.episode_done or success or self._episode_steps >= self.max_episode_steps)
+        terminal = getattr(self._env, 'terminated', done)
+        self._last_info = (done, bool(success), float(reward), float(not terminal))
         return np.asarray(executed, dtype=np.float32), "policy"
 
     def pop_network_ms(self):
@@ -204,8 +209,7 @@ def _evaluate(agent, env, *, episodes: int, max_steps: int, replan_steps: int,
     checkpoint comparable.
     """
     eval_agent = agent.replace(rng=jax.random.PRNGKey(seed))
-    env._env.episode_index = 0
-    env._env.env.seed(env._env.seed)
+    env._env.reset_sequence()
     successes = 0
     lengths = []
     trials = []
@@ -260,12 +264,12 @@ def main(_):
         mesh, jax.sharding.PartitionSpec()
     )
 
-    log_dir = os.path.join(FLAGS.output_dir, FLAGS.run_name)
+    run_name = FLAGS.run_name or f'{FLAGS.suite}_task_{FLAGS.task_id:02d}'
+    log_dir = os.path.join(FLAGS.output_dir, run_name)
     os.makedirs(log_dir, exist_ok=True)
     train_video_dir = os.path.join(log_dir, "train_videos")
     os.makedirs(train_video_dir, exist_ok=True)
     checkpoint_dir = os.path.join(log_dir, "checkpoints")
-    os.makedirs(checkpoint_dir, exist_ok=True)
 
     checkpoint_dir_path = epath.Path(checkpoint_dir)
     best_eval_checkpointing = (
@@ -281,30 +285,39 @@ def main(_):
         best_metric="eval/success_rate" if best_eval_checkpointing else None,
     )
 
-    init_wandb(checkpoint_dir_path, resuming, FLAGS.project_name, FLAGS.run_name)
+    init_wandb(checkpoint_dir_path, resuming, FLAGS.project_name, run_name)
     wandb.config.update(FLAGS.flag_values_dict(), allow_val_change=resuming)
 
     # LIBERO replaces the upstream DROID dataset/client boundary.  The replay
     # buffer and BatchProcessor below remain the Expo-FT implementations.
-    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+    from dcrl.benchmarks import asset_id, is_ocbench, make_env, max_episode_steps, validate_eval_episodes
 
-    probe_env = LiberoTaskEnv(
+    if is_ocbench(FLAGS.suite):
+        if (not FLAGS.config.pi05_weight_loader_path or 'pi05_libero' in FLAGS.config.pi05_weight_loader_path
+                or FLAGS.config.pi05_asset_id != asset_id(FLAGS.suite)):
+            raise ValueError('Set the Pi0.5 weight and asset config to an OCBench base policy and its normalization.')
+    probe_env = make_env(
         FLAGS.suite, FLAGS.task_id, seed=FLAGS.seed, image_size=FLAGS.image_size,
         benchmark_eval=True,
     )
     task_description = probe_env.instruction
     demo_path = Path(FLAGS.demo_path) if FLAGS.demo_path else probe_env.demo_path(FLAGS.demos_root)
     probe_env.close()
-    dataset = _load_libero_dataset(
-        demo_path, task_description, FLAGS.image_size, FLAGS.num_data,
+    dataset = _load_benchmark_dataset(
+        FLAGS.suite, demo_path, task_description, FLAGS.image_size, FLAGS.num_data,
     )
-    if not dataset:
-        raise ValueError(f"No LIBERO demonstrations loaded from {demo_path}.")
-    example_action = dataset[0]['actions'][np.newaxis]
+    first_demo = next(dataset, None)
+    if first_demo is None:
+        raise ValueError(f"No benchmark demonstrations loaded from {demo_path}.")
+    example_action = first_demo['actions'][np.newaxis]
+    dataset = chain((first_demo,), dataset)
 
     model_cls = FLAGS.config.model_cls
     # BCLearner uses human-intervention chunks for the actor batch only (no critic).
     use_dagger_hil_sampling = model_cls == "BCLearner"
+    if use_dagger_hil_sampling and FLAGS.offline_ratio:
+        # This configuration seeds both replay buffers from the same rows.
+        dataset = list(dataset)
     if model_cls == "BCLearner":
         from expo_ft.agents.alg.bc import load_agent, restore_checkpoint, save_checkpoint
     elif model_cls == "EXPOLearner":
@@ -322,10 +335,13 @@ def main(_):
     # LIBERO has the two official cameras used by Pi0.5; the Pi replay buffer
     # pads the absent right-wrist view according to the official model transform.
     critic_camera_keys = ("base_0_rgb", "left_wrist_0_rgb")
+    replay_capacity = FLAGS.replay_capacity or FLAGS.max_steps
+    if replay_capacity <= FLAGS.replan_steps:
+        raise ValueError('Replay capacity must exceed the number of actions executed per chunk.')
     rb_args = dict(
         config=FLAGS.config,
         example_action=example_action,
-        capacity=FLAGS.max_steps,
+        capacity=replay_capacity,
         task_description=task_description,
         replan_steps=FLAGS.replan_steps,
         seed=FLAGS.seed,
@@ -348,13 +364,14 @@ def main(_):
         dataset=dataset,
     )
 
+    example_buffer = offline_replay_buffer if FLAGS.offline_ratio else replay_buffer
     critic_example = {
-        _critic_key_to_storage(k): offline_replay_buffer.dataset_dict[_critic_key_to_storage(k)][0][np.newaxis]
+        _critic_key_to_storage(k): example_buffer.dataset_dict[_critic_key_to_storage(k)][0][np.newaxis]
         for k in critic_camera_keys
     }
-    critic_example["state"] = offline_replay_buffer.dataset_dict['state'][0][np.newaxis]
-    critic_example["actions"] = offline_replay_buffer.dataset_dict['actions'][0][np.newaxis]
-    agent_example_observation, agent_example_state, agent_example_action = offline_replay_buffer.convert_to_critic_format(
+    critic_example["state"] = example_buffer.dataset_dict['state'][0][np.newaxis]
+    critic_example["actions"] = example_buffer.dataset_dict['actions'][0][np.newaxis]
+    agent_example_observation, agent_example_state, agent_example_action = example_buffer.convert_to_critic_format(
         critic_example)
     actor.action_dim = agent_example_action.squeeze().shape[-1]
     actor.state_dim = agent_example_state.squeeze().shape[-1]
@@ -427,9 +444,11 @@ def main(_):
 
     # The environment is created only now, after the slow Pi0.5 build.
     logging.info("Creating LIBERO environment...")
-    env = _LiberoEnvClient(
+    env = _BenchmarkEnvClient(
         FLAGS.suite, FLAGS.task_id, seed=FLAGS.seed, image_size=FLAGS.image_size,
-        max_episode_steps=FLAGS.max_episode_steps,
+        max_episode_steps=(max_episode_steps(FLAGS.suite, FLAGS.task_id)
+                           if is_ocbench(FLAGS.suite) and not FLAGS['max_episode_steps'].present
+                           else FLAGS.max_episode_steps),
     )
     completed_episodes = (
         int(resume_state["completed_episodes"]) if resume_state is not None
@@ -439,7 +458,7 @@ def main(_):
     env.reset()
     logging.info("Created training environment %s (%s)", env.env_id, task_description)
     eval_env = None
-    eval_horizon = FLAGS.eval_max_steps or LIBERO_SUITE_MAX_STEPS[FLAGS.suite]
+    eval_horizon = FLAGS.eval_max_steps or max_episode_steps(FLAGS.suite, FLAGS.task_id)
     eval_dir = Path(log_dir) / "evals"
     eval_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = Path(log_dir) / "metrics.jsonl"
@@ -527,17 +546,13 @@ def main(_):
             logging.info("Updated best-eval checkpoint at step %d (success=%.3f)", step, score)
 
     if FLAGS.eval_interval > 0 and FLAGS.eval_episodes > 0:
-        eval_env = _LiberoEnvClient(
+        eval_env = _BenchmarkEnvClient(
             FLAGS.suite, FLAGS.task_id, seed=FLAGS.eval_seed,
             image_size=FLAGS.image_size,
             max_episode_steps=eval_horizon,
             benchmark_eval=True,
         )
-        if FLAGS.eval_episodes > len(eval_env._env.init_states):
-            raise ValueError(
-                f"eval_episodes={FLAGS.eval_episodes} exceeds the "
-                f"{len(eval_env._env.init_states)} official initial states"
-            )
+        validate_eval_episodes(eval_env._env, FLAGS.eval_episodes)
     # On resume, start evaluations at the next interval boundary rather than
     # immediately after the first resumed episode.
     next_eval_step = (
@@ -651,7 +666,7 @@ def main(_):
         sampler.on_episode_end()
         training_log.on_episode_done(episode_log, episode_success, metrics)
 
-        can_update = training_log.ep_count >= 10 and step >= FLAGS.batch_size
+        can_update = training_log.ep_count >= FLAGS.warmup_episodes and step >= FLAGS.batch_size
         if not can_update:
             transitions_since_update = 0
         if FLAGS.update_type == "episode" and can_update:
@@ -766,7 +781,7 @@ def main(_):
             sink.record_transition(i, transition)
             transitions_since_update += 1
 
-        can_update = training_log.ep_count >= 10 and i >= FLAGS.batch_size
+        can_update = training_log.ep_count >= FLAGS.warmup_episodes and i >= FLAGS.batch_size
         if FLAGS.update_type == "step" and can_update:
             if FLAGS.num_updates > 0:
                 run_agent_updates(FLAGS.num_updates, step_metrics)

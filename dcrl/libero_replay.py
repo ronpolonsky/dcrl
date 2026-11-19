@@ -21,11 +21,12 @@ from dcrl.libero_env import CAMERA_KEYS, observation
 @dataclass
 class Transition:
     obs: dict
-    action: np.ndarray  # command actually sent to LIBERO, before normalization
+    action: np.ndarray  # command sent to the environment, before normalization
     reward: float
     done: bool
     episode_id: int
     success: bool = False
+    truncated: bool = False
 
 
 class ExpoLiberoReplay:
@@ -103,8 +104,10 @@ class ExpoLiberoReplay:
         reward = np.float32(current.reward)
         mask = np.float32(not current.done)
         valid = np.float32(1)
+        touches_truncation = current.truncated
         for offset in range(1, self.r):
             row = self.rows[t + offset]
+            touches_truncation |= row.truncated
             reward += np.float32(self.discount ** offset * row.reward * mask)
             valid = mask
             mask = min(mask, np.float32(not row.done))
@@ -123,7 +126,7 @@ class ExpoLiberoReplay:
             'tokenized_prompt': current.obs['tokenized_prompt'],
             'tokenized_prompt_mask': current.obs['tokenized_prompt_mask'],
             'rewards': reward, 'masks': np.float32(mask),
-            'valids': np.float32(valid),
+            'valids': np.float32(valid and not touches_truncation),
         }
 
 

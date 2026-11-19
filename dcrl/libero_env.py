@@ -74,6 +74,7 @@ class LiberoTaskEnv:
         self.init_state_offset = init_state_offset
         self.benchmark_eval = benchmark_eval
         self.episode_index = 0
+        self.episode_done = False
         self.seed = seed
         self.env = OffScreenRenderEnv(
             bddl_file_name=self.suite.get_task_bddl_file_path(task_id),
@@ -82,7 +83,12 @@ class LiberoTaskEnv:
         )
         self.env.seed(seed)
 
+    def reset_sequence(self):
+        self.episode_index = 0
+        self.env.seed(self.seed)
+
     def reset(self) -> dict:
+        self.episode_done = False
         if not self.benchmark_eval:
             # Keep training episode resets reproducible across checkpoint resume.
             self.env.seed(self.seed + self.episode_index)
@@ -106,6 +112,7 @@ class LiberoTaskEnv:
         executed = action.astype(np.float32, copy=False)
         raw, _, done, _ = self.env.step(executed)
         success = bool(done)
+        self.episode_done = success
         return observation(raw, self.instruction, self.image_size), float(success), success, executed
 
     def demo_path(self, demos_root: str | None = None) -> Path:

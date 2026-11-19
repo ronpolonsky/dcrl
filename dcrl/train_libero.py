@@ -20,10 +20,10 @@ import subprocess
 import numpy as np
 from tqdm import tqdm
 
-from dcrl.libero_env import DEFAULT_TASK_IDS, LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+from dcrl.benchmarks import is_ocbench, iter_demonstrations, make_env, max_episode_steps, task_count, validate_eval_episodes
+from dcrl.libero_env import DEFAULT_TASK_IDS
 from dcrl.libero_replay import (
     ExpoLiberoReplay, Transition, compute_norm_stats, concatenate_batches,
-    load_demonstrations,
 )
 
 
@@ -254,7 +254,7 @@ def _official_norm_stats(task_dir: Path, source_dir: Path, *, state_dim: int):
         if np.asarray(stats[name].q01).shape != (width,) or np.asarray(stats[name].q99).shape != (width,):
             raise ValueError(f'Wrong official {name} stats dimension in {source_file}')
     logging.info(
-        'Using official Pi0.5 LIBERO normalization from %s; '
+        'Using Pi0.5 policy normalization from %s; '
         'state.q01=%s state.q99=%s actions.q01=%s actions.q99=%s',
         source_file,
         np.asarray(stats['state'].q01).tolist(), np.asarray(stats['state'].q99).tolist(),
@@ -320,8 +320,7 @@ def _evaluate(agent, env, *, episodes: int, max_steps: int, replan_steps: int, s
     import jax
     eval_agent = agent.replace(rng=jax.random.PRNGKey(seed))
     # Reuse the same benchmark initial states at every checkpoint.
-    env.episode_index = 0
-    env.env.seed(env.seed)
+    env.reset_sequence()
     successes = 0
     lengths = []
     for _ in range(episodes):
@@ -332,8 +331,8 @@ def _evaluate(agent, env, *, episodes: int, max_steps: int, replan_steps: int, s
                 chunk, eval_agent, _ = eval_agent.sample_actions(obs)
                 plan.extend(np.asarray(jax.device_get(chunk))[:replan_steps])
             obs, _, success, _ = env.step(plan.popleft())
-            if success:
-                successes += 1
+            if env.episode_done or success:
+                successes += int(success)
                 lengths.append(step + 1)
                 break
         else:
@@ -353,8 +352,7 @@ def _evaluate_actor(agent, env, *, episodes: int, max_steps: int, replan_steps: 
     """
     import jax
     eval_agent = agent.replace(rng=jax.random.PRNGKey(seed))
-    env.episode_index = 0
-    env.env.seed(env.seed)
+    env.reset_sequence()
     successes = 0
     lengths = []
     for _ in range(episodes):
@@ -365,8 +363,8 @@ def _evaluate_actor(agent, env, *, episodes: int, max_steps: int, replan_steps: 
                 chunk, eval_agent, _ = eval_agent.eval_actor_only(obs)
                 plan.extend(np.asarray(jax.device_get(chunk))[:replan_steps])
             obs, _, success, _ = env.step(plan.popleft())
-            if success:
-                successes += 1
+            if env.episode_done or success:
+                successes += int(success)
                 lengths.append(step + 1)
                 break
         else:
@@ -420,7 +418,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
     from dcrl.agents.small_expo_learner import SmallExpoLearner
     from dcrl.expo.agents.alg.agent import initialize_checkpoint_dir
 
-    official_max_steps = LIBERO_SUITE_MAX_STEPS[suite]
+    official_max_steps = max_episode_steps(suite, task_id)
     train_max_steps = args.max_episode_steps or official_max_steps
     task_dir = args.output_dir / suite / f'task_{task_id:02d}'
     task_dir.mkdir(parents=True, exist_ok=True)
@@ -458,7 +456,7 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             raise ValueError(f'Resume configuration differs from {config_path}')
     else:
         config_path.write_text(json.dumps(fixed, indent=2) + '\n')
-    env = LiberoTaskEnv(suite, task_id, seed=args.seed + task_id,
+    env = make_env(suite, task_id, seed=args.seed + task_id,
                         image_size=args.image_size)
     pi_distill_eval_interval = (
         args.pi_distill_eval_interval
@@ -475,14 +473,14 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         or (args.offline_rl_steps and args.offline_rl_eval_interval)
         or (args.init_distill_steps and pi_distill_eval_interval)
     )
-    eval_env = (LiberoTaskEnv(suite, task_id, seed=args.eval_seed,
+    eval_env = (make_env(suite, task_id, seed=args.eval_seed,
                               image_size=args.image_size, benchmark_eval=True)
                 if eval_enabled and args.eval_episodes else None)
     manager = None
     best_manager = None
     try:
-        if eval_env is not None and args.eval_episodes > len(eval_env.init_states):
-            raise ValueError(f'Official evaluation has only {len(eval_env.init_states)} initial states')
+        if eval_env is not None:
+            validate_eval_episodes(eval_env, args.eval_episodes)
         obs = env.reset()
         demo_path = env.demo_path(args.demos_root)
         distill_paths = (
@@ -490,12 +488,6 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
         )
         stats = _official_norm_stats(
             task_dir, Path(args.norm_stats_dir), state_dim=len(obs['state']))
-        demos = load_demonstrations(
-            demo_path, instruction=env.instruction, image_size=args.image_size,
-            max_episodes=args.num_demos or None)
-        if not demos:
-            raise ValueError(f'No demonstration transitions: {demo_path}')
-
         mesh = openpi_sharding.make_mesh(1)
         data_sharding = jax.sharding.NamedSharding(
             mesh, jax.sharding.PartitionSpec(openpi_sharding.DATA_AXIS))
@@ -518,9 +510,11 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
             discount=float(agent.discount), norm_stats=stats)
         online = ExpoLiberoReplay(**replay_kwargs, seed=args.seed + task_id)
         offline = ExpoLiberoReplay(**replay_kwargs, seed=args.seed + 1000 + task_id)
-        for demo in demos:
+        for demo in iter_demonstrations(suite, demo_path, instruction=env.instruction,
+                                        image_size=args.image_size, max_episodes=args.num_demos or None):
             offline.insert_episode(demo)
-        del demos
+        if not offline:
+            raise ValueError(f'No demonstration transitions: {demo_path}')
 
         distill_replay = None
         if args.init_distill_steps:
@@ -533,6 +527,13 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                 seed=args.seed + 3000 + task_id,
                 success_only=args.distill_success_only,
             )
+            if is_ocbench(suite):
+                import hashlib
+
+                source = distill_replay.metadata
+                norm_hash = hashlib.sha256((task_dir / 'norm_stats.json').read_bytes()).hexdigest()
+                if (source.get('suite'), source.get('task_id'), source.get('norm_sha256')) != (suite, task_id, norm_hash):
+                    raise ValueError('Pi0.5 distillation data must match the OCBench suite, task, and normalization.')
 
         manager, resuming = initialize_checkpoint_dir(
             last_checkpoint_dir, keep_period=None,
@@ -795,9 +796,10 @@ def train_task(args, suite: str, task_id: int, wandb_run=None):
                 proposed = plan.popleft()
                 next_obs, reward, success, executed = env.step(proposed)
                 episode_steps += 1
-                done = success or episode_steps >= train_max_steps or step == online_target
+                done = env.episode_done or success or episode_steps >= train_max_steps or step == online_target
                 online.insert(Transition(obs=obs, action=executed, reward=reward,
-                                         done=done, episode_id=episode_id))
+                                         done=done, episode_id=episode_id,
+                                         truncated=bool(done and is_ocbench(suite) and not env.terminated)))
                 if done and success:
                     online.mark_episode_success(episode_id)
                 obs = next_obs
@@ -922,12 +924,11 @@ def main(argv=None):
         raise ValueError('resume and overwrite cannot be combined')
     if args.online_rl_steps + args.offline_rl_steps + args.init_distill_steps == 0:
         raise ValueError('at least one distillation, offline, or online step is required')
-    from libero.libero import benchmark
-    if args.suite not in LIBERO_SUITE_MAX_STEPS:
-        raise ValueError(f'Unknown official LIBERO suite: {args.suite}')
-    suite = benchmark.get_benchmark_dict()[args.suite]()
-    if not 0 <= args.task_id < suite.get_num_tasks():
-        raise ValueError(f'Task ID must be in [0, {suite.get_num_tasks()})')
+    count = task_count(args.suite)
+    if not 0 <= args.task_id < count:
+        raise ValueError(f'Task ID must be in [0, {count})')
+    if is_ocbench(args.suite) and 'pi05_libero' in args.norm_stats_dir:
+        raise ValueError('OCBench requires --norm-stats-dir from the OCBench Pi0.5 base policy.')
     import wandb
     run_name = args.wandb_name or f'small_expo_{args.suite}_task_{args.task_id:02d}'
     wandb_run = wandb.init(

@@ -30,7 +30,8 @@ from typing import Any
 
 import numpy as np
 
-from dcrl.libero_env import DEFAULT_TASK_IDS, LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+from dcrl.benchmarks import asset_id, is_ocbench, make_env, max_episode_steps, validate_eval_episodes
+from dcrl.libero_env import DEFAULT_TASK_IDS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -128,6 +129,10 @@ def _build_large_agent(args, obs, task_description, mesh, data_sharding, replica
         args.pi05_weight_loader_path,
         getattr(args, "pi05_config_module", "configs.model.expo_ft_pi_config"),
     )
+    for field in ('pi05_assets_dir', 'pi05_asset_id'):
+        value = getattr(args, field, None)
+        if value is not None:
+            setattr(config, field, str(value))
     agent = PiExpoLearner.from_pi05(
         config=config,
         seed=args.seed,
@@ -249,6 +254,7 @@ def parse_args(argv=None):
     parser.add_argument("--pi05-weight-loader-path", default=None,
                         help="Optional Pi05 base checkpoint when no large checkpoint is restored")
     parser.add_argument("--suite", default="libero_90")
+    parser.add_argument('--pi05-assets-dir', type=Path, help='Pi0.5 normalization assets root.')
     parser.add_argument("--task-id", type=int, choices=range(90), default=DEFAULT_TASK_IDS[0])
     parser.add_argument("--episodes", type=int, default=20,
                         help="Fixed official LIBERO initial states to evaluate")
@@ -279,22 +285,23 @@ def main(argv=None):
     import jax
     from dcrl.train_libero import _evaluate
 
-    max_steps = args.max_steps or LIBERO_SUITE_MAX_STEPS[args.suite]
-    env = LiberoTaskEnv(
+    max_steps = args.max_steps or max_episode_steps(args.suite, args.task_id)
+    if is_ocbench(args.suite):
+        if args.pi05_assets_dir is None or not args.pi05_weight_loader_path:
+            raise ValueError('OCBench requires --pi05-assets-dir and --pi05-weight-loader-path.')
+        args.pi05_asset_id = asset_id(args.suite)
+        args.pi05_config_module = 'configs.model.expo_ft_pi_ocbench_config'
+    env = make_env(
         args.suite, args.task_id, seed=args.seed + args.task_id,
         image_size=args.image_size,
     )
-    eval_env = LiberoTaskEnv(
+    eval_env = make_env(
         args.suite, args.task_id, seed=args.eval_seed,
         image_size=args.image_size, benchmark_eval=True,
     )
     large_manager = compact_manager = None
     try:
-        if args.episodes > len(eval_env.init_states):
-            raise ValueError(
-                f"--episodes={args.episodes} exceeds the {len(eval_env.init_states)} "
-                "official initial states for this task"
-            )
+        validate_eval_episodes(eval_env, args.episodes)
         obs = env.reset()
         mesh, data_sharding, replicated_sharding = _make_mesh()
         large = _build_large_agent(

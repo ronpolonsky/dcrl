@@ -127,12 +127,15 @@ def _resolve_compact_root(path: Path) -> tuple[Path, int | None]:
     """Resolve a local SmallExpo checkpoint path to its manager root and step."""
     path = path.expanduser().resolve()
     step_hint = int(path.name) if path.name.isdigit() else None
-    if path.name.isdigit() and path.parent.name == "checkpoints":
+    slots = ("checkpoints", "checkpoints_best", "checkpoints_last")
+    if step_hint is not None and path.parent.name in slots:
         return path.parent, step_hint
-    if path.name == "checkpoints":
+    if path.name in slots:
         return path, None
-    if (path / "checkpoints").is_dir():
-        return path / "checkpoints", None
+    for slot in slots:
+        root = path / slot
+        if root.is_dir() and _numeric_steps(root):
+            return root, None
     return path, step_hint
 
 
@@ -157,7 +160,7 @@ def _compact_run_config(path: Path, action_horizon: int, replan_steps: int,
                         image_size: int) -> tuple[int, int, int]:
     """Read the compact checkpoint's construction dimensions when available."""
     root, _ = _resolve_compact_root(path)
-    run_root = root.parent if root.name == "checkpoints" else root
+    run_root = root.parent if root.name in ("checkpoints", "checkpoints_best", "checkpoints_last") else root
     candidates = [run_root / "run_config.json", path.expanduser().resolve() / "run_config.json"]
     if path.expanduser().resolve().name.isdigit():
         candidates.append(path.expanduser().resolve().parent.parent / "run_config.json")
@@ -284,18 +287,24 @@ def _build_sft_plus_editor_agent(
         raise
 
 
-def _build_config(assets_dir: Path | None):
+def _build_config(assets_dir: Path | None, suite='libero_90', pi05_params=None):
+    from dcrl.benchmarks import asset_id, is_ocbench
     from configs.model import expo_ft_pi_libero_config
 
     config = copy.deepcopy(expo_ft_pi_libero_config.get_config())
+    if is_ocbench(suite) and (assets_dir is None or pi05_params is None):
+        raise ValueError('OCBench Full EXPO evaluation requires --assets-dir and --pi05-params.')
+    if pi05_params is not None:
+        config.pi05_weight_loader_path = str(pi05_params)
     if assets_dir is not None:
         config.pi05_assets_dir = str(assets_dir)
-        config.pi05_asset_id = "physical-intelligence/libero"
+        config.pi05_asset_id = asset_id(suite)
     return config
 
 
 def _sft_checkpoint_config(checkpoint: Path, assets_dir: Path | None,
                            replan_steps: int, image_size: int):
+    from dcrl.benchmarks import asset_id
     root, step_hint = _resolve_full_root(checkpoint)
     manifest_path = root.parent / "sft_config.json"
     if not manifest_path.is_file():
@@ -311,7 +320,7 @@ def _sft_checkpoint_config(checkpoint: Path, assets_dir: Path | None,
         if manifest.get(key) != expected:
             raise ValueError(f"Saved {key}={manifest.get(key)} differs from evaluation {expected}")
     assets = assets_dir or root.parent / "student_assets"
-    if not (assets / "physical-intelligence/libero/norm_stats.json").is_file():
+    if not (assets / asset_id(manifest.get('source_suite', 'libero_90')) / 'norm_stats.json').is_file():
         raise FileNotFoundError(f"Missing SFT normalization statistics below {assets}")
     # Training omits the update budget from its manifest. This placeholder
     # affects neither checkpoint shapes nor inference; no updates are run.
@@ -325,6 +334,7 @@ def _build_sft_agent(checkpoint, assets_dir, instruction, mesh,
         checkpoint, assets_dir, replan_steps, image_size
     )
     from importlib import import_module
+    from dcrl.benchmarks import asset_id
     from dcrl.agents.my_expo_learner import restore_checkpoint
     from dcrl.expo.agents.alg.agent import initialize_checkpoint_dir
 
@@ -341,7 +351,7 @@ def _build_sft_agent(checkpoint, assets_dir, instruction, mesh,
         build_learner = import_module(args.learner_config).build_learner
         agent, _, _ = build_learner(
             args=args, output_dir=root.parent, instruction=instruction,
-            stats_dir=assets / "physical-intelligence/libero", assets_dir=assets,
+            stats_dir=assets / asset_id(getattr(args, 'source_suite', 'libero_90')), assets_dir=assets,
             restore_only=True, mesh=mesh, data_sharding=data_sharding,
             replicated_sharding=replicated_sharding,
         )
@@ -398,12 +408,13 @@ class _OfficialPi05Actor:
 def _build_official_pi05(checkpoint: str, assets_dir: Path | None,
                          instruction: str, mesh: Any, data_sharding: Any,
                          replicated_sharding: Any, seed: int,
-                         resize_size: int):
+                         resize_size: int, suite='libero_90'):
     import dataclasses as stdlib_dataclasses
     import jax
     from openpi.training import config as openpi_configs, optimizer, weight_loaders
     from flax import nnx
     from dcrl.expo.agents.vla.pi05 import Pi05Agent
+    from dcrl.benchmarks import asset_id, is_ocbench
 
     checkpoint = Path(checkpoint).expanduser().resolve()
     params_path = checkpoint / "params"
@@ -413,31 +424,34 @@ def _build_official_pi05(checkpoint: str, assets_dir: Path | None,
         )
     if assets_dir is None:
         raise ValueError("official_pi05 requires an assets directory")
-    assets_dir.mkdir(parents=True, exist_ok=True)
-    stats_dir = assets_dir / "physical-intelligence" / "libero"
-    stats_dir.mkdir(parents=True, exist_ok=True)
+    stats_dir = assets_dir / asset_id(suite)
     stats_path = stats_dir / "norm_stats.json"
     if not stats_path.exists():
         raise FileNotFoundError(
-            "official_pi05 requires local LIBERO norm stats at "
+            "official_pi05 requires local normalization stats at "
             f"{stats_path}; pass --assets-dir <checkpoint>/assets"
         )
 
     config = openpi_configs.get_config("pi05_libero")
+    loader = weight_loaders.CheckpointWeightLoader
+    if is_ocbench(suite):
+        from dcrl.expo.utils.train_utils import FlexibleCheckpointWeightLoader
+
+        config = stdlib_dataclasses.replace(config, model=stdlib_dataclasses.replace(
+            config.model, paligemma_variant='gemma_2b_lora', action_expert_variant='gemma_300m_lora'))
+        loader = FlexibleCheckpointWeightLoader
     # Point Pi05Agent's normalizer at the official LIBERO assets downloaded
     # above, so its preprocessing is exactly the same one used by
     # MyEXPOLearner's actor-only path.
     data_assets = stdlib_dataclasses.replace(
         config.data.assets,
         assets_dir=str(assets_dir),
-        asset_id="physical-intelligence/libero",
+        asset_id=asset_id(suite),
     )
     config = stdlib_dataclasses.replace(
         config,
         data=stdlib_dataclasses.replace(config.data, assets=data_assets),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            str(params_path)
-        ),
+        weight_loader=loader(str(params_path)),
         # Actor-only official eval must not allocate learner AdamW/EMA state.
         optimizer=optimizer.SGD(momentum=0.0),
         freeze_filter=nnx.All(nnx.Param),
@@ -453,7 +467,7 @@ def _build_official_pi05(checkpoint: str, assets_dir: Path | None,
         default_prompt=instruction,
         freeze_pi05_encoder=False,
     )
-    actor.action_dim, actor.state_dim = 7, 8
+    actor.action_dim, actor.state_dim = 7, 7 if is_ocbench(suite) else 8
     LOGGER.info("Loaded official Pi0.5 checkpoint %s", checkpoint)
     return _OfficialPi05Actor(
         actor=actor,
@@ -479,12 +493,14 @@ def _build_agent(
     seed: int,
     replan_steps: int,
     resize_size: int,
+    suite='libero_90',
+    pi05_params=None,
 ):
     """Build actor-only, hybrid, compact local EXPO, or full Pi EXPO agent."""
     if mode == "official_pi05":
         return _build_official_pi05(
             checkpoint, assets_dir, task_description, mesh,
-            data_sharding, replicated_sharding, seed, resize_size,
+            data_sharding, replicated_sharding, seed, resize_size, suite,
         )
     if mode == "sft_pi":
         return _build_sft_agent(
@@ -550,14 +566,14 @@ def _build_agent(
 
     from expo_ft.agents.vla.pi05 import build_pi05
 
-    config = _build_config(assets_dir)
+    config = _build_config(assets_dir, suite, pi05_params)
     actor, actor_train_state, target_actor_params, agent_kwargs, metadata = build_pi05(
         config,
         seed,
         mesh,
         data_sharding,
         replicated_sharding,
-        False,
+        True,
         task_description,
     )
 
@@ -633,35 +649,35 @@ def _evaluate_task(
     eval_seed: int,
 ):
     import jax
-    from dcrl.libero_env import LiberoTaskEnv
+    from dcrl.benchmarks import is_ocbench, make_env, validate_eval_episodes
 
-    env = LiberoTaskEnv(
+    env = make_env(
         suite,
         task_id,
         seed=eval_seed,
         image_size=image_size,
         benchmark_eval=True,
     )
-    if episodes > len(env.init_states):
+    try:
+        validate_eval_episodes(env, episodes)
+    except ValueError:
         env.close()
-        raise ValueError(
-            f"task {task_id}: episodes={episodes} exceeds the "
-            f"{len(env.init_states)} official initial states"
-        )
+        raise
 
-    env.episode_index = 0
-    env.env.seed(eval_seed)
+    env.reset_sequence()
     eval_agent = agent.replace(rng=jax.random.PRNGKey(eval_seed))
     successes = 0
     lengths: list[int] = []
     trials: list[dict[str, Any]] = []
     instruction = env.instruction
+    score_return = is_ocbench(suite) and env.env_id.startswith('visual-bowling-')
     try:
         for episode in range(episodes):
             local_observation = env.reset()
             observation = (local_observation if mode == "compact"
                            else _flat_observation(local_observation, instruction))
             action_plan: deque[np.ndarray] = deque()
+            episode_return = 0.0
             for step in range(max_steps):
                 if not action_plan:
                     if mode in ("sft_pi", "official_pi05"):
@@ -673,17 +689,18 @@ def _evaluate_task(
                     action_plan.extend(
                         np.asarray(jax.device_get(chunk))[:replan_steps]
                     )
-                raw_observation, _, success, _ = env.step(action_plan.popleft())
+                raw_observation, reward, success, _ = env.step(action_plan.popleft())
+                episode_return += reward
                 observation = (raw_observation if mode == "compact"
                                else _flat_observation(raw_observation, instruction))
-                if success:
-                    successes += 1
+                if env.episode_done or success:
+                    successes += int(success)
                     lengths.append(step + 1)
                     trials.append(
                         {
                             "episode": episode,
                             "initial_state_index": episode,
-                            "success": True,
+                            "success": bool(success),
                             "steps": step + 1,
                         }
                     )
@@ -698,9 +715,17 @@ def _evaluate_task(
                         "steps": max_steps,
                     }
                 )
+            if score_return:
+                trials[-1]['return'] = episode_return
     finally:
         env.close()
 
+    metrics = {'eval/success_rate': float(successes / episodes),
+               'eval/mean_steps': float(np.mean(lengths))}
+    if is_ocbench(suite):
+        from dcrl.ocbench_env import evaluation_metrics
+
+        metrics = evaluation_metrics(trials, max_steps, score_return=score_return)
     return {
         "suite": suite,
         "task_id": int(task_id),
@@ -711,8 +736,7 @@ def _evaluate_task(
         "action_horizon": 10,
         "replan_steps": int(replan_steps),
         "successes": int(successes),
-        "eval/success_rate": float(successes / episodes),
-        "eval/mean_steps": float(np.mean(lengths)),
+        **metrics,
         "trials": trials,
     }
 
@@ -757,6 +781,8 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--editor-norm-stats-dir", type=Path, default=None,
                         help="Optional directory containing the SmallExpo norm_stats.json")
     parser.add_argument("--suite", default="libero_90")
+    parser.add_argument('--pi05-params', type=Path,
+                        help='Initial Pi0.5 params directory used by an OCBench Full EXPO run.')
     parser.add_argument("--task-id", type=int, default=None)
     parser.add_argument("--task-ids", default=None,
                         help="Comma-separated IDs or 'all'; ignored when --task-id is set")
@@ -790,15 +816,11 @@ def main(argv: Iterable[str] | None = None) -> int:
     if args.episodes < 1:
         raise ValueError("episodes must be positive")
 
-    from libero.libero import benchmark
-    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS
+    from dcrl.benchmarks import make_env, max_episode_steps, task_count
 
-    if args.suite not in LIBERO_SUITE_MAX_STEPS:
-        raise ValueError(f"Unknown LIBERO suite {args.suite!r}")
-    suite = benchmark.get_benchmark_dict()[args.suite]()
-    count = suite.get_num_tasks()
+    count = task_count(args.suite)
     task_ids = _task_ids(args, count)
-    max_steps = args.max_steps or LIBERO_SUITE_MAX_STEPS[args.suite]
+    horizons = {task_id: args.max_steps or max_episode_steps(args.suite, task_id) for task_id in task_ids}
 
     checkpoint = args.checkpoint.expanduser().resolve()
     assets_dir = args.assets_dir.expanduser().resolve() if args.assets_dir else None
@@ -811,9 +833,7 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     # Build once per shard. Prompts are supplied in each observation, so the
     # same actor/EXPO parameters can be evaluated on all tasks in that shard.
-    from dcrl.libero_env import LiberoTaskEnv
-
-    first_env = LiberoTaskEnv(
+    first_env = make_env(
         args.suite,
         task_ids[0],
         seed=args.eval_seed,
@@ -845,6 +865,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         seed=args.seed,
         replan_steps=args.replan_steps,
         resize_size=args.image_size,
+        suite=args.suite,
+        pi05_params=args.pi05_params,
     )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -860,7 +882,7 @@ def main(argv: Iterable[str] | None = None) -> int:
                     suite=args.suite,
                     task_id=task_id,
                     episodes=args.episodes,
-                    max_steps=max_steps,
+                    max_steps=horizons[task_id],
                     replan_steps=args.replan_steps,
                     image_size=args.image_size,
                     eval_seed=args.eval_seed,
@@ -878,12 +900,12 @@ def main(argv: Iterable[str] | None = None) -> int:
                     )
                 _atomic_json(task_output, result)
                 results.append(result)
-                LOGGER.info(
-                    "task %02d: %.1f%% success, mean steps %.2f",
-                    task_id,
-                    100.0 * result["eval/success_rate"],
-                    result["eval/mean_steps"],
-                )
+                if 'eval/normalized_return' in result:
+                    LOGGER.info('task %02d: %.1f normalized return, mean steps %.2f',
+                                task_id, result['eval/normalized_return'], result['eval/mean_steps'])
+                else:
+                    LOGGER.info('task %02d: %.1f%% success, mean steps %.2f',
+                                task_id, 100 * result['eval/success_rate'], result['eval/mean_steps'])
             except Exception as error:
                 LOGGER.exception("task %02d failed", task_id)
                 failure = {"task_id": task_id, "error": repr(error)}
@@ -895,6 +917,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             if args.shard_index is not None
             else "summary.json"
         )
+        success_rates = [result['eval/success_rate'] for result in results if 'eval/success_rate' in result]
         aggregate = {
             "mode": args.mode,
             "suite": args.suite,
@@ -902,15 +925,14 @@ def main(argv: Iterable[str] | None = None) -> int:
             "assets_dir": None if assets_dir is None else str(assets_dir),
             "task_ids": task_ids,
             "episodes_per_task": args.episodes,
-            "max_steps": max_steps,
+            "max_steps": next(iter(horizons.values())) if len(set(horizons.values())) == 1 else None,
             "eval_seed": args.eval_seed,
             "action_horizon": args.action_horizon,
             "replan_steps": args.replan_steps,
             "completed_tasks": len(results),
             "failed_tasks": failed,
             "mean_task_success_rate": (
-                float(np.mean([r["eval/success_rate"] for r in results]))
-                if results else None
+                float(np.mean(success_rates)) if success_rates else None
             ),
             "results": [
                 {
@@ -918,8 +940,8 @@ def main(argv: Iterable[str] | None = None) -> int:
                     "instruction": r["instruction"],
                     "successes": r["successes"],
                     "episodes": r["episodes"],
-                    "eval/success_rate": r["eval/success_rate"],
-                    "eval/mean_steps": r["eval/mean_steps"],
+                    "max_steps": r['max_steps'],
+                    **{key: value for key, value in r.items() if key.startswith('eval/')},
                 }
                 for r in results
             ],

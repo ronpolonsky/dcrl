@@ -71,7 +71,8 @@ def collect(
     from openpi.shared import download, normalize
     from openpi.training import config as configs, optimizer, sharding, weight_loaders
     from dcrl.expo.agents.vla.pi05 import Pi05Agent
-    from dcrl.libero_env import LIBERO_SUITE_MAX_STEPS, LiberoTaskEnv
+    from dcrl.benchmarks import asset_id, initial_state_index, is_ocbench, make_env, max_episode_steps
+    from dcrl.expo.utils.train_utils import FlexibleCheckpointWeightLoader
 
     if episodes is not None and episodes <= 0:
         raise ValueError("episodes must be positive")
@@ -86,18 +87,35 @@ def collect(
     partial = output.with_suffix(".partial.hdf5")
 
     # Official pi05_libero is action_horizon=10 and action_dim=7.
-    config = dataclasses.replace(
-        configs.get_config("pi05_libero"),
-        weight_loader=weight_loaders.CheckpointWeightLoader(checkpoint.rstrip("/") + "/params"),
-        optimizer=optimizer.SGD(momentum=0.0),
-    )
+    ocbench = is_ocbench(suite)
+    if ocbench and ('pi05_libero' in checkpoint or 'physical-intelligence/libero' in norm_stats):
+        raise ValueError('Use a Pi0.5 actor and normalization fitted to OCBench.')
+    base = configs.get_config('pi05_libero')
+    loader = FlexibleCheckpointWeightLoader if ocbench else weight_loaders.CheckpointWeightLoader
+    params_path = checkpoint.rstrip('/') + '/params'
+    if ocbench:
+        params_path = str(download.maybe_download(params_path))
+    assets_dir = output.parent / 'pi05_assets'
+    stats_dir = assets_dir / asset_id(suite)
     stats_source = download.maybe_download(norm_stats)
-    stats_dir = output.parent / "pi05_assets" / "physical-intelligence" / "libero"
     stats_dir.mkdir(parents=True, exist_ok=True)
     stats_path = stats_dir / "norm_stats.json"
     if not stats_path.exists():
         stats_path.write_bytes(Path(stats_source).read_bytes())
+    elif ocbench and stats_path.read_bytes() != Path(stats_source).read_bytes():
+        raise ValueError(f'Existing policy normalization differs from {stats_source}')
     stats = normalize.load(stats_dir)
+    if ocbench:
+        from flax import nnx
+
+        base = dataclasses.replace(
+            base, model=dataclasses.replace(base.model, paligemma_variant='gemma_2b_lora',
+                                           action_expert_variant='gemma_300m_lora'),
+            freeze_filter=nnx.All(nnx.Param), ema_decay=None,
+            data=dataclasses.replace(base.data, assets=configs.AssetsConfig(
+                assets_dir=str(assets_dir), asset_id=asset_id(suite))),
+        )
+    config = dataclasses.replace(base, weight_loader=loader(params_path), optimizer=optimizer.SGD(momentum=0.0))
     mesh = sharding.make_mesh(1)
     data_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec(sharding.DATA_AXIS))
     replicated_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
@@ -107,7 +125,7 @@ def collect(
         default_prompt="", freeze_pi05_encoder=False,
     )
     print(f"Initialized Pi0.5 base actor from {checkpoint}", flush=True)
-    actor.action_dim, actor.state_dim = 7, 8
+    actor.action_dim, actor.state_dim = 7, len(stats['state'].mean)
     dc = actor.data_config
     transform = transforms.compose([
         *dc.data_transforms.inputs,
@@ -120,8 +138,8 @@ def collect(
         *dc.data_transforms.outputs,
     ])
 
-    env = LiberoTaskEnv(suite, task_id, seed=seed, image_size=224, benchmark_eval=True)
-    max_steps = LIBERO_SUITE_MAX_STEPS[suite]
+    env = make_env(suite, task_id, seed=seed, image_size=224, benchmark_eval=True)
+    max_steps = max_episode_steps(suite, task_id)
     instruction = env.instruction
     norm_bytes = stats_path.read_bytes()
     metadata = {
@@ -134,11 +152,11 @@ def collect(
         "target_successes": None if successes is None else int(successes),
         "target_failures": None if failures is None else int(failures),
         "image_size": 224,
-        "render_resolution": 256,
+        "render_resolution": 224 if ocbench else 256,
         "action_horizon": 10,
         "replan_steps": 5,
         "max_steps": max_steps,
-        "official_pi05_libero": True,
+        "official_pi05_libero": not ocbench,
         "norm_sha256": hashlib.sha256(norm_bytes).hexdigest(),
         "format_version": 1,
     }
@@ -187,13 +205,14 @@ def collect(
                     del file[name]
                 # Repeat the fixed official benchmark starts if more than the
                 # suite's 50 standard evaluation states are requested.
-                env.init_state_offset = episode % len(env.init_states)
+                state_index = initial_state_index(env, episode)
+                env.init_state_offset = state_index
                 env.episode_index = 0
                 obs = env.reset()
                 rows = []
                 success = False
                 step = 0
-                while step < max_steps and not success:
+                while step < max_steps and not (success or env.episode_done):
                     start = obs
                     inputs = transform(_raw_input(obs, instruction))
                     inputs = jax.tree.map(lambda value: np.asarray(value)[None], inputs)
@@ -208,11 +227,12 @@ def collect(
                     actions = np.asarray(actions, dtype=np.float32)
                     if actions.shape != (10, 7) or not np.isfinite(actions).all():
                         raise ValueError(f"invalid Pi0.5 action chunk shape={actions.shape}")
-                    executed = min(5, max_steps - step)
-                    for action in actions[:executed]:
+                    executed = 0
+                    for action in actions[:min(5, max_steps - step)]:
                         obs, _, success, _ = env.step(action)
                         step += 1
-                        if success or step >= max_steps:
+                        executed += 1
+                        if env.episode_done or success or step >= max_steps:
                             break
                     rows.append((start, actions, executed))
                 # Keep exactly the requested number in each partition. Extra
@@ -225,7 +245,7 @@ def collect(
                         continue
                 group = file.create_group(name)
                 group.attrs.update(success=bool(success), steps=int(step),
-                                   initial_state_index=episode % len(env.init_states), complete=True)
+                                   initial_state_index=state_index, complete=True)
                 for key in ("base_0_rgb", "left_wrist_0_rgb"):
                     group.create_dataset(key, data=np.stack([r[0]["image"][key] for r in rows]), compression="gzip")
                 group.create_dataset("state", data=np.stack([r[0]["state"] for r in rows]))

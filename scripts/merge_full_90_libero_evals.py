@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge per-task LIBERO-90 evaluator JSON files into one summary."""
+"""Merge per-task benchmark evaluator JSON files into one summary."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("results_dir", type=Path)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument('--suite', choices=('libero_90', 'ocbench', 'ocbench_lite'), default='libero_90')
+    parser.add_argument('--task-ids', help='Comma-separated expected task IDs. Defaults to the entire suite.')
     args = parser.parse_args()
     files = sorted(args.results_dir.glob("task_[0-8][0-9].json"))
     if not files:
@@ -21,29 +23,38 @@ def main() -> int:
     failures = []
     for path in files:
         item = json.loads(path.read_text())
-        if "eval/success_rate" not in item:
+        if "eval/success_rate" not in item and "eval/normalized_return" not in item:
             failures.append({"path": str(path), **item})
         else:
             results.append(item)
     ids = sorted(int(item["task_id"]) for item in results)
-    expected = set(range(90))
+    if args.task_ids:
+        expected = {int(value) for value in args.task_ids.split(',')}
+    else:
+        expected = set(range(90 if args.suite == 'libero_90' else 28))
+    if any(item.get('suite', args.suite) != args.suite for item in results):
+        parser.error('Per-task results belong to a different benchmark suite.')
+    unexpected = sorted(set(ids) - expected)
+    if unexpected:
+        parser.error(f'Unexpected task IDs: {unexpected}')
     missing = sorted(expected - set(ids))
     duplicate = sorted({task_id for task_id in ids if ids.count(task_id) > 1})
+    success_results = [item for item in results if 'eval/success_rate' in item]
     summary = {
-        "suite": "libero_90",
+        "suite": args.suite,
         "results_dir": str(args.results_dir.resolve()),
         "completed_tasks": len(results),
         "missing_tasks": missing,
         "duplicate_tasks": duplicate,
         "failed_tasks": failures,
         "mean_task_success_rate": (
-            float(np.mean([item["eval/success_rate"] for item in results]))
-            if results else None
+            float(np.mean([item["eval/success_rate"] for item in success_results]))
+            if success_results else None
         ),
         "overall_episode_success_rate": (
-            float(sum(int(item["successes"]) for item in results) /
-                  sum(int(item["episodes"]) for item in results))
-            if results else None
+            float(sum(int(item["successes"]) for item in success_results) /
+                  sum(int(item["episodes"]) for item in success_results))
+            if success_results else None
         ),
         "results": [
             {
@@ -51,8 +62,7 @@ def main() -> int:
                 "instruction": item.get("instruction"),
                 "successes": int(item["successes"]),
                 "episodes": int(item["episodes"]),
-                "eval/success_rate": float(item["eval/success_rate"]),
-                "eval/mean_steps": float(item["eval/mean_steps"]),
+                **{key: value for key, value in item.items() if key.startswith('eval/')},
             }
             for item in sorted(results, key=lambda value: int(value["task_id"]))
         ],

@@ -15,6 +15,17 @@ import numpy as np
 
 
 LEARNER_CLASS = "dcrl.agents.my_expo_learner:MyEXPOLearner"
+OCBENCH_NORMALIZED_ACTION_LIMITS = np.array([5, 5, 5, 5, 5, 5, 1], dtype=np.float32)
+
+
+def _clip_ocbench_normalized_actions(data):
+    if 'actions' in data:
+        actions = data['actions'].copy()
+        controls = actions[..., :len(OCBENCH_NORMALIZED_ACTION_LIMITS)]
+        limits = OCBENCH_NORMALIZED_ACTION_LIMITS
+        np.clip(controls, -limits, limits, out=controls)
+        return {**data, 'actions': actions}
+    return data
 
 
 def _resolve_class(path: str):
@@ -37,9 +48,16 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
     from configs.sft import pi05_base_libero
     from flax import nnx
     from openpi.shared import nnx_utils
+    from dcrl.benchmarks import asset_id, is_ocbench
 
     learner_cls = _resolve_class(LEARNER_CLASS)
     stats = normalize.load(stats_dir)
+    state_dim = len(stats['state'].mean)
+    suite = getattr(args, 'source_suite', 'libero_90')
+    loader = weight_loaders.CheckpointWeightLoader
+    if is_ocbench(suite):
+        from dcrl.expo.utils.train_utils import FlexibleCheckpointWeightLoader
+        loader = FlexibleCheckpointWeightLoader
 
     base = pi05_base_libero.get_config()
     if args.trainable_scope == "lora_only":
@@ -60,25 +78,47 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
             }
         )
     model = dataclasses.replace(base.model, action_horizon=args.action_horizon)
+    if is_ocbench(suite) and getattr(args, 'collection_source', None) == 'benchmark_demos':
+        # Pi0.5 consumes proprioception through discretized prompt tokens.
+        # The LIBERO configuration deliberately omits those tokens.
+        model = dataclasses.replace(model, discrete_state_input=True)
     if args.finetune_mode == "lora":
         model = dataclasses.replace(
             model,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
         )
+    data = dataclasses.replace(
+        base.data,
+        assets=openpi_configs.AssetsConfig(
+            assets_dir=str(assets_dir or output_dir / "student_assets"),
+            asset_id=asset_id(suite),
+        ),
+    )
+    if getattr(args, 'ocbench_reference_action_normalization', False):
+        action_stats = stats['actions']
+        if (not is_ocbench(suite) or action_stats.q01[-1] != -1.0 or action_stats.q99[-1] != 1.0):
+            raise ValueError('OCBench reference normalization requires native gripper quantiles [-1, 1].')
+
+        @dataclasses.dataclass(frozen=True)
+        class OCBenchDataConfig(openpi_configs.LeRobotLiberoDataConfig):
+            def create(self, assets_dirs, model_config):
+                config = super().create(assets_dirs, model_config)
+                # Model-side transforms run after normalization on inputs and
+                # before unnormalization on sampled actions.
+                return dataclasses.replace(config, model_transforms=config.model_transforms.push(
+                    inputs=(_clip_ocbench_normalized_actions,),
+                    outputs=(_clip_ocbench_normalized_actions,),
+                ))
+
+        data = OCBenchDataConfig(**vars(data))
     train_config = dataclasses.replace(
         base,
         model=model,
         freeze_filter=model.get_freeze_filter(),
         ema_decay=None if args.finetune_mode == "lora" else base.ema_decay,
-        data=dataclasses.replace(
-            base.data,
-            assets=openpi_configs.AssetsConfig(
-                assets_dir=str(assets_dir or output_dir / "student_assets"),
-                asset_id="physical-intelligence/libero",
-            ),
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
+        data=data,
+        weight_loader=loader(
             args.student_checkpoint.rstrip("/") + "/params"
         ),
         lr_schedule=optimizer.CosineDecaySchedule(
@@ -115,7 +155,7 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
         )
         actor_train_state = dataclasses.replace(actor_train_state, params=params)
     actor.action_dim = 7
-    actor.state_dim = 8
+    actor.state_dim = state_dim
     target_actor_params = actor.get_params(actor_train_state)
 
     # MyEXPOLearner uses these only to initialize its EXPO critic/editor
@@ -124,7 +164,7 @@ def build_learner(*, args, output_dir: Path, instruction: str, stats_dir: Path,
         (args.image_size, args.image_size, 6), dtype=jnp.float32
     )
     example_action = np.zeros((7,), dtype=np.float32)
-    example_state = np.zeros((8,), dtype=np.float32)
+    example_state = np.zeros((state_dim,), dtype=np.float32)
     learner = learner_cls.create(
         seed=args.seed,
         observation_space=example_observation,
